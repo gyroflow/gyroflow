@@ -6,6 +6,8 @@ import assert from 'node:assert/strict';
 
 const calibratorSource = readFileSync(new URL('../src/ui/Calibrator.qml', import.meta.url), 'utf8');
 const lensCalibrateSource = readFileSync(new URL('../src/ui/menu/LensCalibrate.qml', import.meta.url), 'utf8');
+const submissionModule = vm.createContext({});
+vm.runInContext(readFileSync(new URL('../src/ui/menu/ProfileSubmission.js', import.meta.url), 'utf8'), submissionModule);
 
 
 function harness({upload=true, valid=true}={}) {
@@ -24,6 +26,7 @@ function harness({upload=true, valid=true}={}) {
         }
     };
     const state = {
+        ProfileSubmission: submissionModule,
         batch:{
             active:true,finalizing:true,currentFile:'clip.mp4',
             runIn(ms,cb) { scheduled.push({ms,cb}); },

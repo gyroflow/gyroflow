@@ -5,6 +5,8 @@ import QtQuick
 import QtQuick.Dialogs
 
 import "../components/"
+import "CameraIdentity.js" as CameraIdentity
+import "ProfileReview.js" as ProfileReview
 
 MenuItem {
     id: root;
@@ -185,18 +187,13 @@ MenuItem {
             }
 
             const identity = additional_data && additional_data.camera_identifier;
-            root.detectedCamera = identity && identity.brand? {
-                "brand": identity.brand,
-                "model": identity.model || "",
-                "lens": identity.lens_model || identity.lens_info || ""
-            } : {};
+            root.detectedCamera = CameraIdentity.detectedCamera(identity);
             if (root.lensProfilesListPrepared) root.applyDetectedCamera();
         }
         function onSearch_lens_profile_finished(profiles: list<var>): void {
             root.searchComplete = true;
             root.reviewProfiles = profiles;
-            root.reviewIndex = profiles.findIndex(item =>
-                item[1] === root.profilePath || (!!root.profileChecksum && item[2] === root.profileChecksum));
+            root.reviewIndex = ProfileReview.findIndex(profiles, root.profilePath, root.profileChecksum);
         }
         function onGyroflow_file_loaded(obj: var): void {
             if (!root.presetLoadBusy) return;
@@ -386,11 +383,7 @@ MenuItem {
         rejectedProfiles = rejected;
         updateRejectedProfiles();
 
-        root.reviewProfiles = root.reviewProfiles.filter(item => {
-            const sameChecksum = checksum && item[2] === checksum;
-            const samePath = path && item[1] === path;
-            return !sameChecksum && !samePath;
-        });
+        root.reviewProfiles = ProfileReview.withoutIdentity(root.reviewProfiles, checksum, path);
         if (root.reviewIndex >= root.reviewProfiles.length) {
             root.reviewIndex = root.reviewProfiles.length - 1;
         }
@@ -407,28 +400,16 @@ MenuItem {
     }
 
     function selectorModel(emptyText: string, values: var): var {
-        let model = [emptyText];
-        for (const value of values || []) {
-            if (value && model.indexOf(value) === -1) {
-                model.push(value);
-            }
-        }
-        model.push(qsTr("Other"));
-        return model;
+        return CameraIdentity.selectorModel(emptyText, values, qsTr("Other"));
     }
     function selectorValue(combo: var): string {
-        if (combo.currentIndex <= 0 || combo.currentIndex >= combo.model.length - 1) {
-            return "";
-        }
-        return combo.model[combo.currentIndex];
+        return CameraIdentity.selectorValue(combo.currentIndex, combo.model, true);
     }
     function setSelectorValue(combo: var, value: string): bool {
-        const index = combo.model.indexOf(value);
-        if (index > 0) {
-            combo.currentIndex = index;
-            return true;
-        }
-        return false;
+        const index = CameraIdentity.selectorIndex(combo.model, value);
+        if (index < 0) return false;
+        combo.currentIndex = index;
+        return true;
     }
     function resetCameraSelection(): void {
         cameraBrand.popup.maxItemWidth = 0;
@@ -524,7 +505,7 @@ MenuItem {
         updateCameraSearch();
     }
     function loadProfileItem(item: var): void {
-        const position = root.reviewProfiles.findIndex(entry => entry[1] === item[1] && entry[2] === item[2]);
+        const position = ProfileReview.findExactIndex(root.reviewProfiles, item[1], item[2]);
         if (position !== -1) root.reviewIndex = position;
 
         if (root.presetLoadBusy) {

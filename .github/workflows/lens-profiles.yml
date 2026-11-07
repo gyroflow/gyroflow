@@ -33,7 +33,7 @@ jobs:
             qml6-module-qttest qml6-module-qtqml-workerscript qml6-module-qtquick \
             qml6-module-qtquick-controls qml6-module-qtquick-layouts \
             qml6-module-qtquick-templates qml6-module-qtquick-window
-          /usr/lib/qt6/bin/qmltestrunner -input tests/qml -import src/ui/components
+          /usr/lib/qt6/bin/qmltestrunner -input tests/qml
 
   profile-installer:
     runs-on: macos-15

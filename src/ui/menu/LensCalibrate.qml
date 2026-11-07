@@ -5,6 +5,8 @@ import QtQuick
 import QtQuick.Dialogs
 
 import "../components/"
+import "CameraIdentity.js" as CameraIdentity
+import "ProfileSubmission.js" as ProfileSubmission
 
 MenuItem {
     id: calib;
@@ -93,25 +95,15 @@ MenuItem {
         list.model = model;
     }
     function selectorModel(values: var): var {
-        let model = [qsTr("Other")];
-        for (const value of values || []) {
-            if (value && model.indexOf(value) === -1) {
-                model.push(value);
-            }
-        }
-        return model;
+        return CameraIdentity.selectorModel(qsTr("Other"), values, "");
     }
     function selectorValue(combo: var): string {
-        return combo.currentIndex > 0? combo.model[combo.currentIndex] : "";
+        return CameraIdentity.selectorValue(combo.currentIndex, combo.model, false);
     }
     function setSelectorValue(combo: var, value: string): bool {
-        const index = combo.model.indexOf(value);
-        if (index > 0) {
-            combo.currentIndex = index;
-            return true;
-        }
-        combo.currentIndex = 0;
-        return false;
+        const index = CameraIdentity.selectorIndex(combo.model, value);
+        combo.currentIndex = index >= 0 ? index : 0;
+        return index >= 0;
     }
     function setMetadataField(key: string, label: string, value: string): void {
         calib.calibrationInfo[key] = value || "";
@@ -216,67 +208,38 @@ MenuItem {
         return Math.max(-combo.x, Math.min(0, parentWidth - combo.x - combo.popup.width));
     }
     function cameraNeedsLens(brand: string, model: string): bool {
-        const info = controller.camera_database_info(brand, model);
-        const mounts = info.mounts || [];
-        const compatibleMounts = info.compatible_mounts || [];
-        const hasFixedLensMount = mounts.some(mount => /^[a-z]/.test(mount));
-        const hasInterchangeableMount = mounts.some(mount => /^[A-Z]/.test(mount));
-        if (hasFixedLensMount && !hasInterchangeableMount) {
-            return false;
-        }
-        if (hasInterchangeableMount || compatibleMounts.length > 0) {
-            return true;
-        }
-
-        const normalizedBrand = (brand || "").trim().toLowerCase();
-        const normalizedModel = (model || "").trim().toLowerCase();
-        if (normalizedBrand === "dji") {
-            if (/^(zenmuse|x[3579]\b)/.test(normalizedModel)) {
-                return true;
-            }
-            if (/^(action|osmo|pocket|mavic|mini|air|phantom|fpv|avata|spark)\b/.test(normalizedModel)) {
-                return false;
-            }
-        }
-
-        const fixedLensBrands = ["gopro", "insta360", "runcam", "caddx", "foxeer", "garmin", "sjcam", "aee"];
-        return fixedLensBrands.indexOf(normalizedBrand) === -1;
+        return CameraIdentity.cameraNeedsLens(controller.camera_database_info(brand, model));
     }
     function isZoomLens(lens: string): bool {
-        if (/\bzoom\b|\d+(?:\.\d+)?\s*(?:mm\s*)?[-–—]\s*\d+(?:\.\d+)?\s*mm/i.test(lens)) return true;
-        // Community profiles also use names like "18-105 F4", without units.
-        const range = /(?:^|[\s(])([1-9]\d{0,2})\s*[-–—]\s*([1-9]\d{0,3})(?=$|[\s/@(]|f\d)/i.exec(lens);
-        return !!range && +range[2] > +range[1];
+        return CameraIdentity.isZoomLens(lens);
     }
     function hasSetupName(value: string): bool {
-        return !!value && !/^(?:[-?]+|other|unknown|none|n\/?a|unspecified)$/i.test(value);
+        return CameraIdentity.hasSetupName(value);
     }
     function validateProfileMetadata(upload: bool): bool {
         list.commitAll();
         if (!upload) return true;
 
-        const brand = (calib.calibrationInfo.camera_brand || "").trim();
-        const model = (calib.calibrationInfo.camera_model || "").trim();
-        const lens = (calib.calibrationInfo.lens_model || "").trim();
-        let errors = [];
-
-        if (!hasSetupName(brand)) errors.push(qsTr("Camera brand is required."));
-        if (!hasSetupName(model)) errors.push(qsTr("Camera model is required."));
-        if ((cameraBrand.currentIndex > 0 && brand !== selectorValue(cameraBrand)) ||
-            (cameraModel.currentIndex > 0 && model !== selectorValue(cameraModel))) {
-            errors.push(qsTr("Select Other before entering a different camera."));
-        }
-        if (brand && model && !hasSetupName(lens) && cameraNeedsLens(brand, model)) errors.push(qsTr("Lens model is required for this camera."));
-        if (cameraLens.currentIndex > 0 && lens !== selectorValue(cameraLens)) {
-            errors.push(qsTr("Select Other before entering a different lens."));
-        }
-        const focal = +calib.calibrationInfo.focal_length;
-        if (isZoomLens(lens) && (!flcb.checked || !Number.isFinite(focal) || focal <= 0)) {
-            errors.push(qsTr("Zoom lenses require a focal length."));
-        }
+        const brand = calib.calibrationInfo.camera_brand || "";
+        const model = calib.calibrationInfo.camera_model || "";
+        const needsLens = !!brand && !!model && cameraNeedsLens(brand, model);
+        const errors = ProfileSubmission.validationErrors(calib.calibrationInfo, {
+            brandIndex: cameraBrand.currentIndex, brandValue: selectorValue(cameraBrand),
+            modelIndex: cameraModel.currentIndex, modelValue: selectorValue(cameraModel),
+            lensIndex: cameraLens.currentIndex, lensValue: selectorValue(cameraLens), hasFocalLength: flcb.checked
+        }, needsLens, hasSetupName, isZoomLens, ProfileSubmission.isOpticsSpecOnlyLens);
 
         if (errors.length > 0) {
-            messageBox(Modal.Error, qsTr("Complete the camera setup before uploading this lens profile.") + "\n\n" + errors.join("\n"), [ { text: qsTr("Ok") } ]);
+            const messages = {
+                camera_brand_required: qsTr("Camera brand is required."),
+                camera_model_required: qsTr("Camera model is required."),
+                camera_other_required: qsTr("Select Other before entering a different camera."),
+                lens_required: qsTr("Lens model is required for this camera."),
+                lens_name_required: qsTr("Enter a lens name; focal length and aperture alone do not identify it."),
+                lens_other_required: qsTr("Select Other before entering a different lens."),
+                zoom_focal_length_required: qsTr("Zoom lenses require a focal length.")
+            };
+            messageBox(Modal.Error, qsTr("Complete the camera setup before uploading this lens profile.") + "\n\n" + errors.map(code => messages[code]).join("\n"), [ { text: qsTr("Ok") } ]);
             return false;
         }
         return true;
@@ -358,7 +321,7 @@ MenuItem {
 
     function prepareProfileExport(upload: bool): var {
         if (!calib.validateProfileMetadata(upload)) return null;
-        return { metadata: JSON.parse(JSON.stringify(calib.calibrationInfo)), upload: upload };
+        return { metadata: ProfileSubmission.metadataSnapshot(calib.calibrationInfo), upload: upload };
     }
     function exportProfile(fileUrl: url, notify: bool): void {
         const profile = calib.prepareProfileExport(calib.uploadProfile.checked);

@@ -23,6 +23,7 @@ pub struct CameraEntry {
     pub model: String,
     pub brand_aliases: Vec<String>,
     pub aliases: Vec<String>,
+    pub fixed_lens: Option<bool>,
     pub mounts: Vec<String>,
     pub compatible_mounts: Vec<String>,
     pub sensor_size: Option<String>,
@@ -48,6 +49,7 @@ pub struct CameraInfo {
     pub model: String,
     pub brand_aliases: Vec<String>,
     pub aliases: Vec<String>,
+    pub fixed_lens: bool,
     pub mounts: Vec<String>,
     pub compatible_mounts: Vec<String>,
     pub sensor_size: Option<String>,
@@ -63,6 +65,9 @@ pub struct CameraDatabase {
     mount_lenses: BTreeMap<String, BTreeSet<String>>,
     lens_names: BTreeMap<String, (String, bool)>,
     lens_aliases: BTreeMap<String, Option<String>>,
+    observed_lens_keys: BTreeMap<String, BTreeSet<String>>,
+    camera_aliases: BTreeMap<(String, String), Option<(String, String)>>,
+    camera_profile_keys: BTreeMap<(String, String), BTreeSet<(String, String)>>,
     brand_search_keys: BTreeMap<String, BTreeSet<(String, String)>>,
     brands: Vec<String>,
     models: BTreeMap<String, Vec<String>>,
@@ -99,10 +104,14 @@ impl CameraDatabase {
     fn from_file(file: CameraDatabaseFile) -> Self {
         let mut db = Self::empty();
         for camera in file.cameras {
-            db.merge_camera(camera);
+            if !Self::is_legacy_observation_source(&camera.source) {
+                db.merge_camera(camera);
+            }
         }
         for lens in file.lenses {
-            db.merge_lens(lens);
+            if !Self::is_legacy_observation_source(&lens.source) {
+                db.merge_lens(lens);
+            }
         }
         db.rebuild_indexes();
         db
@@ -116,8 +125,14 @@ impl CameraDatabase {
         if file.cameras.iter().any(|camera| camera.brand.trim().is_empty() || camera.model.trim().is_empty()) {
             return Err("Camera database contains an unnamed camera".to_owned());
         }
+        if file.cameras.iter().all(|camera| Self::is_legacy_observation_source(&camera.source)) {
+            return Err("Camera database contains no sourced primary camera identities".to_owned());
+        }
         if file.lenses.iter().any(|lens| lens.brand.trim().is_empty() || lens.model.trim().is_empty()) {
             return Err("Camera database contains a lens without a make and model".to_owned());
+        }
+        if file.lenses.iter().all(|lens| Self::is_legacy_observation_source(&lens.source)) {
+            return Err("Camera database contains no sourced primary lens identities".to_owned());
         }
         Ok(file)
     }
@@ -153,12 +168,13 @@ impl CameraDatabase {
                 continue;
             };
 
-            let lens_name = self.resolve_profile_lens_identity(&profile.lens_model)
-                .and_then(|identity| self.lens_names.get(&identity));
-            if let Some((lens_name, _)) = lens_name {
-                self.camera_lenses.entry(camera_key)
-                    .or_default()
-                    .insert(lens_name.clone());
+            if let Some(identity) = self.resolve_profile_lens_identity(&profile.lens_model) {
+                let lens_name = &self.lens_names[&identity].0;
+                self.camera_lenses.entry(camera_key).or_default().insert(lens_name.clone());
+                let raw = Self::key(&profile.lens_model);
+                if raw != identity {
+                    self.observed_lens_keys.entry(identity).or_default().insert(raw);
+                }
             }
         }
 
@@ -179,10 +195,10 @@ impl CameraDatabase {
 
     pub fn selected_camera_keys(&self, brand: &str, model: &str) -> BTreeSet<(String, String)> {
         self.find_camera(brand, model)
-            .map(|(_, camera)| Self::camera_search_keys(camera))
+            .map(|(key, _)| self.camera_profile_keys.get(&key).cloned().unwrap_or_default())
             .unwrap_or_else(|| {
                 let key = Self::camera_key(brand, model);
-                if key.0.is_empty() || key.1.is_empty() {
+                if key.0.is_empty() || key.1.is_empty() || self.camera_aliases.contains_key(&key) {
                     BTreeSet::new()
                 } else {
                     BTreeSet::from([key])
@@ -202,7 +218,7 @@ impl CameraDatabase {
 
     pub fn compatible_camera_keys(&self, brand: &str, model: &str) -> BTreeSet<(String, String)> {
         self.compatible_cameras(brand, model).into_iter()
-            .flat_map(|camera| Self::camera_search_keys(&camera))
+            .flat_map(|camera| self.camera_profile_keys.get(&Self::camera_key(&camera.brand, &camera.model)).cloned().unwrap_or_default())
             .collect()
     }
 
@@ -223,6 +239,10 @@ impl CameraDatabase {
             sensor_size: camera.sensor_size.clone(),
             crop_factor: camera.crop_factor,
             source: camera.source.clone(),
+            // Lensfun reserves lowercase mount names for built-in optics.
+            fixed_lens: camera.fixed_lens.unwrap_or_else(|| !camera.mounts.is_empty() && camera.mounts.iter().all(|mount| {
+                mount.as_bytes().first().is_some_and(u8::is_ascii_lowercase)
+            })),
             known_lens_count: self.lenses.get(&key).map(|x| x.len()).unwrap_or_default(),
         })
     }
@@ -276,7 +296,8 @@ impl CameraDatabase {
             return None;
         }
 
-        let mut keys = BTreeSet::from([identity.clone()]);
+        let mut keys = self.observed_lens_keys.get(&identity).cloned().unwrap_or_default();
+        keys.insert(identity.clone());
         keys.extend(self.lens_aliases.iter().filter_map(|(alias, candidate)| {
             (candidate.as_deref() == Some(identity.as_str()) && !self.lens_names.contains_key(alias))
                 .then(|| alias.clone())
@@ -291,6 +312,9 @@ impl CameraDatabase {
             mount_lenses: BTreeMap::new(),
             lens_names: BTreeMap::new(),
             lens_aliases: BTreeMap::new(),
+            observed_lens_keys: BTreeMap::new(),
+            camera_aliases: BTreeMap::new(),
+            camera_profile_keys: BTreeMap::new(),
             brand_search_keys: BTreeMap::new(),
             brands: Vec::new(),
             models: BTreeMap::new(),
@@ -309,21 +333,7 @@ impl CameraDatabase {
             return;
         }
 
-        let mut key = Self::camera_key(&camera.brand, &camera.model);
-        if !self.cameras.contains_key(&key) {
-            let brand_key = key.0.clone();
-            let model_key = key.1.clone();
-            if let Some(existing_key) = self.cameras.iter()
-                .find(|((candidate_brand, _), candidate)| {
-                    candidate_brand == &brand_key &&
-                    candidate.aliases.iter().any(|alias| Self::key(alias) == model_key)
-                })
-                .map(|(existing_key, _)| existing_key.clone())
-            {
-                key = existing_key;
-            }
-        }
-
+        let key = Self::camera_key(&camera.brand, &camera.model);
         let entry = self.cameras.entry(key).or_insert_with(|| CameraEntry {
             brand: camera.brand.clone(),
             model: camera.model.clone(),
@@ -342,12 +352,19 @@ impl CameraDatabase {
         Self::extend_unique(&mut entry.compatible_mounts, &camera.compatible_mounts);
         Self::extend_unique(&mut entry.source, &camera.source);
 
+        if camera.fixed_lens.is_some() {
+            entry.fixed_lens = camera.fixed_lens;
+        }
         if entry.crop_factor.is_none() {
             entry.crop_factor = camera.crop_factor;
         }
         if entry.sensor_size.is_none() {
             entry.sensor_size = camera.sensor_size;
         }
+    }
+
+    fn is_legacy_observation_source(sources: &[String]) -> bool {
+        sources.len() == 1 && matches!(Self::key(&sources[0]).as_str(), "profiles" | "gyroflow")
     }
 
     fn merge_lens(&mut self, lens: LensEntry) {
@@ -359,7 +376,7 @@ impl CameraDatabase {
             return;
         }
 
-        let name = if lens.brand.is_empty() || lens.model.starts_with(&lens.brand) {
+        let name = if lens.brand.is_empty() || Self::key(&lens.model).starts_with(&Self::key(&lens.brand)) {
             lens.model.clone()
         } else {
             format!("{} {}", lens.brand, lens.model)
@@ -403,10 +420,36 @@ impl CameraDatabase {
         let mut lenses = self.camera_lenses.clone();
         let mut brand_search_keys: BTreeMap<String, BTreeSet<(String, String)>> = BTreeMap::new();
 
+        let mut alias_targets: BTreeMap<(String, String), BTreeSet<(String, String)>> = BTreeMap::new();
+        for (key, camera) in &self.cameras {
+            for profile_key in Self::all_camera_search_keys(camera) {
+                alias_targets.entry(profile_key).or_default().insert(key.clone());
+            }
+        }
+        let primary_keys = self.cameras.keys().cloned().collect::<BTreeSet<_>>();
+        self.camera_aliases = alias_targets.into_iter().map(|(profile_key, targets)| {
+            let target = if primary_keys.contains(&profile_key) {
+                Some(profile_key.clone())
+            } else if targets.len() == 1 {
+                targets.into_iter().next()
+            } else {
+                None
+            };
+            (profile_key, target)
+        }).collect();
+
+        self.camera_profile_keys = self.cameras.iter().map(|(key, camera)| {
+            let safe_keys = Self::all_camera_search_keys(camera).into_iter()
+                .filter(|profile_key| self.camera_aliases.get(profile_key).and_then(Option::as_ref) == Some(key))
+                .collect();
+            (key.clone(), safe_keys)
+        }).collect();
+
         for ((brand_key, model_key), camera) in &self.cameras {
             brands.insert(camera.brand.clone());
             models.entry(brand_key.clone()).or_default().insert(camera.model.clone());
-            brand_search_keys.entry(brand_key.clone()).or_default().extend(Self::camera_search_keys(camera));
+            brand_search_keys.entry(brand_key.clone()).or_default()
+                .extend(self.camera_profile_keys.get(&(brand_key.clone(), model_key.clone())).into_iter().flatten().cloned());
 
             let camera_lenses = lenses.entry((brand_key.clone(), model_key.clone())).or_default();
             for mount in camera.mounts.iter().chain(camera.compatible_mounts.iter()) {
@@ -451,23 +494,11 @@ impl CameraDatabase {
         if let Some(camera) = self.cameras.get(&key) {
             return Some((key, camera));
         }
-
-        let brand_key = Self::key(&Self::camera_brand_name(brand, model));
-        let model_key = Self::key(&Self::model_name(brand, model));
-        let candidates = self.cameras.iter()
-            .filter(|((candidate_brand, _), camera)| {
-                (candidate_brand == &brand_key || camera.brand_aliases.iter().any(|alias| Self::key(alias) == brand_key)) &&
-                (Self::key(&camera.model) == model_key || camera.aliases.iter().any(|alias| Self::key(alias) == model_key))
-            })
-            .collect::<Vec<_>>();
-        if candidates.len() == 1 {
-            let (key, camera) = candidates[0];
-            return Some((key.clone(), camera));
-        }
-        None
+        let key = self.camera_aliases.get(&key)?.as_ref()?.clone();
+        self.cameras.get(&key).map(|camera| (key, camera))
     }
 
-    fn camera_search_keys(camera: &CameraEntry) -> BTreeSet<(String, String)> {
+    fn all_camera_search_keys(camera: &CameraEntry) -> BTreeSet<(String, String)> {
         let brands = std::iter::once(&camera.brand).chain(camera.brand_aliases.iter()).collect::<Vec<_>>();
         let models = std::iter::once(&camera.model).chain(camera.aliases.iter()).collect::<Vec<_>>();
         let mut keys = BTreeSet::new();
@@ -631,7 +662,19 @@ impl CameraDatabase {
         if self.lens_names.contains_key(&key) {
             return Some(key);
         }
-        self.lens_aliases.get(&key).and_then(Clone::clone)
+        if let Some(alias) = self.lens_aliases.get(&key) {
+            return alias.clone();
+        }
+        // Some profiles append the focal length used for the shot to the lens name.
+        static SETTING: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(||
+            regex::Regex::new(r"(?i)(?:\s+|\s*@\s*)[0-9]{1,3}(?:\.[0-9]+)?\s*mm$").unwrap()
+        );
+        let model = &key[..SETTING.find(&key)?.start()];
+        if self.lens_names.contains_key(model) {
+            Some(model.to_owned())
+        } else {
+            self.lens_aliases.get(model).and_then(Clone::clone)
+        }
     }
 }
 
@@ -640,9 +683,28 @@ mod tests {
     use super::*;
 
     #[test]
+    fn catalog_primary_identity_wins_over_another_bodys_alias() {
+        let mut db = CameraDatabase::empty();
+        for (model, aliases, mounts) in [("Body A", vec!["Body B".into()], vec!["builtIn".into()]), ("Body B", vec![], vec!["Mount".into()])] {
+            db.merge_camera(CameraEntry { brand: "Example".into(), model: model.into(), aliases, mounts, ..Default::default() });
+        }
+        assert!(db.camera_info("Example", "Body A").unwrap().fixed_lens);
+        let second = db.camera_info("Example", "Body B").unwrap();
+        assert_eq!(second.model, "Body B");
+        assert!(!second.fixed_lens);
+    }
+
+    #[test]
     fn rejects_legacy_catalogs_that_treat_unidentified_lenses_as_models() {
         let legacy = r#"{"version":1,"cameras":[{"brand":"Sony","model":"Alpha 7C"}],"lenses":[{"model":"35mm"}]}"#;
         assert!(CameraDatabase::parse_file(legacy).is_err());
+
+        let observations_only = r#"{"version":1,"cameras":[{"brand":"Sony","model":"Observed 7C","mounts":["E mount"],"source":["profiles"]}],"lenses":[{"brand":"Sony","model":"FE 35mm F1.4 GM","source":["gyroflow"]}]}"#;
+        assert!(CameraDatabase::parse_file(observations_only).is_err());
+        let stale_lenses = r#"{"version":1,"cameras":[{"brand":"Sony","model":"Alpha 7C","source":["lensfun"]}],"lenses":[{"brand":"Sony","model":"FE 35mm F1.4 GM","source":["profiles"]}]}"#;
+        assert!(CameraDatabase::parse_file(stale_lenses).is_err());
+        let generated_source_less = r#"{"version":1,"cameras":[{"brand":"Sony","model":"Alpha 7C"}],"lenses":[{"brand":"Sony","model":"FE 35mm F1.4 GM"}]}"#;
+        assert!(CameraDatabase::parse_file(generated_source_less).is_ok());
     }
 
     #[test]
@@ -727,6 +789,12 @@ mod tests {
                 aliases: vec!["FE 35mm F1.4 GM".to_owned()],
                 source: vec!["lensfun".to_owned()],
                 ..Default::default()
+            }, LensEntry {
+                brand: "Sony".to_owned(),
+                model: "Old Profile Lens".to_owned(),
+                mounts: vec!["E mount".to_owned()],
+                source: vec!["profiles".to_owned()],
+                ..Default::default()
             }],
             ..Default::default()
         });
@@ -748,6 +816,7 @@ mod tests {
         assert!(db.brands().iter().all(|brand| brand != "NewBrand"));
         let lenses = db.lenses("Sony", "Alpha 7 IV");
         assert!(lenses.iter().any(|lens| lens == "Sony FE 35mm F1.4 GM"));
+        assert!(!lenses.iter().any(|lens| lens == "Sony Old Profile Lens"));
         assert!(!lenses.iter().any(|lens| lens == "Unlisted Lens"));
     }
 
@@ -843,8 +912,9 @@ mod tests {
 
     #[test]
     fn compatible_cameras_require_shared_mount_and_sensor_class() {
-        let mut db = CameraDatabase::empty();
-        db.merge_camera(CameraEntry {
+        let db = CameraDatabase::from_file(CameraDatabaseFile {
+            version: 1,
+            cameras: vec![CameraEntry {
             brand: "Brand".to_owned(),
             model: "Primary".to_owned(),
             aliases: vec!["Primary Alias".to_owned()],
@@ -852,49 +922,98 @@ mod tests {
             sensor_size: Some("Full frame".to_owned()),
             crop_factor: Some(1.0),
             ..Default::default()
-        });
-        db.merge_camera(CameraEntry {
+            }, CameraEntry {
             brand: "Brand".to_owned(),
             model: "Primary Alias".to_owned(),
+            mounts: vec!["Mount A".to_owned()],
+            sensor_size: Some("APS-C".to_owned()),
+            crop_factor: Some(1.5),
             source: vec!["profiles".to_owned()],
             ..Default::default()
-        });
-        db.merge_camera(CameraEntry {
+            }, CameraEntry {
             brand: "Brand".to_owned(),
             model: "Same Mount".to_owned(),
             mounts: vec!["Mount A".to_owned()],
             sensor_size: Some("Full frame".to_owned()),
             crop_factor: Some(1.02),
             ..Default::default()
-        });
-        db.merge_camera(CameraEntry {
+            }, CameraEntry {
             brand: "Brand".to_owned(),
             model: "Different Sensor".to_owned(),
             mounts: vec!["Mount A".to_owned()],
             sensor_size: Some("APS-C".to_owned()),
             crop_factor: Some(1.5),
             ..Default::default()
-        });
-        db.merge_camera(CameraEntry {
+            }, CameraEntry {
             brand: "Brand".to_owned(),
             model: "Different Mount".to_owned(),
             mounts: vec!["Mount B".to_owned()],
             sensor_size: Some("Full frame".to_owned()),
             crop_factor: Some(1.0),
             ..Default::default()
-        });
-        db.merge_camera(CameraEntry {
+            }, CameraEntry {
             brand: "Brand".to_owned(),
             model: "Adapter Only".to_owned(),
             compatible_mounts: vec!["Mount A".to_owned()],
             sensor_size: Some("Full frame".to_owned()),
             crop_factor: Some(1.0),
             ..Default::default()
+            }],
+            lenses: vec![],
         });
-        db.rebuild_indexes();
 
         assert_eq!(db.compatible_camera_names("Brand", "Primary"), vec!["Brand Same Mount"]);
         assert!(db.selected_camera_keys("Brand", "Primary").contains(&CameraDatabase::camera_key("Brand", "Primary Alias")));
         assert!(!db.models("Brand").contains(&"Primary Alias".to_owned()));
+    }
+
+    #[test]
+    fn ambiguous_and_primary_colliding_camera_aliases_do_not_leak_profile_keys() {
+        let db = CameraDatabase::from_file(CameraDatabaseFile {
+            version: 1,
+            cameras: vec![
+                CameraEntry { brand: "Brand".into(), model: "Body A".into(), aliases: vec!["Body B".into(), "Shared Alias".into()], mounts: vec!["Mount".into()], sensor_size: Some("Full frame".into()), crop_factor: Some(1.0), ..Default::default() },
+                CameraEntry { brand: "Brand".into(), model: "Body B".into(), aliases: vec!["Shared Alias".into()], mounts: vec!["Mount".into()], sensor_size: Some("Full frame".into()), crop_factor: Some(1.0), ..Default::default() },
+                CameraEntry { brand: "Brand".into(), model: "Body C".into(), mounts: vec!["Mount".into()], sensor_size: Some("Full frame".into()), crop_factor: Some(1.0), ..Default::default() },
+                CameraEntry { brand: "Brand".into(), model: "Body B".into(), source: vec!["profiles".into()], ..Default::default() },
+                CameraEntry { brand: "Brand".into(), model: "Shared Alias".into(), source: vec!["profiles".into()], ..Default::default() },
+            ],
+            lenses: vec![],
+        });
+
+        let a_keys = db.selected_camera_keys("Brand", "Body A");
+        assert!(!a_keys.contains(&CameraDatabase::camera_key("Brand", "Body B")));
+        assert!(db.selected_camera_keys("Brand", "Body B").contains(&CameraDatabase::camera_key("Brand", "Body B")));
+        assert!(db.selected_camera_keys("Brand", "Shared Alias").is_empty());
+        assert!(!db.models("Brand").contains(&"Shared Alias".to_owned()));
+        let compatible = db.compatible_camera_keys("Brand", "Body C");
+        assert!(!compatible.contains(&CameraDatabase::camera_key("Brand", "Shared Alias")));
+        assert!(compatible.contains(&CameraDatabase::camera_key("Brand", "Body B")));
+    }
+
+    #[test]
+    fn observed_focal_suffix_resolves_to_catalog_lens_and_profile_key() {
+        let mut db = CameraDatabase::from_file(CameraDatabaseFile {
+            version: 1,
+            cameras: vec![CameraEntry { brand: "Sony".into(), model: "Alpha 7 IV".into(), mounts: vec!["E mount".into()], ..Default::default() }],
+            lenses: vec![LensEntry { brand: "Sony".into(), model: "FE 35mm F1.4 GM".into(), mounts: vec!["E mount".into()], source: vec!["lensfun".into()], ..Default::default() }],
+        });
+        let mut profile = crate::lens_profile::LensProfile::default();
+        profile.camera_brand = "Sony".into();
+        profile.camera_model = "Alpha 7 IV".into();
+        profile.lens_model = "Sony FE 35mm F1.4 GM 50mm".into();
+        db.add_profile_observations([&profile].into_iter());
+
+        assert_eq!(db.resolve_lens("Sony", "Alpha 7 IV", &profile.lens_model), Some("Sony FE 35mm F1.4 GM".into()));
+        let keys = db.lens_profile_keys("Sony", "Alpha 7 IV", "Sony FE 35mm F1.4 GM").unwrap();
+        assert!(keys.contains("sony fe 35mm f1.4 gm 50mm"));
+    }
+
+    #[test]
+    fn lens_brand_prefix_is_case_insensitive() {
+        let mut db = CameraDatabase::empty();
+        db.merge_lens(LensEntry { brand: "Leica".into(), model: "LEICA Q2 & compatibles".into(), ..Default::default() });
+
+        assert_eq!(db.lens_names["leica q2 & compatibles"].0, "LEICA Q2 & compatibles");
     }
 }

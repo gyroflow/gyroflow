@@ -5,6 +5,8 @@ import { qmlMethod as methodFrom } from './helpers/qml-method.mjs';
 import assert from 'node:assert/strict';
 const source = readFileSync(new URL('../src/ui/menu/LensProfile.qml', import.meta.url), 'utf8');
 const videoSource = readFileSync(new URL('../src/ui/VideoArea.qml', import.meta.url), 'utf8');
+const reviewModule = vm.createContext({});
+vm.runInContext(readFileSync(new URL('../src/ui/menu/ProfileReview.js', import.meta.url), 'utf8'), reviewModule);
 function method(name, indent = '    ') {
     return methodFrom(source, name, indent);
 }
@@ -14,6 +16,7 @@ function harness(contents = '{}', accepted = true, loadedFilename = 'clip.mp4', 
             reviewProfiles:[],reviewIndex:-1,presetLoadBusy:false,activeProfileLoad:null,queuedProfileLoad:null,
             pendingGyroflowData:null,pendingQueueJobId:0
         },
+        ProfileReview: reviewModule,
         profileLoadExpiry: {restart() {}, stop() {}},
         controller: {
             get_preset_contents:()=>contents,
