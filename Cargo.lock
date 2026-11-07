@@ -3976,7 +3976,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "1.6.3"
+version = "1.7.0"
 dependencies = [
  "argh",
  "breakpad-sys",
@@ -4042,7 +4042,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.6.3"
+version = "1.7.0"
 dependencies = [
  "ahrs",
  "akaze",
@@ -7463,9 +7463,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.16.4"
+version = "1.16.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0d5d4b1981b8bbbb7aed204cae5726d683d5d6ac7e74ec54122ea28f315e7c8"
+checksum = "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46"
 dependencies = [
  "serde",
 ]
@@ -8636,9 +8636,9 @@ checksum = "3a3b425286980a367278453f3b6d28cdcb134b574e5a35824a6ff5eebad50bb6"
 
 [[package]]
 name = "uuid"
-version = "1.29.0"
+version = "1.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a0e2d11620c50695fe12bbbfde96b3477fe606e7284c22d505c12ce51214514"
+checksum = "4a06f08a856b009bc7bbaf7d3e79808595d032dd19074c0c2ef26e49e03e6bdc"
 dependencies = [
  "getrandom 0.4.3",
  "js-sys",

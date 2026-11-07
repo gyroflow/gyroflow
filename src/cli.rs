@@ -32,7 +32,7 @@ macro_rules! connect {
     };
 }
 
-/** Gyroflow v1.6.3
+/** Gyroflow v1.7.0
 Video stabilization using gyroscope data
 Exit codes: 0 - success, 1 - render failure, 2 - invalid arguments
 */
