@@ -681,19 +681,18 @@ Item {
                     anchors.fill: parent;
                     property bool loaded: false;
 
-                    property bool stabEnabled: root.showStabilized;
                     transform: [
                         Scale {
                             readonly property real r: vidInfo.videoRotation * (Math.PI / 180);
                             readonly property real rotW: Math.abs(vidParent.width * Math.cos(r)) + Math.abs(vidParent.height * Math.sin(r));
                             readonly property real rotH: Math.abs(vidParent.width * Math.sin(r)) + Math.abs(vidParent.height * Math.cos(r));
                             origin.x: vid.width / 2; origin.y: vid.height / 2;
-                            xScale: vid.stabEnabled? 1 : Math.min(vidParent.h / rotH, vidParent.w / rotW) * (fovOverviewBtn.checked? 0.5 : 1);
+                            xScale: root.showStabilized? 1 : Math.min(vidParent.h / rotH, vidParent.w / rotW) * (fovOverviewBtn.checked? 0.5 : 1);
                             yScale: xScale;
                         },
                         Rotation {
                             origin.x: vid.width / 2; origin.y: vid.height / 2;
-                            angle: vid.stabEnabled? 0 : -vidInfo.videoRotation;
+                            angle: root.showStabilized? 0 : -vidInfo.videoRotation;
                         }
                     ]
 
@@ -832,7 +831,7 @@ Item {
                         id: opticalPointEditor;
                         anchors.fill: parent;
                         timestampUs: vid.timestamp * 1000;
-                        stabilized: vid.stabEnabled;
+                        stabilized: root.showStabilized;
                         onRedraw: vid.forceRedraw();
                     }
                 }

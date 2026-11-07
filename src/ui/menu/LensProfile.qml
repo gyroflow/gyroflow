@@ -142,7 +142,7 @@ MenuItem {
             const firstLoad = !lensProfilesListPrepared;
             lensProfilesListPrepared = true;
             root.refreshCameraBrands();
-            if (firstLoad) {
+            if (firstLoad && !root.selected_manually) {
                 root.applyDetectedCamera();
             } else {
                 setSelectorValue(cameraBrand, previous.brand);
@@ -188,7 +188,7 @@ MenuItem {
 
             const identity = additional_data && additional_data.camera_identifier;
             root.detectedCamera = CameraIdentity.detectedCamera(identity);
-            if (root.lensProfilesListPrepared) root.applyDetectedCamera();
+            if (root.lensProfilesListPrepared && !root.selected_manually) root.applyDetectedCamera();
         }
         function onSearch_lens_profile_finished(profiles: list<var>): void {
             root.searchComplete = true;
@@ -570,6 +570,7 @@ MenuItem {
                 popup.width: root.selectorPopupWidth(cameraBrand);
                 popup.height: popup.implicitHeight;
                 onActivated: {
+                    root.selected_manually = true;
                     root.refreshCameraModels();
                     root.updateCameraSearch();
                 }
@@ -589,6 +590,7 @@ MenuItem {
                 popup.width: root.selectorPopupWidth(cameraModel);
                 popup.height: popup.implicitHeight;
                 onActivated: {
+                    root.selected_manually = true;
                     root.refreshCameraLenses();
                     root.updateCameraSearch();
                 }
@@ -607,7 +609,10 @@ MenuItem {
                 popup.x: root.selectorPopupX(cameraLens);
                 popup.width: root.selectorPopupWidth(cameraLens);
                 popup.height: popup.implicitHeight;
-                onActivated: root.updateCameraSearch();
+                onActivated: {
+                    root.selected_manually = true;
+                    root.updateCameraSearch();
+                }
             }
         }
     }
