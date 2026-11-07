@@ -2461,36 +2461,34 @@ impl Controller {
         let text = text.to_string();
         let hidden_profiles = HashSet::<String>::from_iter(hidden_profiles.into_iter().map(|x| x.to_qbytearray().to_string()).filter(|x| !x.is_empty()));
         let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
-        let (selected_camera_keys, brand_camera_keys, compatible_camera_keys, lens_profile_keys) = {
+        let camera_filter = {
             let camera_database = self.camera_database.read();
-            (
-                HashSet::<(String, String)>::from_iter(camera_database.selected_camera_keys(&brand, &model)),
-                if brand.is_empty() || !model.is_empty() {
+            core::lens_profile_database::CameraProfileFilter {
+                brand: brand.clone(),
+                model: model.clone(),
+                lens: lens.clone(),
+                selected_camera_keys: HashSet::from_iter(camera_database.selected_camera_keys(&brand, &model)),
+                brand_camera_keys: if brand.is_empty() || !model.is_empty() {
                     HashSet::new()
                 } else {
-                    HashSet::<(String, String)>::from_iter(camera_database.brand_camera_keys(&brand))
+                    HashSet::from_iter(camera_database.brand_camera_keys(&brand))
                 },
-                HashSet::<(String, String)>::from_iter(camera_database.compatible_camera_keys(&brand, &model)),
-                camera_database.lens_profile_keys(&brand, &model, &lens).map(HashSet::<String>::from_iter)
-            )
+                compatible_camera_keys: HashSet::from_iter(camera_database.compatible_camera_keys(&brand, &model)),
+                lens_profile_keys: camera_database.lens_profile_keys(&brand, &model, &lens)
+                    .map(HashSet::from_iter),
+            }
+        };
+        let profile_query = core::lens_profile_database::ProfileSearchQuery {
+            camera: camera_filter,
+            text,
+            hidden_profiles,
+            favorites,
+            aspect_ratio,
+            aspect_ratio_swapped,
         };
 
         core::run_threaded(move || {
-            let profiles = Self::lens_profile_results_to_qvariant(db.read().search_by_camera_with_lens_keys(
-                &brand,
-                &model,
-                &lens,
-                &text,
-                &selected_camera_keys,
-                &brand_camera_keys,
-                &compatible_camera_keys,
-                &hidden_profiles,
-                &favorites,
-                aspect_ratio,
-                aspect_ratio_swapped,
-                lens_profile_keys.as_ref()
-            ));
-
+            let profiles = Self::lens_profile_results_to_qvariant(db.read().search_by_camera(&profile_query));
             finished(profiles);
         });
     }
