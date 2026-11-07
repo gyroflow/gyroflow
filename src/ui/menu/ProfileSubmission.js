@@ -1,15 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-function isOpticsSpecOnlyLens(value) {
-    const focal = "\\d+(?:\\.\\d+)?\\s*(?:mm)?";
-    const range = focal + "(?:\\s*[-–—]\\s*" + focal + ")?";
-    const stop = "(?:f|t)\\s*\\/?\\s*\\d+(?:\\.\\d+)?";
-    const ratio = "1\\s*:\\s*\\d+(?:\\.\\d+)?";
-    return new RegExp("^(?:" + range + "(?:\\s+(?:" + stop + "|" + ratio + "))?|" + stop + "|" + ratio + ")$", "i").test((value || "").trim());
+function hasSetupName(value) {
+    return !!value && !/^(?:[-?]+|other|unknown|none|n\/?a|unspecified)$/i.test(value);
 }
 
-function validationErrors(metadata, selection, needsLens, hasSetupName, isZoomLens, isOpticsSpecOnlyLens) {
+function isZoomLens(lens) {
+    if (/\bzoom\b|\d+(?:\.\d+)?\s*(?:mm\s*)?[-–—]\s*\d+(?:\.\d+)?\s*mm/i.test(lens)) return true;
+    // Community profiles also use names like "18-105 F4", without units.
+    const range = /(?:^|[\s(])([1-9]\d{0,2})\s*[-–—]\s*([1-9]\d{0,3})(?=$|[\s/@(]|f\d)/i.exec(lens);
+    return !!range && +range[2] > +range[1];
+}
+
+function isOpticsSpecOnlyLens(value) {
+    const specs = value.replace(/mm|[ft]/gi, "");
+    return /\d/.test(specs) && /^[\d\s.,:/@–—-]+$/.test(specs);
+}
+
+function validationErrors(metadata, selection, needsLens) {
     const brand = (metadata.camera_brand || "").trim();
     const model = (metadata.camera_model || "").trim();
     const lens = (metadata.lens_model || "").trim();

@@ -26,12 +26,12 @@ TestCase {
     function test_upload_validation_and_snapshot() {
         const metadata = {"camera_brand":"Sony", "camera_model":"A7", "lens_model":"24-70mm", "focal_length":35};
         const selection = {"brandIndex":1, "brandValue":"Sony", "modelIndex":0, "modelValue":"", "lensIndex":0, "lensValue":"", "hasFocalLength":true};
-        compare(ProfileSubmission.validationErrors(metadata, selection, true, CameraIdentity.hasSetupName, CameraIdentity.isZoomLens, ProfileSubmission.isOpticsSpecOnlyLens), ["lens_name_required"]);
+        compare(ProfileSubmission.validationErrors(metadata, selection, true), ["lens_name_required"]);
         metadata.lens_model = "Sony FE 24-70mm f/2.8";
-        compare(ProfileSubmission.validationErrors(metadata, selection, true, CameraIdentity.hasSetupName, CameraIdentity.isZoomLens, ProfileSubmission.isOpticsSpecOnlyLens), []);
+        compare(ProfileSubmission.validationErrors(metadata, selection, true), []);
         metadata.lens_model = "24-70mm";
         selection.hasFocalLength = false;
-        compare(ProfileSubmission.validationErrors(metadata, selection, true, CameraIdentity.hasSetupName, CameraIdentity.isZoomLens, ProfileSubmission.isOpticsSpecOnlyLens), ["lens_name_required", "zoom_focal_length_required"]);
+        compare(ProfileSubmission.validationErrors(metadata, selection, true), ["lens_name_required", "zoom_focal_length_required"]);
         const snapshot = ProfileSubmission.metadataSnapshot(metadata);
         snapshot.camera_brand = "Canon";
         compare(metadata.camera_brand, "Sony");

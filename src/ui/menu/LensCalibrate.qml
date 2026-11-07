@@ -210,12 +210,6 @@ MenuItem {
     function cameraNeedsLens(brand: string, model: string): bool {
         return CameraIdentity.cameraNeedsLens(controller.camera_database_info(brand, model));
     }
-    function isZoomLens(lens: string): bool {
-        return CameraIdentity.isZoomLens(lens);
-    }
-    function hasSetupName(value: string): bool {
-        return CameraIdentity.hasSetupName(value);
-    }
     function validateProfileMetadata(upload: bool): bool {
         list.commitAll();
         if (!upload) return true;
@@ -227,7 +221,7 @@ MenuItem {
             brandIndex: cameraBrand.currentIndex, brandValue: selectorValue(cameraBrand),
             modelIndex: cameraModel.currentIndex, modelValue: selectorValue(cameraModel),
             lensIndex: cameraLens.currentIndex, lensValue: selectorValue(cameraLens), hasFocalLength: flcb.checked
-        }, needsLens, hasSetupName, isZoomLens, ProfileSubmission.isOpticsSpecOnlyLens);
+        }, needsLens);
 
         if (errors.length > 0) {
             const messages = {

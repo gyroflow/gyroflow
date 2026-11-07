@@ -29,17 +29,6 @@ function detectedCamera(identifier) {
     };
 }
 
-function hasSetupName(value) {
-    return !!value && !/^(?:[-?]+|other|unknown|none|n\/?a|unspecified)$/i.test(value);
-}
-
-function isZoomLens(lens) {
-    if (/\bzoom\b|\d+(?:\.\d+)?\s*(?:mm\s*)?[-–—]\s*\d+(?:\.\d+)?\s*mm/i.test(lens)) return true;
-    // Community profiles also use names like "18-105 F4", without units.
-    const range = /(?:^|[\s(])([1-9]\d{0,2})\s*[-–—]\s*([1-9]\d{0,3})(?=$|[\s/@(]|f\d)/i.exec(lens);
-    return !!range && +range[2] > +range[1];
-}
-
 function cameraNeedsLens(info) {
     info = info || {};
     return info.fixed_lens !== true;
