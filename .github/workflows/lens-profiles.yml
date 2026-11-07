@@ -36,7 +36,14 @@ jobs:
           /usr/lib/qt6/bin/qmltestrunner -input tests/qml
 
   profile-installer:
-    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-15]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     permissions:
       contents: read
     env:
@@ -51,10 +58,19 @@ jobs:
           workspaces: src/core
       - name: Fetch the released bundle used by the compatibility test
         run: |
-          mkdir -p "$(dirname "$GYROFLOW_PROFILES_BUNDLE")"
+          node -e "require('node:fs').mkdirSync(require('node:path').dirname(process.env.GYROFLOW_PROFILES_BUNDLE), { recursive: true })"
           curl --fail --location --retry 3 --output "$GYROFLOW_PROFILES_BUNDLE" \
             "https://github.com/gyroflow/lens_profiles/releases/download/v$GYROFLOW_PROFILE_RELEASE_VERSION/profiles.cbor.gz"
-          echo "5b9136697b75ddf9cda20965f17e786b6c8530e3d59109f87505069602e7f676  $GYROFLOW_PROFILES_BUNDLE" | shasum -a 256 --check
+          node --input-type=module <<'NODE'
+          import { createHash } from 'node:crypto';
+          import { readFile } from 'node:fs/promises';
+
+          const bundle = await readFile(process.env.GYROFLOW_PROFILES_BUNDLE);
+          const digest = createHash('sha256').update(bundle).digest('hex');
+          if (digest !== '5b9136697b75ddf9cda20965f17e786b6c8530e3d59109f87505069602e7f676') {
+            throw new Error(`Profile bundle checksum mismatch: ${digest}`);
+          }
+          NODE
       - name: Test the native catalog and profile installer
         run: |
           cargo test --manifest-path src/core/Cargo.toml --locked --lib
