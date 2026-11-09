@@ -124,7 +124,17 @@ float map_coord(float x, float in_min, float in_max, float out_min, float out_ma
 
 // The pipeline carries a ray as an angle vector: |.| is the angle from the axis in radians, the direction
 // is the azimuth. See stabilization/projection.rs - nothing diverges at 90° the way a z=1 plane point does
+// The equirect plane (longitude across, latitude down, in radians) to a direction: +z at the middle, +x at
+// +90°, up (-y) at the top. Straight behind is an angle vector of length π, which the encoding carries
+vec2 equirect_to_ray(vec2 n) {
+    float cl = cos(n.y);
+    vec3 d = vec3(cl * sin(n.x), sin(n.y), cl * cos(n.x));
+    float rxy = length(d.xy);
+    if (rxy < 1e-12) return vec2(0.0, 0.0);
+    return d.xy * (atan(rxy, d.z) / rxy);
+}
 vec2 ray_unproject(vec2 n, int proj) {
+    if (proj == 5) return equirect_to_ray(n);                           // equirect
     float r = length(n);
     if (r < 1e-12) return vec2(0.0, 0.0);
     float theta = atan(r);                                              // rectilinear
@@ -137,7 +147,7 @@ vec2 ray_unproject(vec2 n, int proj) {
 // Where a ray of angle `theta` lands on the output plane, under the output projection
 float ray_radius(float theta, int proj) {
     if (proj == 1) return 2.0 * tan(theta * 0.5);
-    if (proj == 2) return theta;
+    if (proj == 2 || proj == 5) return theta;
     if (proj == 3) return 2.0 * sin(theta * 0.5);
     if (proj == 4) return sin(theta);
     return theta < 1.5707? tan(theta) : 1e9;
@@ -156,7 +166,7 @@ float blend_residual(float theta, vec2 u, float t, float a) {
 // The ray angle that lands at a given output radius, inverse of `ray_radius`
 float ray_theta(float r, int proj) {
     if (proj == 1) return 2.0 * atan(r * 0.5);
-    if (proj == 2) return r;
+    if (proj == 2 || proj == 5) return r;
     if (proj == 3) return 2.0 * asin(min(r * 0.5, 1.0));
     if (proj == 4) return asin(min(r, 1.0));
     return atan(r);
@@ -245,6 +255,8 @@ void main() {
     float stretch = params.input_horizontal_stretch > 0.01? 1.0 / params.input_horizontal_stretch : 1.0;
     vec2 out_c = vec2(params.output_width / 2.0, params.output_height / 2.0);
     vec2 out_f = params.f * stretch / params.fov;
+    // The equirect's plane is the sphere's, not the lens's: all of it 360°×180° at zoom (`fov`) 1
+    if (params.output_projection == 5) out_f = vec2(float(params.output_width) / 6.2831853, float(params.output_height) / 3.1415927) / max(params.fov, 1e-6);
     float a = params.lens_correction_amount;
     vec2 n_raw = (texPos - out_c) / out_f;
     vec2 n = n_raw;

@@ -395,7 +395,17 @@ DATA_TYPEF sample_input_at(float2 uv, float4 jac, __global const uchar *srcptr, 
 
 // The pipeline carries a ray as an angle vector: |.| is the angle from the axis in radians, the direction
 // is the azimuth. See stabilization/projection.rs - nothing diverges at 90 degrees the way a z=1 plane point does
+// The equirect plane (longitude across, latitude down, in radians) to a direction: +z at the middle, +x at
+// +90 degrees, up (-y) at the top. Straight behind is an angle vector of length pi, which the encoding carries
+float2 equirect_to_ray(float2 n) {
+    float cl = cos(n.y);
+    float3 d = (float3)(cl * sin(n.x), sin(n.y), cl * cos(n.x));
+    float rxy = length(d.xy);
+    if (rxy < 1e-12f) { return (float2)(0.0f, 0.0f); }
+    return d.xy * (atan2(rxy, d.z) / rxy);
+}
 float2 ray_unproject(float2 n, int proj) {
+    if (proj == 5) { return equirect_to_ray(n); }                       // equirect
     float r = length(n);
     if (r < 1e-12f) { return (float2)(0.0f, 0.0f); }
     float theta;
@@ -409,7 +419,7 @@ float2 ray_unproject(float2 n, int proj) {
 // Where a ray of angle `theta` lands on the output plane, under the output projection
 float ray_radius(float theta, int proj) {
     if (proj == 1) { return 2.0f * tan(theta * 0.5f); }
-    if (proj == 2) { return theta; }
+    if (proj == 2 || proj == 5) { return theta; }
     if (proj == 3) { return 2.0f * sin(theta * 0.5f); }
     if (proj == 4) { return sin(theta); }
     return theta < 1.5707f? tan(theta) : 1e9f;
@@ -428,7 +438,7 @@ float blend_residual(float theta, float2 u, float t, float a, __global KernelPar
 // The ray angle that lands at a given output radius, inverse of `ray_radius`
 float ray_theta(float r, int proj) {
     if (proj == 1) { return 2.0f * atan(r * 0.5f); }
-    if (proj == 2) { return r; }
+    if (proj == 2 || proj == 5) { return r; }
     if (proj == 3) { return 2.0f * asin(min(r * 0.5f, 1.0f)); }
     if (proj == 4) { return asin(min(r, 1.0f)); }
     return atan(r);
@@ -571,6 +581,8 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
     float stretch = params->input_horizontal_stretch > 0.01f? 1.0f / params->input_horizontal_stretch : 1.0f;
     float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
     float2 out_f = params->f * stretch / params->fov;
+    // The equirect's plane is the sphere's, not the lens's: all of it 360 x 180 degrees at zoom (`fov`) 1
+    if (params->output_projection == 5) { out_f = (float2)((float)params->output_width / 6.2831853f, (float)params->output_height / 3.1415927f) / max(params->fov, 1e-6f); }
     float a = params->lens_correction_amount;
     float2 n_raw = (out_pos - out_c) / out_f;
     float2 n = n_raw;

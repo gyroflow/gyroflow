@@ -85,7 +85,79 @@ pub struct ComputeParams {
     pub lens_metadata_delay_frames: i32,          // every per-frame lens lookup is shifted by this many frames, see synchronization::lens_delay
 
     pub lens_breathing_enabled: bool,             // breathing compensation: the target holds the narrowest field of view (the breathing itself is in `focal_lengths` either way)
+
+    /// Where this lens is in a rig of several (a 360° camera), when its picture goes into the rig's sphere rather
+    /// than into a frame of its own. The default - no turn, no offset - changes nothing
+    pub rig_lens: RigLens,
 }
+
+/// One lens of a rig, for rendering it into a picture of the whole rig (with `OutputProjection::Equirect`, the
+/// rig's sphere). The axes are the camera's, as `video-types` has them: +x right, +y down, +z forward, the rig's
+/// being those of the camera the gyro describes (the motion data's own camera, after `imu_orientation`).
+///
+/// The output camera is then the rig's, and each output ray `d` stands for the point `R·d` of a sphere of radius
+/// `R` (the stitching distance) around the rig's center. The lens, `t` away from that center, sees the point
+/// along `R·d - t`, turned into its own axes. At `R` = infinity, or with `t` zero, that's the ray `d` itself and
+/// only the turn is left: a flat clip has neither
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct RigLens {
+    /// The lens's orientation in the rig: turns a direction in the lens's axes into the rig's
+    pub rotation: nalgebra::UnitQuaternion<f64>,
+    /// Where the lens is (its entrance pupil), from the rig's center, in metres, in the rig's axes
+    pub translation: [f64; 3],
+    /// The radius of the sphere the lenses are stitched on, in metres. 0 (or anything not finite and positive)
+    /// is infinity: no parallax
+    pub stitching_distance: f64,
+    /// The largest angle from the lens's axis it has picture for, in radians, when that is less than the lens
+    /// model's own field (a rig's validity limit: the other lens, the body). 0 is the model's own. Rays past it
+    /// are background, never clamped to its edge
+    pub validity: f64,
+}
+impl Default for RigLens {
+    fn default() -> Self {
+        Self { rotation: nalgebra::UnitQuaternion::identity(), translation: [0.0; 3], stitching_distance: 0.0, validity: 0.0 }
+    }
+}
+impl RigLens {
+    pub fn is_identity(&self) -> bool { *self == Self::default() }
+
+    /// The kernel's part: the rotation from the rig's axes into the lens's (multiplied onto the matrices, which
+    /// take an output ray into the source camera) and the lens's offset in the lens's axes, divided by the
+    /// stitching distance (`KernelParams::translation3d` is `-` that: the kernel adds it to the turned unit ray).
+    /// In the axes the kernel works in, which have `y` up when the framebuffer is inverted
+    pub fn kernel_parts(&self, framebuffer_inverted: bool) -> (nalgebra::Matrix3<f64>, nalgebra::Vector3<f64>) {
+        let lens_from_rig = *self.rotation.inverse().to_rotation_matrix().matrix();
+        let r = self.stitching_distance;
+        let t = if r.is_finite() && r > 0.0 { lens_from_rig * nalgebra::Vector3::from(self.translation) / r } else { nalgebra::Vector3::zeros() };
+        if framebuffer_inverted {
+            let flip = nalgebra::Matrix3::from_diagonal(&nalgebra::Vector3::new(1.0, -1.0, 1.0));
+            (flip * lens_from_rig * flip, flip * t)
+        } else {
+            (lens_from_rig, t)
+        }
+    }
+
+    /// The field limit the kernel stops at: the model's (0 when it has none), and the rig's validity within it
+    pub fn field_limit(&self, model_field_limit: f64) -> f64 {
+        if self.validity > 0.0 && (model_field_limit <= 0.0 || self.validity < model_field_limit) { self.validity } else { model_field_limit }
+    }
+}
+
+/// `R·d - t` back to `d`: the unit ray from the rig's center whose point on the stitching sphere a lens sees along
+/// the unit direction `s` (in the lens's axes, with `t` the lens's offset over the stitching distance, as
+/// [`RigLens::kernel_parts`] gives it). `M·d = λ·s + t` with `|d| = 1`, `λ > 0`: the far root of
+/// `|λ·s + t| = 1`. Returned in the lens's axes - the caller turns it back - and `None` when the lens, outside the
+/// sphere, looks past it
+pub fn ray_from_lens_offset(s: nalgebra::Vector3<f64>, t: nalgebra::Vector3<f64>) -> Option<nalgebra::Vector3<f64>> {
+    let s = s.try_normalize(1e-12)?;
+    let b = s.dot(&t);
+    let disc = b * b - (t.norm_squared() - 1.0);
+    if disc < 0.0 { return None; }
+    let lambda = -b + disc.sqrt();
+    if !(lambda > 0.0) { return None; }
+    Some(s * lambda + t)
+}
+
 impl ComputeParams {
     /// Time (µs) the lens metadata of the picture at `timestamp_ms` is looked up at: the frame time shifted by
     /// `lens_metadata_delay_frames`, the delay the lens reports its state with (see `synchronization::lens_delay`). The
@@ -191,6 +263,8 @@ impl ComputeParams {
             lens_metadata_delay_frames: params.lens_metadata_delay_frames,
 
             lens_breathing_enabled: params.lens_breathing_enabled,
+
+            rig_lens: RigLens::default(),
         };
         // Everything above is a read of `mgr.params`, and nothing below needs it. "Automatic" measures the
         // projection on the lens data, which takes the `gyro` and `file_metadata` locks (`get_lens_data_at_timestamp`),

@@ -22,6 +22,7 @@ fn get_mtrx_param(_size_for_rs: f32, matrices: &MatricesType, _sampler: SamplerT
 /// direction is the azimuth. See `stabilization::projection` - nothing diverges at 90° the way a z=1 plane
 /// point does
 pub fn ray_unproject(n: Vec2, proj: i32) -> Vec2 {
+    if proj == 5 { return equirect_to_ray(n); }
     let r = n.length();
     if r < 1e-12 { return vec2(0.0, 0.0); }
     let theta = if proj == 1 { 2.0 * (r * 0.5).atan() }
@@ -34,7 +35,7 @@ pub fn ray_unproject(n: Vec2, proj: i32) -> Vec2 {
 /// Where a ray of angle `theta` lands on the output plane, under the output projection
 pub fn ray_radius(theta: f32, proj: i32) -> f32 {
     if proj == 1 { 2.0 * (theta * 0.5).tan() }
-    else if proj == 2 { theta }
+    else if proj == 2 || proj == 5 { theta }
     else if proj == 3 { 2.0 * (theta * 0.5).sin() }
     else if proj == 4 { theta.sin() }
     else if theta < 1.5707 { theta.tan() }
@@ -54,10 +55,19 @@ pub fn blend_residual(theta: f32, u: Vec2, t: f32, a: f32, params: &KernelParams
 /// The ray angle that lands at a given output radius, inverse of [`ray_radius`]
 pub fn ray_theta(r: f32, proj: i32) -> f32 {
     if proj == 1 { 2.0 * (r * 0.5).atan() }
-    else if proj == 2 { r }
+    else if proj == 2 || proj == 5 { r }
     else if proj == 3 { 2.0 * (r * 0.5).min(1.0).asin() }
     else if proj == 4 { r.min(1.0).asin() }
     else { r.atan() }
+}
+/// The equirect plane (longitude across, latitude down, in radians) to a ray: +z at the middle, +x at +90°, up
+/// (-y) at the top. Straight behind is an angle vector of length π, which the encoding carries
+pub fn equirect_to_ray(n: Vec2) -> Vec2 {
+    let cl = n.y.cos();
+    let d = vec3(cl * n.x.sin(), n.y.sin(), cl * n.x.cos());
+    let rxy = (d.x * d.x + d.y * d.y).sqrt();
+    if rxy < 1e-12 { return vec2(0.0, 0.0); }
+    vec2(d.x, d.y) * (rxy.atan2(d.z) / rxy)
 }
 pub fn ray_to_dir(ray: Vec2) -> Vec3 {
     let theta = ray.length();
@@ -138,7 +148,9 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
     // angles the two projections would each have given on their own
     let stretch = if params.input_horizontal_stretch > 0.01 { 1.0 / params.input_horizontal_stretch } else { 1.0 };
     let out_c = vec2(params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-    let out_f = params.f * stretch / params.fov;
+    let mut out_f = params.f * stretch / params.fov;
+    // The equirect's plane is the sphere's, not the lens's: all of it 360°×180° at zoom (`fov`) 1
+    if params.output_projection == 5 { out_f = vec2(params.output_width as f32 / 6.2831853, params.output_height as f32 / 3.1415927) / params.fov.max(1e-6); }
     let a = params.lens_correction_amount;
     let n_raw = (out_pos - out_c) / out_f;
     let mut n = n_raw;
