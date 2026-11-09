@@ -203,9 +203,9 @@ checksum = "3bc62ac97cc33321f50863d514c3bc38a453947a8f9e781137e47c7401020aed"
 
 [[package]]
 name = "arc-swap"
-version = "1.9.4"
+version = "1.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db4c94f57a570fce5d381be3289b3f79aef6332d72948fe82ab5772e423ccf92"
+checksum = "84a22b5d51209f6de83d37a0b33d320acb8da88823e42a94c075140708f032a5"
 dependencies = [
  "rustversion",
 ]
@@ -738,9 +738,9 @@ checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 
 [[package]]
 name = "burn"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "568cb1a4ba57451e09e22a4f66edfffb2de60f06485be06b29973ff941ef5eda"
+checksum = "4100e9ad9b9a5fca8385a35e1368b8b3e9a5936ebec6100740c32425a2006229"
 dependencies = [
  "burn-core",
  "burn-linalg",
@@ -755,9 +755,9 @@ dependencies = [
 
 [[package]]
 name = "burn-autodiff"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "063c5360c339a76834567943db6bdf09b1e4c7941bd5ba92ccc1e9ed6720090b"
+checksum = "33af61bbc67555c1654a7598249c9dec57b04a53ddc2643c6338d642c2aa9cd8"
 dependencies = [
  "burn-backend",
  "burn-std",
@@ -771,9 +771,9 @@ dependencies = [
 
 [[package]]
 name = "burn-backend"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e2b7ed941f572b57409114d365764abeb026a4955fd11f30261133a2a9a3fcf"
+checksum = "adb14d1f73815a7cc03612e1dfdbd8dab10a651a3fea538244c46bf8de592e62"
 dependencies = [
  "burn-std",
  "cubecl",
@@ -802,9 +802,9 @@ dependencies = [
 
 [[package]]
 name = "burn-core"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "687e179a1409700885419e8acbc736d1f1bfd6e33b53cc5f768140b25e2f0f54"
+checksum = "6f246829e37fb4c72ce792ec5039250c3b20df41192985682e7131e8b6962a70"
 dependencies = [
  "burn-backend",
  "burn-backend-extension",
@@ -834,9 +834,9 @@ dependencies = [
 
 [[package]]
 name = "burn-cpu"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11e70b449c7f7fe0701e4b45df284aa8fcd2c4f61754cb3f5d6ab6c19682c1a7"
+checksum = "157c5b628b38f6ce01946a32a3c46b688c4ef7f22b8e17d9a8926bab1d5a42f8"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -846,9 +846,9 @@ dependencies = [
 
 [[package]]
 name = "burn-cubecl"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2606fa66c4b2624f996280a3eec1fece91f1ecb4d9b493495d2ae6c7c1110c6"
+checksum = "29d33b33f13e8e053065a8b8d17739dcff3e64871b1353454ff7e838e0150f24"
 dependencies = [
  "burn-backend",
  "burn-cubecl-fusion",
@@ -866,9 +866,9 @@ dependencies = [
 
 [[package]]
 name = "burn-cubecl-fusion"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ca345fe620fa41c07b03b8792e5675acf464f09278a504410c46923e07cbd53"
+checksum = "d574c5606ce4b3233bd453034b915a9778b18a6eea8a516f750822551b3e8476"
 dependencies = [
  "burn-backend",
  "burn-fusion",
@@ -885,9 +885,9 @@ dependencies = [
 
 [[package]]
 name = "burn-cuda"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c30764297b63489699d0e2db1c1d619b6444e86680791593ae61da4f20725b3"
+checksum = "a9d1b4100c45445c63cc756325065606ed5d7deab5a448bd9a4d44200a426166"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -910,9 +910,9 @@ dependencies = [
 
 [[package]]
 name = "burn-dispatch"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72f83d57c018283279a9aae65607592fcbf617d66682d3ec756a444a66b9892c"
+checksum = "a85cda0784402682fc6e261ea699c51425d96ac338858ada80e75de1ca25a6e6"
 dependencies = [
  "burn-autodiff",
  "burn-backend",
@@ -920,6 +920,7 @@ dependencies = [
  "burn-cubecl",
  "burn-flex",
  "burn-remote",
+ "burn-router",
  "paste",
  "portable-atomic",
 ]
@@ -932,9 +933,9 @@ checksum = "38cd2b119d7ff14ec3b496a05a8bc75069a7a9c944395507177ad915f8ae05e8"
 
 [[package]]
 name = "burn-flex"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83d87a7fa69da94408d74cdc2af457a734dc8e8e2912d3040830f9fac66fbe55"
+checksum = "386b0b78fc8fe4a6b604d93906b4819de33e987860ec653a2cb57500c301b992"
 dependencies = [
  "burn-backend",
  "burn-ir",
@@ -950,9 +951,9 @@ dependencies = [
 
 [[package]]
 name = "burn-fusion"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbf389ab6f59b11eaf31e2170cce8486edfc0c29122bd64ed4c066bae18f8bf0"
+checksum = "6bb3b6d0580fe7bbf13a1064b1c7ed8db972b6e2949f8ea8564191786cdd45e2"
 dependencies = [
  "burn-backend",
  "burn-ir",
@@ -967,9 +968,9 @@ dependencies = [
 
 [[package]]
 name = "burn-instrument"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "931f7233a22efc3c45cfbb18592f21a5860a90d0dd31e764cc09e486f06367e6"
+checksum = "41f4d34ecd4edd3e06f6079015cc22310fb8b741d87f3e5973d1bb6af7ececb5"
 dependencies = [
  "burn-fusion",
  "burn-instrument-macros",
@@ -995,9 +996,9 @@ dependencies = [
 
 [[package]]
 name = "burn-ir"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "498fa668ef9e528446903602e6b294200aae758dd944ee8375eefb2d1844c53f"
+checksum = "5779ea2dde224585671092e1bf524a4f6b36d2112e5be2a984b942afdab39513"
 dependencies = [
  "burn-backend",
  "burn-std",
@@ -1007,9 +1008,9 @@ dependencies = [
 
 [[package]]
 name = "burn-linalg"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80798b7e76f623a4e6b18da57f1e75864c67d35c6acefe5aa3a2cbab003705fe"
+checksum = "d359ed188a01e2e6b1b2cc34d21fe0c91a012c9e2a933ef5bba65a70e8eb9e25"
 dependencies = [
  "burn-core",
  "burn-cubecl",
@@ -1021,9 +1022,9 @@ dependencies = [
 
 [[package]]
 name = "burn-nn"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "691ff9b4e75c9e7ec48d84a207c4ab73cc947c8db695b3447680883adf0c2755"
+checksum = "89409efcb0080c96a9faad4d3b61cc8dfe124f2dc2686f8892b56664fa04eae4"
 dependencies = [
  "burn-core",
  "burn-linalg",
@@ -1032,9 +1033,9 @@ dependencies = [
 
 [[package]]
 name = "burn-optim"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2d8233a0daebfec1e3ad3e26ae9c453c250c0f1091c7cd5e31258b6418a2fc9"
+checksum = "2ff5907579e378086706e2912f7db16489c66bd0ede046fdc71f2afb45ebafba"
 dependencies = [
  "burn-core",
  "burn-derive",
@@ -1048,9 +1049,9 @@ dependencies = [
 
 [[package]]
 name = "burn-pack"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76cea59a8f8ff2eccd0fd2c1767d25d72c7e502e91cbd2806e0b39df368bdd68"
+checksum = "0831a51f222a775a70ca01be1bdd840cc5de270b9386e70f9cbad92f6d55fcd0"
 dependencies = [
  "burn-std",
  "byteorder",
@@ -1060,9 +1061,9 @@ dependencies = [
 
 [[package]]
 name = "burn-remote"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7867bd61608e5d5d41ec1744b3ed3561c0c13dac5a9c472fc00604642923d1de"
+checksum = "0a97b5fb4f78afe43fd0bc578d92093b2a844e7899c751fb87409ab6020b3fa5"
 dependencies = [
  "burn-backend",
  "burn-fusion",
@@ -1083,9 +1084,9 @@ dependencies = [
 
 [[package]]
 name = "burn-rocm"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34a21518a8013345e4b4bb01865d1814a592912387e10ad70349ede05516c41f"
+checksum = "ca0d14f077785481fd2bd187eecb8008a0400fbdced52a12818353b9434491b3"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -1095,15 +1096,16 @@ dependencies = [
 
 [[package]]
 name = "burn-router"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a15efdfcdf0936f711830b472d9b69d039ef1e5eb5e7b8dc85f2b0914072d68"
+checksum = "f30e853537c4f032a57956f7d7332873a9c475699a0c184e146da343b6c1f3ff"
 dependencies = [
  "burn-backend",
  "burn-fusion",
  "burn-ir",
  "burn-std",
  "hashbrown 0.16.1",
+ "log",
  "portable-atomic",
  "serde",
  "spin",
@@ -1111,9 +1113,9 @@ dependencies = [
 
 [[package]]
 name = "burn-signal"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93fb124bf22bc337b5e4a4912069e3184b389fada6b7536a7660a3406ce43fa9"
+checksum = "f4af76f874eef6d79059a0bb5be074dfdaac1de2a3e1469373984d8058b24477"
 dependencies = [
  "burn-autodiff",
  "burn-core",
@@ -1125,9 +1127,9 @@ dependencies = [
 
 [[package]]
 name = "burn-std"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd37a68c49ad6fdfea6e32cebeedc84cbf01cc91b82189aeff4fbb876a79862f"
+checksum = "003e4787f9ed44cc2e367726c6f78a9d9097123ac2e4a3e6fabed2799dc59ae8"
 dependencies = [
  "ahash",
  "bytemuck",
@@ -1151,9 +1153,9 @@ dependencies = [
 
 [[package]]
 name = "burn-store"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3a33b22314d68f26047740b0a2b0e48de11139426273cd5e27c779199571e0f"
+checksum = "b02401f6413bd3fa857ef6c0528718eeec72c133519f94854193cebea8841a01"
 dependencies = [
  "burn-core",
  "burn-pack",
@@ -1169,9 +1171,9 @@ dependencies = [
 
 [[package]]
 name = "burn-tensor"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a69924f8207041892b93bf266c57143e4d3df1ff5ad81f289fc959c100583a7"
+checksum = "d3d8eb74859d782f6378befeccbc6686f8830a7ffb41f561ec95c0d435419531"
 dependencies = [
  "burn-backend",
  "burn-derive",
@@ -1186,9 +1188,9 @@ dependencies = [
 
 [[package]]
 name = "burn-vision"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "941360c2d568f5f6a6952673dbb4a673fd598b9473dec6dabbe1abc084779881"
+checksum = "33126b0625fdb3288e7071b04b0d245eccbdfd4726108f28d6a47ff376fd2556"
 dependencies = [
  "aligned-vec",
  "bon",
@@ -1208,9 +1210,9 @@ dependencies = [
 
 [[package]]
 name = "burn-wgpu"
-version = "0.23.0-pre.1"
+version = "0.23.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01498372859f9deca7473662d5fe3f86d93ace2b4b4b14ef9cc823125a537245"
+checksum = "39a243dcd4901c1770d6e732739156cd1080e317d01f4b63295f3d92a098ff34"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -1674,9 +1676,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73cecd0a7b628459fa3bc73e9a74c24b063ea9a4cce4125d121f4c295b21a7c2"
+checksum = "8715cfffdeb2ba56dfd2b15d02e155401f0a89fe47a37ec61a65dfc7241a2209"
 dependencies = [
  "cubecl-core",
  "cubecl-cpu",
@@ -1694,9 +1696,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-common"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73897e559a541e2f8edb9fd574e2ffd512082d4aa3e77bb392c9ba9e8ed0e727"
+checksum = "8448ffb55663578703e6e7cd02b6a599cc33aebf36e8d00659b7c1380e33460d"
 dependencies = [
  "bytemuck",
  "cfg_aliases",
@@ -1719,9 +1721,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-core"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b11a12de0053027af0e8ae5d3d406cd857d0ced6de9b66dd80d2e5f9bc17381"
+checksum = "492e1a1143a291b4f2ec32692d46e4f0fc6c66603d865f2d46fa99fcc556c400"
 dependencies = [
  "bitflags 2.13.2",
  "bytemuck",
@@ -1750,9 +1752,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-cpp"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "404ac07ea34fc122b6b0175524d24b1c4fbadd63b4750e00ddfdfcf086a7339f"
+checksum = "2e2c102e471cb08d03bd27cb78418294878a4b43361c37767d51a6816ab89d87"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -1773,9 +1775,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-cpu"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a57ec22b1ba715a91cc9fe43c7932c968c7cd96397c4c52fe5e619366b20a26b"
+checksum = "166f78303c7af6491c7c1a92fc28cb918f08a88e421dc003c8b6c9c3a7e9d576"
 dependencies = [
  "bytemuck",
  "crossbeam-utils",
@@ -1796,9 +1798,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-cuda"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f741febf70420bd2b3fdb9157281076fe3b9fde74c83ef4e133c8659bcd540b"
+checksum = "da8c7835f25bf580938bb8a50160ba924ee103a255995bb91b029d7a719afc21"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -1817,9 +1819,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-environment"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22ec29682bdeb247f7c5a13618634202c6f6a71f639034f1e022e433b48c2b35"
+checksum = "e9a56af83f8eb9af1bcf8075e941789aeb25b2154fe14d33f3f2120a5269e2e4"
 dependencies = [
  "async-channel",
  "backtrace",
@@ -1856,9 +1858,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-hip"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7897fdc74308f7b6b0790a1ad5d0634475bb617e5be979922686c446238f638c"
+checksum = "41130f9db4663cf86bb2bd909672bb2f9e0dde2ab77387609a1282a300a265ef"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -1871,6 +1873,7 @@ dependencies = [
  "cubecl-server",
  "derive-new",
  "half",
+ "libloading 0.8.9",
  "log",
  "paste",
  "serde",
@@ -1889,9 +1892,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-ir"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e09478aab51860e5740bbca04a6c4cef9bbcb9f2aeaa0eb1b007a2742f10f34"
+checksum = "4d44422a696df82bf8d9843d6aed74572250a4366133a81cefcbad4a86ef1ab4"
 dependencies = [
  "bumpalo",
  "cubecl-common",
@@ -1921,9 +1924,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-llvm"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df375ac5f29473f6d65018eb67e081bf1c6a61fedb3c2b61aa31e725150f5124"
+checksum = "1c4fb256e6e0e02026fd17c296ab9f77164996cf433d49d245dc877c7b90e1a5"
 dependencies = [
  "cc",
  "cubecl-core",
@@ -1973,9 +1976,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-metal"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2be5175cc0ff598f0255c53e5a408e9ab989923d77c22d272ca6f46952e88d1"
+checksum = "0d2a82684cf2464920ccf1a23d3349078747bf0dc2afbe14e97369191b99f933"
 dependencies = [
  "block2",
  "bytemuck",
@@ -1998,9 +2001,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-monitoring"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf88d9db1b4b873eba468097d291300d8a3fb3798f7c9b0daeebfcb7d131c767"
+checksum = "e5f0401cdeb421f71f84b6618c796a0210c5d750f7c344f5d12045f33821c9f3"
 dependencies = [
  "cfg_aliases",
  "cubecl-ir",
@@ -2012,9 +2015,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-opt"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "503927721ff2f0b5c2cec709582ddb064a4867bd57249396f9d8750ccee8df19"
+checksum = "f93f41ece54106ec3bf8b9512cdd7a6987c48c55e736a71413794d9dd1c40e66"
 dependencies = [
  "cubecl-common",
  "cubecl-core",
@@ -2035,9 +2038,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-runtime"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3635474c34784019c1a02fc0b6f641b02d460ba5c7bbdfdcc8de8c52554dd787"
+checksum = "c0bc07734224707abe011a6e22a3cf0549ae79240c9ad352214e4d324e738207"
 dependencies = [
  "buildid",
  "bytemuck",
@@ -2067,9 +2070,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-server"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "190f9ea7734eea58a415b60269b262af1a6be9b62224ac59b26c326311548135"
+checksum = "ac630c0f06efecc5edf2e7e80ec104dec170a039b4577bcb26a00c1d2e038853"
 dependencies = [
  "buildid",
  "bytemuck",
@@ -2096,9 +2099,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-spirv"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c326b0cef2322ad092a56d996fe85130fd41b2b49b2a61503253ee0999cbc8e3"
+checksum = "c1d645937a4055de711d7b27e089c4748a2fdebb4122ef05b7ed62a7f2c88c5e"
 dependencies = [
  "bitflags 2.13.2",
  "cubecl-common",
@@ -2120,9 +2123,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-std"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a2bb963adfa03a43e377cdc53647c9b51d3daebcaf9ea1a8101feeae22342d2"
+checksum = "1dcbf630e192a8105268b69a375acf58d61f7ed49a1e955d6a478f20eed8b553"
 dependencies = [
  "cubecl-common",
  "cubecl-core",
@@ -2138,9 +2141,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-tile"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb67e3278b3bd950822e2a4a1bef58eb9b624df8e1846091a770dd64572d9f16"
+checksum = "0e7c7f405d6e72ff84ed2e9eeca7d95ebb204a0bb971252fd03abdba67f81172"
 dependencies = [
  "cubecl-core",
  "cubecl-ir",
@@ -2153,9 +2156,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-wgpu"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3ee2fc26e93180d2ebed49574cf31dbfcdee8e1658f2fb9e79f8097a1666d85"
+checksum = "982709e60c3ccce9eb1d60d3ff2aecc9fceb6c534e7a16971fcf6d3143425b5e"
 dependencies = [
  "ash",
  "bytemuck",
@@ -2186,9 +2189,9 @@ dependencies = [
 
 [[package]]
 name = "cubecl-zspace"
-version = "0.12.0-pre.1"
+version = "0.12.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "248a232137a3cd4d2d8a28b70f074a4fcc27ccb146670c7ab9b4df25407c9589"
+checksum = "263b9105e1e027db9f79721898a849ebc74824193053b8813b35ee72812fcfa6"
 dependencies = [
  "derive-new",
  "serde",
@@ -2197,9 +2200,9 @@ dependencies = [
 
 [[package]]
 name = "cubek"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba6a084a8d266a8697c1ddddc91317693880b047fd8d6c0466abb4587fafd7f9"
+checksum = "06a85e878cfc38cf5887cbf8e2727a9166741ccfb5ae76715f12e14e9b578af6"
 dependencies = [
  "cubecl",
  "cubek-attention",
@@ -2208,6 +2211,7 @@ dependencies = [
  "cubek-fft",
  "cubek-interpolate",
  "cubek-matmul",
+ "cubek-microkernel",
  "cubek-pool",
  "cubek-quant",
  "cubek-random",
@@ -2217,9 +2221,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-attention"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3049bfa5b9cd17b17576d7ecd91788dfa03fc4632de51539c9d94f655920350"
+checksum = "ba97a74a04879a087f45140a7679e2b1f7fd2201267fda69ac16aeba071a47b9"
 dependencies = [
  "bytemuck",
  "cubecl",
@@ -2233,9 +2237,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-attention-backward"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "081d7eeb2cfa6ddf9fe9f13fa7eb23b592bc2013c9b6f30f6882fcb391dc0305"
+checksum = "28e23bbc3dc568b1b01641a0f303128ba70bd5cf58aacc815de36a808733b48d"
 dependencies = [
  "cubecl",
  "cubek-matmul",
@@ -2246,9 +2250,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-convolution"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0138a4af566b3965b58a724cc41f16853ce752ba82365df398f75a307e546bb"
+checksum = "54a97d32a5f6eea51e91009bcfc9bc1acc1822e49af261bb3f2865906f99ad6d"
 dependencies = [
  "bytemuck",
  "cubecl",
@@ -2262,9 +2266,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-fft"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23da01886b8244f72d941d9be370764c059e5651b7d62f065a635b328c4c4fcb"
+checksum = "57abdea19a5afc85335229aaf23033839ccc8f7b9e958aaa2e10a60c004fd15a"
 dependencies = [
  "cubecl",
  "thiserror 2.0.21",
@@ -2272,9 +2276,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-interpolate"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1804a556fbe25af67a8bfb94c6ecacad123ed4d283cfc168f19108f7e366a83"
+checksum = "d4288868ef2efb7ca9494b2302452ea83db829b145289ddca232006129603234"
 dependencies = [
  "cubecl",
  "cubecl-common",
@@ -2286,9 +2290,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-matmul"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa48cb4929b1158db2c8885215eafd6389f68dcb2058b896fa7cafe3d324be46"
+checksum = "bfca8225c2859143e52b385584f71869977211f72744a052a5285e7b91092331"
 dependencies = [
  "bytemuck",
  "cubecl",
@@ -2303,9 +2307,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-microkernel"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c7917cfd9295002d6c1cd8f077e5557e8fa032c7f1d6bc457275efa66be0134"
+checksum = "0351815be61dcf6f56f61a135d50d6f1ff23b73242a3c08ad0074d4b04442e70"
 dependencies = [
  "cubecl",
  "cubek-std",
@@ -2314,9 +2318,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-pool"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4bd72de628d1d34fc72d8c2af8a3972835d0f5860c5b82c4d420d220bca1475a"
+checksum = "addf4f2c910f313c2568445b527b87b02d8c63ce8b85712951573c350db2f09c"
 dependencies = [
  "cubecl",
  "cubecl-common",
@@ -2325,9 +2329,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-quant"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b946ff494d9ef97248fecd15d956f817a249d8ab4e0b965f88005e1fb11e2aa5"
+checksum = "f68b1417612169e8b33d0dd258e3bef9b2bcb3d885471c559fd372171fb74f48"
 dependencies = [
  "cubecl",
  "cubecl-common",
@@ -2338,9 +2342,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-random"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35cb051ae0bf6385cfb86a12cf537971edb847b832b8a38341be9168d6da73a1"
+checksum = "873a07f3a372cc36fda2aac29fd2206056379371c564fe275c7917a1d5bfdbf1"
 dependencies = [
  "cubecl",
  "cubecl-common",
@@ -2354,11 +2358,12 @@ dependencies = [
 
 [[package]]
 name = "cubek-reduce"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a5aa80d38003c778804567aa93b112757cefe7cafcfcef9f9ee98f45ab0c774"
+checksum = "b8426c1c66043edbc0e8937d73e90c8952ac7d393aa00ff8a69048a4811997bf"
 dependencies = [
  "cubecl",
+ "cubek-microkernel",
  "cubek-std",
  "half",
  "num-traits 0.2.19",
@@ -2368,9 +2373,9 @@ dependencies = [
 
 [[package]]
 name = "cubek-std"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2594801d4a8b5bd549ed3fc1624e059b6310f78dd50e858beae4f914f1b7caae"
+checksum = "35d147c56794d1585d0c17c5eef3dbc3df6ab3f37dd14172d5869592cbe5057a"
 dependencies = [
  "cubecl",
  "cubecl-common",
@@ -6943,7 +6948,7 @@ checksum = "c1bbb9f3c5c463a01705937a24fdabc5047929ac764b2d5b9cf681c1f5041ed5"
 [[package]]
 name = "telemetry-parser"
 version = "0.4.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=cfb5659#cfb5659169174320cf7e3d1e9e818a693aff89f1"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=9350bc2#9350bc2e4b57b8c83315c3bcb80ffa0ba91975d4"
 dependencies = [
  "argh",
  "byteorder",
