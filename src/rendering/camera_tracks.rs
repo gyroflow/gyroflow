@@ -578,7 +578,7 @@ pub fn copy_camera_tracks(output_url: &str, input_url: &str, tracks: &CameraTrac
         let _ = file.set_len(output_len);
         return Err(e);
     }
-    file.sync_data()?;
+    gyroflow_core::filesystem::sync_data(file)?;
     // The new `moov` is complete: the old one, the first for the readers, becomes free space
     file.seek(SeekFrom::Start(out_moov_pos + 4))?;
     file.write_all(b"free")?;

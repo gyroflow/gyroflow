@@ -768,7 +768,7 @@ impl TempOutput {
     /// Once it's on disk, it gets the output's name, which replaces the file there at once. A program that opened that file
     /// since is told apart. Kept where only that rename fails
     pub fn publish(mut self) -> std::result::Result<(), OutputError> {
-        self.file.sync_all().map_err(|e| OutputError::Write(display_url(&self.url), e))?;
+        sync_all(&self.file).map_err(|e| OutputError::Write(display_url(&self.url), e))?;
         self.done = true;
         publish(&self.path, &self.target, &self.url).map_err(|e| OutputError::Kept(Box::new(e), self.path.clone()))
     }
@@ -780,6 +780,33 @@ impl Drop for TempOutput {
             log::error!("Failed to remove the partial output {}: {e:?}", self.path.display());
         }
     }
+}
+
+/// [`File::sync_all`], also where the volume can't flush it all the way to the disk's media: see [`full_sync_unsupported`]
+pub fn sync_all(file: &File) -> std::io::Result<()> {
+    full_sync_unsupported(file, file.sync_all())
+}
+/// [`File::sync_data`], also where the volume can't flush it all the way to the disk's media: see [`full_sync_unsupported`]
+pub fn sync_data(file: &File) -> std::io::Result<()> {
+    full_sync_unsupported(file, file.sync_data())
+}
+/// On Apple systems std syncs a file with `F_FULLFSYNC`, which also flushes the disk's own cache, and which only volumes that
+/// can do that support: network shares (SMB) refuse it with `ENOTSUP`, and nothing gets written. There `fsync` writes the file
+/// out to the volume (to the server), as on other systems
+#[cfg_attr(not(target_vendor = "apple"), allow(unused_variables))]
+fn full_sync_unsupported(file: &File, ret: std::io::Result<()>) -> std::io::Result<()> {
+    #[cfg(target_vendor = "apple")]
+    if let Err(e) = &ret && matches!(e.raw_os_error(), Some(libc::ENOTSUP | libc::EOPNOTSUPP | libc::ENOTTY)) {
+        use std::os::fd::AsRawFd;
+        log::debug!("F_FULLFSYNC isn't supported there ({e}), syncing with fsync");
+        loop {
+            // SAFETY: the descriptor is the open file's
+            if unsafe { libc::fsync(file.as_raw_fd()) } == 0 { return Ok(()); }
+            let e = std::io::Error::last_os_error();
+            if e.kind() != std::io::ErrorKind::Interrupted { return Err(e); }
+        }
+    }
+    ret
 }
 
 /// The temporary output `path` that a process left behind, opened and emptied for reuse: one that no process holds locked
