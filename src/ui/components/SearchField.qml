@@ -57,7 +57,11 @@ TextField {
     }
 
     onTextChanged: {
-        controller.search_lens_profile(text, Object.keys(root.profilesMenu.favorites), profilesMenu.currentVideoAspectRatio, profilesMenu.currentVideoAspectRatioSwapped);
+        if (root.profilesMenu && typeof root.profilesMenu.triggerSearch === "function") {
+            root.profilesMenu.triggerSearch(text);
+        } else {
+            controller.search_lens_profile(text, Object.keys(root.profilesMenu.favorites), profilesMenu.currentVideoAspectRatio, profilesMenu.currentVideoAspectRatioSwapped);
+        }
     }
     Keys.onDownPressed: {
         if (!popup.opened) {
