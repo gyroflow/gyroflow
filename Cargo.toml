@@ -49,7 +49,7 @@ human-sort = "0.2.2"
 argh = "0.1.19"
 indicatif = "0.18"
 rustfft = "6.4.1"
-crc32fast = "1.5.3"
+crc32fast = "1.5.5"
 rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.23" }
 filetime_creation = "0.2"
 
@@ -58,7 +58,7 @@ qttypes     = { version = "0.2.12", default-features = false, features = ["requi
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "c611979" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "9.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { version = "9.1.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
 parking_lot = "0.13"
 
