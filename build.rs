@@ -171,6 +171,7 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=OpenGL");
         println!("cargo:rustc-link-lib=framework=CFNetwork");
         println!("cargo:rustc-link-lib=framework=Security");
+        println!("cargo:rustc-link-arg=-Wl,-weak-lcurl");
     }
 
     let mut public_include = |name| {
