@@ -167,6 +167,19 @@ impl LensProfileDatabase {
                             let relative = entry.path().strip_prefix(&dir).map(|x| x.to_string_lossy().replace('\\', "/")).unwrap_or_else(|_| f_name.clone());
                             load(DataSource::String(data), &f_name, &relative);
                         }
+                    } else if f_name.ends_with(".xml") {
+                        if let Ok(xml_data) = std::fs::read_to_string(&f_name) {
+                            if xml_data.contains("<lensdatabase") {
+                                let lf_db = crate::lensfun::LensfunDatabase::parse_xml(&xml_data);
+                                for mut profile in lf_db.to_lens_profiles(3840, 2160) {
+                                    profile.path_to_file = f_name.clone();
+                                    let key = profile.identifier.clone();
+                                    if !key.is_empty() && !self.map.contains_key(&key) {
+                                        self.map.insert(key, profile);
+                                    }
+                                }
+                            }
+                        }
                     }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
                         if let Ok(data) = std::fs::read(&f_name) {
