@@ -289,6 +289,7 @@ impl PoseEstimator {
 
         let mut gyro = BTreeMap::new();
         let mut quats = TimeQuat::new();
+        let mut cum_quat = Quat64::identity();
         let mut update_eulers = BTreeMap::<i64, Option<(f64, f64, f64)>>::new();
         let mut update_timestamps = BTreeMap::<i64, i64>::new();
         {
@@ -345,8 +346,9 @@ impl PoseEstimator {
                         accl: None,
                         magn: None
                     });
-                    let quat = v.quat.unwrap_or_else(|| Quat64::identity());
-                    quats.insert(ts_us, quat);
+                    let step_quat = v.quat.unwrap_or_else(|| Quat64::identity());
+                    cum_quat = cum_quat * step_quat;
+                    quats.insert(ts_us, cum_quat);
                 }
             }
         }
@@ -406,5 +408,54 @@ impl PoseEstimator {
             2 | 3 => find_offset::rs_sync::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
             v => { log::error!("Unknown offset method: {v}"); Vec::new() }
         }
+    }
+
+    /// Exports integrated optical-flow orientations for optical-only stabilization (#45),
+    /// or splices optical-flow orientations over specified `override_ranges_ms` when gyro
+    /// telemetry has localized glitches/spikes.
+    pub fn export_optical_quats_with_ranges(
+        &self,
+        existing_quats: &TimeQuat,
+        override_ranges_ms: &[(f64, f64)],
+    ) -> TimeQuat {
+        let optical_quats = self.estimated_quats.read().clone();
+        if optical_quats.is_empty() {
+            return existing_quats.clone();
+        }
+        if existing_quats.is_empty() || override_ranges_ms.is_empty() {
+            return optical_quats;
+        }
+
+        let mut merged = existing_quats.clone();
+        for &(start_ms, end_ms) in override_ranges_ms {
+            if end_ms <= start_ms {
+                continue;
+            }
+            let start_us = (start_ms * 1000.0).round() as i64;
+            let end_us = (end_ms * 1000.0).round() as i64;
+            let anchor_base = merged
+                .range(..=start_us)
+                .next_back()
+                .map(|(_, q)| *q)
+                .unwrap_or_else(Quat64::identity);
+            let opt_anchor = optical_quats
+                .range(start_us..=end_us)
+                .next()
+                .map(|(_, q)| *q)
+                .unwrap_or_else(Quat64::identity);
+            let align_delta = anchor_base * opt_anchor.inverse();
+
+            let keys_to_remove: Vec<i64> = merged
+                .range(start_us..=end_us)
+                .map(|(k, _)| *k)
+                .collect();
+            for k in keys_to_remove {
+                merged.remove(&k);
+            }
+            for (&ts_us, &opt_q) in optical_quats.range(start_us..=end_us) {
+                merged.insert(ts_us, align_delta * opt_q);
+            }
+        }
+        merged
     }
 }

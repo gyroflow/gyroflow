@@ -1826,6 +1826,28 @@ impl StabilizationManager {
         self.pose_estimator.lowpass_filter(lpf, params.fps);
     }
 
+    /// Stabilizes the loaded clip using optical-flow pose estimates (`PoseEstimator::estimated_quats`)
+    /// when no hardware gyro telemetry is present, or splices optical-flow orientations over
+    /// `override_ranges_ms` to replace corrupted gyro intervals (#45).
+    pub fn use_optical_flow_for_stabilization(&self, override_ranges_ms: &[(f64, f64)]) -> usize {
+        let fps = self.params.read().fps;
+        self.pose_estimator.recalculate_gyro_data(fps, true);
+        let merged_quats = {
+            let gyro_guard = self.gyro.read();
+            self.pose_estimator.export_optical_quats_with_ranges(&gyro_guard.quaternions, override_ranges_ms)
+        };
+        let count = merged_quats.len();
+        if count == 0 {
+            return 0;
+        }
+        {
+            let mut gyro_guard = self.gyro.write();
+            gyro_guard.quaternions = Arc::new(merged_quats);
+        }
+        self.invalidate_smoothing();
+        count
+    }
+
     pub fn set_lens_param(&self, param: &str, value: f64) {
         let mut lens = self.lens.write();
         if lens.fisheye_params.distortion_coeffs.len() >= 4 &&
