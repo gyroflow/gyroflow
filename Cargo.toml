@@ -78,66 +78,88 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "4
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ff1e23d" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ff1e23d" }
 
-# cubecl 0.12.0-pre.1 + four fixes for AMD's Windows Vulkan driver (Radeon iGPUs), not upstreamed:
-# storage mapped from the iGPU's largest device-local heap, a cooperative matrix zeroed as a
-# composite, the subgroup size pinned where it can vary, and a finite tanh. Plus two more: a comptime
-# enum's variant hashed into its kernel's cache key, and a multi-dimensional cube run as a
-# one-dimensional workgroup (Intel's Arc walked 2-D workgroups in tiles, so planes mixed rows). Every
+# cubecl at the rev burn and cubek pin (6c9af8de) + four fixes for AMD's Windows Vulkan driver
+# (Radeon iGPUs), not upstreamed: storage mapped from the iGPU's largest device-local heap, a
+# cooperative matrix zeroed as a composite, the subgroup size pinned where it can vary, and a finite
+# tanh. Plus two more: a comptime enum's variant hashed into its kernel's cache key, and a
+# multi-dimensional cube run as a one-dimensional workgroup (Intel's Arc walked 2-D workgroups in
+# tiles, so planes mixed rows). burn and cubek name cubecl by git URL, so the patch keys on it. Every
 # cubecl crate comes from the branch, or its in-repo siblings would enter the graph twice.
-cubecl                 = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-common          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-core            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-cpp             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-cpu             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-cuda            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-environment     = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-hip             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-ir              = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-llvm            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-macros          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-macros-internal = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-metal           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-monitoring      = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-opt             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-runtime         = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-server          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-spirv           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-std             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-tile            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-wgpu            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-cubecl-zspace          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
-# burn 0.23.0-pre.1 + conv autotune that benchmarks conv_direct only where it can win (it ran
-# 8-90x slower elsewhere, long enough for Windows to reset an iGPU).
-burn                   = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-autodiff          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-backend           = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-backend-extension = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-core              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-cpu               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-cubecl            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-cubecl-fusion     = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-cuda              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-derive            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-dispatch          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-einsum            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-flex              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-fusion            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-instrument        = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-instrument-macros = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-ir                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-linalg            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-nn                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-optim             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-pack              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-remote            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-rocm              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-router            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-signal            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-std               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-store             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-tensor            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-vision            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
-burn-wgpu              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+[patch."https://github.com/tracel-ai/cubecl"]
+cubecl                 = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-common          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-core            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-cpp             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-cpu             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-cuda            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-environment     = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-hip             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-ir              = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-llvm            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-macros          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-macros-internal = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-metal           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-monitoring      = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-opt             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-runtime         = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-server          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-spirv           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-std             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-tile            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-wgpu            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+cubecl-zspace          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
+
+# burn main (aa57952d) + conv autotune that benchmarks conv_direct only where it can win (it ran
+# 1-2 s a sample on a Radeon iGPU and lost the device to Windows' 2 s timeout).
+[patch."https://github.com/tracel-ai/burn"]
+burn                   = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-autodiff          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-backend           = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-backend-extension = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-core              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-cpu               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-cubecl            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-cubecl-fusion     = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-cuda              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-derive            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-dispatch          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-einsum            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-flex              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-fusion            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-instrument        = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-instrument-macros = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-ir                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-linalg            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-nn                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-optim             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-pack              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-remote            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-rocm              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-router            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-signal            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-std               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-store             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-tensor            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-vision            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+burn-wgpu              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
+
+# cubek at the rev burn pins (47e93a9a) + the matmul autotune holding a cube to 256 units where planes
+# are wider than 32 lanes: at wave64 the 8- and 16-plane settings took up to 1.56 s a dispatch on a
+# Radeon iGPU, and a cold tune lost the device.
+[patch."https://github.com/tracel-ai/cubek"]
+cubek                    = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-attention          = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-attention-backward = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-convolution        = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-fft                = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-interpolate        = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-matmul             = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-microkernel        = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-pool               = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-quant              = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-random             = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-reduce             = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
+cubek-std                = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.62"

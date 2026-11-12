@@ -32,7 +32,7 @@ use burn::nn::conv::{ Conv2d, Conv2dConfig };
 use burn::nn::{ InstanceNorm, InstanceNormConfig, LayerNorm, LayerNormConfig, Linear, LinearConfig, PaddingConfig2d };
 use burn::tensor::activation::{ gelu, relu, sigmoid, softmax, tanh };
 use burn::tensor::module::conv2d;
-use burn::tensor::ops::{ ConvOptions, GridSampleOptions, GridSamplePaddingMode, InterpolateMode };
+use burn::tensor::ops::{ ConvOptions, GridSampleMode, GridSampleOptions, GridSamplePaddingMode };
 use burn::tensor::{ Device, Tensor, TensorData };
 
 use super::{ coop, kernels };
@@ -650,7 +650,7 @@ fn sample(x: Tensor<4>, positions: Tensor<4>) -> Tensor<4> {
     let nx = positions.clone().narrow(1, 0, 1).sub_scalar(cx).div_scalar(cx).reshape([b, ph, pw, 1]);
     let ny = positions.narrow(1, 1, 1).sub_scalar(cy).div_scalar(cy).reshape([b, ph, pw, 1]);
     let grid = Tensor::cat(vec![nx, ny], 3);
-    x.grid_sample_2d(grid, GridSampleOptions::new(InterpolateMode::Bilinear).with_padding_mode(GridSamplePaddingMode::Zeros).with_align_corners(true))
+    x.grid_sample_2d(grid, GridSampleOptions::new(GridSampleMode::Bilinear).with_padding_mode(GridSamplePaddingMode::Zeros).with_align_corners(true))
 }
 
 /// flow_warp: feature [B, C, H, W] sampled at each position + flow. bilinear_sample normalises with 2 x / (w - 1) - 1,

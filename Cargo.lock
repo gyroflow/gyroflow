@@ -934,8 +934,8 @@ checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 
 [[package]]
 name = "burn"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-core",
  "burn-linalg",
@@ -950,8 +950,8 @@ dependencies = [
 
 [[package]]
 name = "burn-autodiff"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-std",
@@ -965,8 +965,8 @@ dependencies = [
 
 [[package]]
 name = "burn-backend"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-std",
  "cubecl",
@@ -984,8 +984,8 @@ dependencies = [
 
 [[package]]
 name = "burn-backend-extension"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -994,8 +994,8 @@ dependencies = [
 
 [[package]]
 name = "burn-core"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-backend-extension",
@@ -1025,8 +1025,8 @@ dependencies = [
 
 [[package]]
 name = "burn-cpu"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -1036,8 +1036,8 @@ dependencies = [
 
 [[package]]
 name = "burn-cubecl"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-cubecl-fusion",
@@ -1055,8 +1055,8 @@ dependencies = [
 
 [[package]]
 name = "burn-cubecl-fusion"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-fusion",
@@ -1073,8 +1073,8 @@ dependencies = [
 
 [[package]]
 name = "burn-cuda"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -1084,8 +1084,8 @@ dependencies = [
 
 [[package]]
 name = "burn-derive"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-einsum",
  "derive-new",
@@ -1096,8 +1096,8 @@ dependencies = [
 
 [[package]]
 name = "burn-dispatch"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-autodiff",
  "burn-backend",
@@ -1105,19 +1105,20 @@ dependencies = [
  "burn-cubecl",
  "burn-flex",
  "burn-remote",
+ "burn-router",
  "paste",
  "portable-atomic",
 ]
 
 [[package]]
 name = "burn-einsum"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 
 [[package]]
 name = "burn-flex"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-ir",
@@ -1133,8 +1134,8 @@ dependencies = [
 
 [[package]]
 name = "burn-fusion"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-ir",
@@ -1149,8 +1150,8 @@ dependencies = [
 
 [[package]]
 name = "burn-instrument"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-fusion",
  "burn-instrument-macros",
@@ -1165,8 +1166,8 @@ dependencies = [
 
 [[package]]
 name = "burn-instrument-macros"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1175,8 +1176,8 @@ dependencies = [
 
 [[package]]
 name = "burn-ir"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-std",
@@ -1186,8 +1187,8 @@ dependencies = [
 
 [[package]]
 name = "burn-linalg"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-core",
  "burn-cubecl",
@@ -1199,8 +1200,8 @@ dependencies = [
 
 [[package]]
 name = "burn-nn"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-core",
  "burn-linalg",
@@ -1209,8 +1210,8 @@ dependencies = [
 
 [[package]]
 name = "burn-optim"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-core",
  "burn-derive",
@@ -1224,8 +1225,8 @@ dependencies = [
 
 [[package]]
 name = "burn-pack"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-std",
  "byteorder",
@@ -1235,8 +1236,8 @@ dependencies = [
 
 [[package]]
 name = "burn-remote"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-fusion",
@@ -1257,8 +1258,8 @@ dependencies = [
 
 [[package]]
 name = "burn-rocm"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -1268,14 +1269,15 @@ dependencies = [
 
 [[package]]
 name = "burn-router"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-fusion",
  "burn-ir",
  "burn-std",
  "hashbrown 0.16.1",
+ "log",
  "portable-atomic",
  "serde",
  "spin",
@@ -1283,8 +1285,8 @@ dependencies = [
 
 [[package]]
 name = "burn-signal"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-autodiff",
  "burn-core",
@@ -1296,8 +1298,8 @@ dependencies = [
 
 [[package]]
 name = "burn-std"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "ahash",
  "bytemuck",
@@ -1321,8 +1323,8 @@ dependencies = [
 
 [[package]]
 name = "burn-store"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-core",
  "burn-pack",
@@ -1338,8 +1340,8 @@ dependencies = [
 
 [[package]]
 name = "burn-tensor"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-derive",
@@ -1354,8 +1356,8 @@ dependencies = [
 
 [[package]]
 name = "burn-vision"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "aligned-vec",
  "bon",
@@ -1375,8 +1377,8 @@ dependencies = [
 
 [[package]]
 name = "burn-wgpu"
-version = "0.23.0-pre.1"
-source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-v0.23.0-pre.1#416577bbc668a0ab3d4ef6fb1f3354ca9150097b"
+version = "0.23.0-pre.2"
+source = "git+https://github.com/AdrianEddy/burn.git?branch=diem%2Ffixes-aa57952d#3c6c655e5ba0ef449eea39b57215b1b794f68722"
 dependencies = [
  "burn-backend",
  "burn-cubecl",
@@ -1832,9 +1834,9 @@ dependencies = [
 
 [[package]]
 name = "crc32fast"
-version = "1.5.4"
+version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f97d3416d5337d15c4b0d78c8c91df922ca143f57ec20e2d1c188333047ef04"
+checksum = "2b929dd2a135771f40afabd1073f85eed59c800b7c61901e5c254270497dad64"
 dependencies = [
  "cfg-if",
 ]
@@ -1969,8 +1971,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "cubecl-core",
  "cubecl-cpu",
@@ -1980,6 +1982,7 @@ dependencies = [
  "cubecl-ir",
  "cubecl-metal",
  "cubecl-runtime",
+ "cubecl-server",
  "cubecl-std",
  "cubecl-tile",
  "cubecl-wgpu",
@@ -1988,8 +1991,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-common"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bytemuck",
  "cfg_aliases",
@@ -2012,8 +2015,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-core"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bitflags 2.13.2",
  "bytemuck",
@@ -2042,8 +2045,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-cpp"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -2064,8 +2067,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-cpu"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bytemuck",
  "crossbeam-utils",
@@ -2086,8 +2089,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-cuda"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -2106,8 +2109,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-environment"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "async-channel",
  "backtrace",
@@ -2144,8 +2147,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-hip"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -2158,6 +2161,7 @@ dependencies = [
  "cubecl-server",
  "derive-new",
  "half",
+ "libloading 0.8.9",
  "log",
  "paste",
  "serde",
@@ -2176,8 +2180,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-ir"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bumpalo",
  "cubecl-common",
@@ -2207,8 +2211,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-llvm"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "cc",
  "cubecl-core",
@@ -2227,8 +2231,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-macros"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "darling 0.24.1",
  "derive-new",
@@ -2244,8 +2248,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-macros-internal"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "darling 0.24.1",
  "inflections",
@@ -2256,8 +2260,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-metal"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "block2",
  "bytemuck",
@@ -2280,8 +2284,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-monitoring"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "cfg_aliases",
  "cubecl-ir",
@@ -2293,8 +2297,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-opt"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "cubecl-common",
  "cubecl-core",
@@ -2315,8 +2319,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-runtime"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "buildid",
  "bytemuck",
@@ -2346,13 +2350,14 @@ dependencies = [
 
 [[package]]
 name = "cubecl-server"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "buildid",
  "bytemuck",
  "cfg-if",
  "cfg_aliases",
+ "ciborium",
  "cubecl-common",
  "cubecl-environment",
  "cubecl-ir",
@@ -2374,8 +2379,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-spirv"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "bitflags 2.13.2",
  "cubecl-common",
@@ -2397,8 +2402,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-std"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "cubecl-common",
  "cubecl-core",
@@ -2414,8 +2419,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-tile"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "cubecl-core",
  "cubecl-ir",
@@ -2428,8 +2433,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-wgpu"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "ash",
  "bytemuck",
@@ -2460,8 +2465,8 @@ dependencies = [
 
 [[package]]
 name = "cubecl-zspace"
-version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
+version = "0.12.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-6c9af8de#ebdd4d01472486634f8a5d974db869ab8382b278"
 dependencies = [
  "derive-new",
  "serde",
@@ -2470,9 +2475,8 @@ dependencies = [
 
 [[package]]
 name = "cubek"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba6a084a8d266a8697c1ddddc91317693880b047fd8d6c0466abb4587fafd7f9"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubek-attention",
@@ -2481,6 +2485,7 @@ dependencies = [
  "cubek-fft",
  "cubek-interpolate",
  "cubek-matmul",
+ "cubek-microkernel",
  "cubek-pool",
  "cubek-quant",
  "cubek-random",
@@ -2490,9 +2495,8 @@ dependencies = [
 
 [[package]]
 name = "cubek-attention"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3049bfa5b9cd17b17576d7ecd91788dfa03fc4632de51539c9d94f655920350"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "bytemuck",
  "cubecl",
@@ -2506,9 +2510,8 @@ dependencies = [
 
 [[package]]
 name = "cubek-attention-backward"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "081d7eeb2cfa6ddf9fe9f13fa7eb23b592bc2013c9b6f30f6882fcb391dc0305"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubek-matmul",
@@ -2519,9 +2522,8 @@ dependencies = [
 
 [[package]]
 name = "cubek-convolution"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0138a4af566b3965b58a724cc41f16853ce752ba82365df398f75a307e546bb"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "bytemuck",
  "cubecl",
@@ -2535,9 +2537,8 @@ dependencies = [
 
 [[package]]
 name = "cubek-fft"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23da01886b8244f72d941d9be370764c059e5651b7d62f065a635b328c4c4fcb"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "thiserror 2.0.21",
@@ -2545,12 +2546,12 @@ dependencies = [
 
 [[package]]
 name = "cubek-interpolate"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1804a556fbe25af67a8bfb94c6ecacad123ed4d283cfc168f19108f7e366a83"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubecl-common",
+ "cubek-microkernel",
  "cubek-std",
  "half",
  "serde",
@@ -2559,9 +2560,8 @@ dependencies = [
 
 [[package]]
 name = "cubek-matmul"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa48cb4929b1158db2c8885215eafd6389f68dcb2058b896fa7cafe3d324be46"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "bytemuck",
  "cubecl",
@@ -2576,9 +2576,8 @@ dependencies = [
 
 [[package]]
 name = "cubek-microkernel"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c7917cfd9295002d6c1cd8f077e5557e8fa032c7f1d6bc457275efa66be0134"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubek-std",
@@ -2587,20 +2586,20 @@ dependencies = [
 
 [[package]]
 name = "cubek-pool"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4bd72de628d1d34fc72d8c2af8a3972835d0f5860c5b82c4d420d220bca1475a"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubecl-common",
+ "cubek-microkernel",
+ "cubek-std",
  "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "cubek-quant"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b946ff494d9ef97248fecd15d956f817a249d8ab4e0b965f88005e1fb11e2aa5"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubecl-common",
@@ -2611,13 +2610,13 @@ dependencies = [
 
 [[package]]
 name = "cubek-random"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35cb051ae0bf6385cfb86a12cf537971edb847b832b8a38341be9168d6da73a1"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubecl-common",
  "cubecl-environment",
+ "cubek-microkernel",
  "cubek-std",
  "half",
  "num-traits 0.2.19",
@@ -2627,11 +2626,11 @@ dependencies = [
 
 [[package]]
 name = "cubek-reduce"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a5aa80d38003c778804567aa93b112757cefe7cafcfcef9f9ee98f45ab0c774"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
+ "cubek-microkernel",
  "cubek-std",
  "half",
  "num-traits 0.2.19",
@@ -2641,9 +2640,8 @@ dependencies = [
 
 [[package]]
 name = "cubek-std"
-version = "0.4.0-pre.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2594801d4a8b5bd549ed3fc1624e059b6310f78dd50e858beae4f914f1b7caae"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/AdrianEddy/cubek.git?branch=diem%2Ffixes-47e93a9a#58a26cac941071096a165c58d6027f624d7d61f3"
 dependencies = [
  "cubecl",
  "cubecl-common",
@@ -3360,9 +3358,9 @@ dependencies = [
 
 [[package]]
 name = "ffmpeg-next"
-version = "9.0.0"
+version = "9.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6380599799e175191eb7ffe82c97f36a2a90a36cbc54c738a903e5287d7f516a"
+checksum = "041fc1d1e9e6f62e03f52d8a2b1cc138d799defbaf7a9d69ddde78c97fb06e97"
 dependencies = [
  "bitflags 2.13.2",
  "ffmpeg-sys-next",
@@ -3371,9 +3369,9 @@ dependencies = [
 
 [[package]]
 name = "ffmpeg-sys-next"
-version = "9.0.1"
+version = "9.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6f932d8c1cede016c65d4f1435f323369c99c74df55143b18676aa10e7603f9"
+checksum = "226c264da7fce6bd034bfc0b20f87ce4ecc97b3294c407503557910c05e43588"
 dependencies = [
  "bindgen 0.73.2",
  "cc",
