@@ -248,6 +248,63 @@ impl LensProfileDatabase {
         }).collect()
     }
 
+    pub fn get_all(&self) -> &HashMap<String, LensProfile> {
+        &self.map
+    }
+
+    /// Builds a standardized `CameraLensCatalog` from the loaded lens profile database (#742).
+    pub fn build_camera_lens_catalog(&self) -> crate::camera_lens_catalog::CameraLensCatalog {
+        crate::camera_lens_catalog::CameraLensCatalog::from_database(self)
+    }
+
+    /// Searches profiles using structured brand, camera model (including mount-compatible cameras), and lens model selectors (#742).
+    pub fn search_by_selectors(
+        &self,
+        brand: Option<&str>,
+        camera_model: Option<&str>,
+        lens_model: Option<&str>,
+    ) -> Vec<&LensProfile> {
+        let catalog = self.build_camera_lens_catalog();
+        let compat_models: Vec<String> = match (brand, camera_model) {
+            (Some(b), Some(m)) if !b.trim().is_empty() && !m.trim().is_empty() => {
+                let mut models: Vec<String> = catalog
+                    .find_compatible_cameras(b, m)
+                    .into_iter()
+                    .map(|c| c.model.to_ascii_lowercase())
+                    .collect();
+                if models.is_empty() {
+                    models.push(m.trim().to_ascii_lowercase());
+                }
+                models
+            }
+            (_, Some(m)) if !m.trim().is_empty() => vec![m.trim().to_ascii_lowercase()],
+            _ => Vec::new(),
+        };
+
+        self.map
+            .values()
+            .filter(|p| {
+                if let Some(b) = brand.map(str::trim).filter(|s| !s.is_empty()) {
+                    if !p.camera_brand.eq_ignore_ascii_case(b) {
+                        return false;
+                    }
+                }
+                if !compat_models.is_empty() {
+                    let pm = p.camera_model.trim().to_ascii_lowercase();
+                    if !compat_models.iter().any(|cm| cm == &pm) {
+                        return false;
+                    }
+                }
+                if let Some(l) = lens_model.map(str::trim).filter(|s| !s.is_empty()) {
+                    if !p.lens_model.to_ascii_lowercase().contains(&l.to_ascii_lowercase()) {
+                        return false;
+                    }
+                }
+                true
+            })
+            .collect()
+    }
+
     pub fn prepare_list_for_ui(&mut self) {
         // (name, path_to_file, crc32, official, rating, aspect_ratio*1000, author)
         let mut set = HashSet::with_capacity(self.map.len());
