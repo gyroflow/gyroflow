@@ -83,7 +83,11 @@ qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 # cooperative matrix zeroed as a composite, the subgroup size pinned where it can vary, and a finite
 # tanh. Plus two more: a comptime enum's variant hashed into its kernel's cache key, and a
 # multi-dimensional cube run as a one-dimensional workgroup (Intel's Arc walked 2-D workgroups in
-# tiles, so planes mixed rows). burn and cubek name cubecl by git URL, so the patch keys on it. Every
+# tiles, so planes mixed rows). Then the thread id read through the syscall, not glibc's `gettid`
+# (2.30+: the Linux build links against an older glibc), and a cached autotune winner that does not
+# launch on a member of its key's bucket giving way to the plan instead of panicking; and the Metal
+# runtime's device-wide memory report and cleanup covering every stream, not only the calling
+# thread's. burn and cubek name cubecl by git URL, so the patch keys on it. Every
 # cubecl crate comes from the branch, or its in-repo siblings would enter the graph twice.
 [patch."https://github.com/tracel-ai/cubecl"]
 cubecl                 = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-6c9af8de" }
@@ -143,9 +147,11 @@ burn-tensor            = { git = "https://github.com/AdrianEddy/burn.git", branc
 burn-vision            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
 burn-wgpu              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-aa57952d" }
 
-# cubek at the rev burn pins (47e93a9a) + the matmul autotune holding a cube to 256 units where planes
-# are wider than 32 lanes: at wave64 the 8- and 16-plane settings took up to 1.56 s a dispatch on a
-# Radeon iGPU, and a cold tune lost the device.
+# cubek at the rev burn pins (47e93a9a) + the matmul autotune holding a cube to four planes where planes
+# are wider than 32 lanes and on a GPU of at most 16 compute units: at wave64 the 8- and 16-plane
+# settings took up to 1.56 s a dispatch on a Radeon iGPU, and a cold tune lost the device. And a float product's k and n tune-keyed by the power of
+# two above them, as m is: keyed exactly, an attention's sequence length made every new length a new
+# set of keys to tune.
 [patch."https://github.com/tracel-ai/cubek"]
 cubek                    = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
 cubek-attention          = { git = "https://github.com/AdrianEddy/cubek.git", branch = "diem/fixes-47e93a9a" }
@@ -179,7 +185,7 @@ objc2-metal = "0.3"
 cpp_build = "0.5.11"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.7"
+cc = "1.11"
 
 [[bin]]
 name = "gyroflow"

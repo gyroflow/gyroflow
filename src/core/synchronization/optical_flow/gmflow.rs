@@ -39,7 +39,7 @@ mod inference {
     // the official checkpoint into the parameters of model.rs (ci-gpu/gmflow-dev: convert_weights), hosted separately rather
     // than embedded. The SHA-256 pin defends against tampering on the download path. GYROFLOW_GMFLOW_WEIGHTS=<path> takes
     // the file from there instead of downloading it (offline installs, packaging, tests); it must still match the pin.
-    const MODEL_URL: &str = "https://api.gyroflow.xyz/sdk/gmflow-scale2-regrefine6.bpk";
+    const MODEL_URL: &str = "https://github.com/gyroflow/gyroflow/raw/refs/heads/master/resources/gmflow-scale2-regrefine6.bpk";
     const MODEL_SHA256: &str = "8d51cb8eaf2c56b6f727ef83534616c4dd98f4ce7ff9b5fa812c132c44db9db7";
     const MODEL_FILENAME: &str = "gmflow-scale2-regrefine6.bpk";
 
