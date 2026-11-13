@@ -13,6 +13,7 @@ pub mod video_processor;
 pub mod zero_copy;
 pub mod camera_tracks;
 use gyroflow_core::settings;
+use gyroflow_core::lens_from_video;
 use zero_copy::*;
 #[cfg(target_os = "android")]
 pub mod ffmpeg_android;
@@ -991,6 +992,109 @@ pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBoo
     let analysis = Rc::try_unwrap(analysis).map_err(|_| "The decoder is still holding the analysis".to_string())?.into_inner();
     // Kept, and fitted with the strength set
     stab.set_optical_measurements(analysis.finish()?)
+}
+
+/// "Find the lens from the video" (Lens profile -> Find lens from the video): decodes these stretches of the clip (its
+/// own milliseconds), tracks every `lens_from_video::frame_step`-th frame of each of them and gives back what was
+/// tracked, see `lens_from_video`. Blocking. `progress` gets the fraction done
+pub fn track_lens_fragments(stab: &StabilizationManager, ranges: Vec<(f64, f64)>, cancel_flag: Arc<AtomicBool>, progress: impl Fn(f64) + 'static) -> Result<Vec<lens_from_video::Fragment>, String> {
+    use gyroflow_core::lens_from_video as lfv;
+    use gyroflow_core::synchronization::optical_motion::{ KltDevice, Tracker };
+    use std::sync::atomic::Ordering::Relaxed;
+
+    let (size, fps, current_device) = { let p = stab.params.read(); (p.size, p.fps, p.current_device) };
+    if size.0 == 0 || size.1 == 0 { return Err("Video is not loaded".into()); }
+    if !(fps > 0.0) { return Err("Unknown frame rate".into()); }
+    if ranges.is_empty() { return Err("Nothing to analyze".into()); }
+    let step = lfv::frame_step(fps);
+    let input_file = stab.input_file.read().clone();
+    let gpu_decoding = stab.gpu_decoding.load(std::sync::atomic::Ordering::SeqCst);
+
+    // The lens is fitted to where the points are in the video's own frame; they're followed in a smaller one
+    // (`lfv::TRACKED_WIDTH`) and scaled to it
+    let tw = (size.0 as u32).min(lfv::TRACKED_WIDTH);
+    let th = (((size.1 as f64 * tw as f64 / size.0 as f64) / 2.0).round() * 2.0) as u32;
+    let mut decoder_options = ffmpeg_next::Dictionary::new();
+    if input_file.image_sequence_fps > 0.0 {
+        let fps = fps_to_rational(input_file.image_sequence_fps);
+        decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+    }
+    if input_file.image_sequence_start > 0 {
+        decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+    }
+    decoder_options.set("scale", &format!("{tw}x{th}"));
+
+    // One tracker for all the fragments, forgetting its points between them (`Tracker::reset`)
+    let tracker = Rc::new(RefCell::new(Tracker::new(lfv::TRACKED_POINTS, gyroflow_core::gyro_source::TrackingMethod::Klt, KltDevice::for_processing(current_device)).map_err(|e| format!("Can't track the video: {e}"))?));
+    {
+        let cancel = cancel_flag.clone();
+        tracker.borrow_mut().set_stop(Box::new(move || cancel.load(Relaxed)));
+    }
+    let builders: Rc<RefCell<Vec<lfv::FragmentBuilder>>> = Rc::new(RefCell::new(ranges.iter().map(|_| lfv::FragmentBuilder::new(size, (tw, th), step as f64 * 1000.0 / fps)).collect()));
+    let total: usize = ranges.iter().map(|(a, b)| (((b - a) / 1000.0 * fps) / step as f64).round() as usize).sum();
+    let error = Rc::new(RefCell::new(None::<String>));
+    let stop = Arc::new(AtomicBool::new(false));
+
+    match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+        Ok(mut proc) => {
+            let (builders2, error2, stop2, tracker2) = (builders.clone(), error.clone(), stop.clone(), tracker.clone());
+            let ranges2 = ranges.clone();
+            // Which fragment the frames are coming from, and the frame of the file that fragment started at: every
+            // `step`-th frame from there is tracked
+            let mut current: Option<(usize, i32)> = None;
+            let mut previous = -1i32;
+            let mut done = 0usize;
+            let mut last_progress = std::time::Instant::now();
+            proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
+                if stop2.load(Relaxed) || cancel_flag.load(Relaxed) {
+                    stop2.store(true, Relaxed);
+                    return Ok(());
+                }
+                let ms = timestamp_us as f64 / 1000.0;
+                let Some(i) = ranges2.iter().position(|(a, b)| ms >= *a - 0.5 && ms <= *b + 0.5) else { return Ok(()); };
+                let index = gyroflow_core::frame_at_timestamp(ms, fps);
+                let first = match current {
+                    Some((fragment, first)) if fragment == i => first,
+                    // A fragment of its own: its tracks start here
+                    _ => { tracker2.borrow_mut().reset(); current = Some((i, index)); previous = index; index }
+                };
+                // Every `step`-th frame from the first of the fragment, and no other: a frame out of order is left out
+                // rather than taken for the next one
+                if (index - first) % step as i32 != 0 || index < previous { return Ok(()); }
+                // A frame missing, or repeated, or one the decoder gave twice: nothing is followed across it, and the
+                // frame it is followed from next is further away in time, which `Fragment::times` carries into the fit
+                if index != first && index != previous + step as i32 {
+                    ::log::debug!("Lens from video: frame {index} after {previous}, the tracks start again");
+                    tracker2.borrow_mut().reset();
+                }
+                previous = index;
+                let slot = ((index - first) / step as i32).max(0) as usize;
+                let result = converter.scale(input_frame, Pixel::GRAY8, tw, th).map_err(|e| e.to_string()).and_then(|small_frame| {
+                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+                    let observations = tracker2.borrow_mut().track(width, height, stride, pixels)?;
+                    builders2.borrow_mut()[i].push_frame(slot, &observations);
+                    Ok(())
+                });
+                if let Err(e) = result {
+                    error2.borrow_mut().get_or_insert(e);
+                    stop2.store(true, Relaxed);
+                }
+                done += 1;
+                if last_progress.elapsed().as_millis() > 100 {
+                    last_progress = std::time::Instant::now();
+                    progress((done as f64 / total.max(1) as f64).min(1.0));
+                }
+                Ok(())
+            });
+            if let Err(e) = proc.start_decoder_only(ranges, stop) {
+                error.borrow_mut().get_or_insert(e.to_string());
+            }
+        },
+        Err(e) => { error.borrow_mut().get_or_insert(e.to_string()); }
+    }
+    if let Some(e) = error.borrow_mut().take() { return Err(e); }
+    ::log::info!("Lens from video: {}", tracker.borrow().describe());
+    Ok(Rc::try_unwrap(builders).map_err(|_| "The decoder is still holding the tracks".to_string())?.into_inner().into_iter().map(|b| b.finish()).collect())
 }
 
 pub fn init_log() {

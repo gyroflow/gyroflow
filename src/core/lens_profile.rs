@@ -75,6 +75,12 @@ pub struct LensProfile {
     pub crop_factor: Option<f64>,
     pub global_shutter: bool,
 
+    /// Found from the picture of a video ("Find the lens from the video", `lens_from_video`), not calibrated on a
+    /// target: a profile to use, not one to submit to the lens profile database. Written only when set, so the profiles
+    /// that aren't - every calibration - stay as they were
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub estimated_from_video: bool,
+
     // Skip these fields, make sure to update in `get_json_value`
     pub path_to_file: String,
     pub optimal_fov: Option<f64>,

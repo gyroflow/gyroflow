@@ -4,6 +4,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls.Material
+import QtQuick.Controls as QQC
 import QtQuick.Dialogs
 
 import "."
@@ -42,6 +43,10 @@ Window {
 
     property alias videoArea: videoArea;
     property alias lensCalib: lensCalib;
+    property alias lensFromVideo: lensFromVideo;
+    // How the profile is made: 0 on a calibration target, 1 from the picture of the project's video
+    property int mode: +settings.value("calibMode", 0);
+    onModeChanged: settings.setValue("calibMode", mode);
 
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;
@@ -236,6 +241,29 @@ Window {
             implicitWidth: settings.value("calibPanelSize", defaultWidth);
             onWidthChanged: settings.setValue("calibPanelSize", width);
 
+            QQC.TabBar {
+                id: modeBar;
+                width: parent.width;
+                font.family: styleFont;
+                font.pixelSize: 13 * dpiScale;
+                font.bold: true;
+                implicitHeight: 40 * dpiScale;
+                currentIndex: calibrator_window.mode;
+                onCurrentIndexChanged: calibrator_window.mode = currentIndex;
+                background: Rectangle {
+                    color: styleBackground2;
+                    Rectangle { width: parent.width; height: 1 * dpiScale; color: stylePopupBorder; anchors.bottom: parent.bottom; }
+                }
+                Repeater {
+                    model: [QT_TRANSLATE_NOOP("Calibrator", "Calibration target"), QT_TRANSLATE_NOOP("Calibrator", "From the video")];
+                    QQC.TabButton {
+                        text: qsTranslate("Calibrator", modelData);
+                        Material.foreground: styleTextColor;
+                        font: modeBar.font;
+                        implicitHeight: modeBar.implicitHeight;
+                    }
+                }
+            }
             Menu.VideoInformation {
                 id: vidInfo;
                 isCalibrator: true;
@@ -248,6 +276,11 @@ Window {
             }
             Menu.LensCalibrate {
                 id: lensCalib;
+                visible: calibrator_window.mode == 0;
+            }
+            Menu.LensFromVideo {
+                id: lensFromVideo;
+                visible: calibrator_window.mode == 1;
             }
         }
 
