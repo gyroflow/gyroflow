@@ -21,7 +21,9 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import subprocess
+import sys
 import tarfile
 import time
 import zipfile
@@ -247,17 +249,31 @@ def abi_info(sdk):
 # Building the plugin
 # ─────────────────────────────────────────────────────────────────────
 
+def remove_tree(path):
+    """shutil.rmtree that also removes read-only files (git's objects on Windows)."""
+    def make_writable(func, p, _exc):
+        os.chmod(p, stat.S_IWRITE)
+        func(p)
+    shutil.rmtree(path, **{"onexc" if sys.version_info >= (3, 12) else "onerror": make_writable})
+
+
 def crm_source(ext_dir, rev):
     local = os.environ.get("MDK_CRM_DIR")
     if local:
         log(f"mdk-crm from MDK_CRM_DIR: {local}")
         return local
     src = os.path.join(ext_dir, "mdk-crm")
-    if not os.path.isdir(os.path.join(src, ".git")):
-        shutil.rmtree(src, ignore_errors=True)
-        subprocess.run(["git", "clone", "--quiet", CRM_REPO, src], check=True)
-    else:
+    # A checkout git can't work in is cloned again. CI restores ext/ from its cache as the runner's user, and git
+    # then refuses it ("dubious ownership") in the Linux build, which runs as root in a container.
+    usable = os.path.isdir(os.path.join(src, ".git")) and subprocess.run(
+        ["git", "-C", src, "rev-parse", "--verify", "--quiet", "HEAD"], capture_output=True).returncode == 0
+    if usable:
         subprocess.run(["git", "-C", src, "fetch", "--quiet", "origin"], check=True)
+    else:
+        if os.path.lexists(src):
+            log("cloning mdk-crm again: git can't use the checkout in ext/mdk-crm")
+            remove_tree(src)
+        subprocess.run(["git", "clone", "--quiet", CRM_REPO, src], check=True)
     ref = rev if rev != "master" else "origin/master"
     subprocess.run(["git", "-C", src, "checkout", "--quiet", "--detach", ref], check=True)
     head = subprocess.run(["git", "-C", src, "rev-parse", "--short", "HEAD"], check=True,
