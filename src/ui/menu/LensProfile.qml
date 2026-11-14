@@ -35,6 +35,111 @@ MenuItem {
     property bool restoring: false;
 
     property bool isSony: false;
+    // A profile found from the picture of a video (`LensProfile::estimated_from_video`): not a calibration, and not one
+    // to submit to the database
+    property bool isEstimated: false;
+
+    // ---- What "Auto" by the search and the calibrator's "From the video" share (`core::lens_from_video`)
+    // The known profile the last search found on the video that's loaded, for the calibrator to take the medium from
+    readonly property var lastFound: lensSearch.result? lensSearch.result.found : null;
+    readonly property bool underWater: isUnderwater.checked;
+    function setUnderwater(v: bool): void { isUnderwater.checked = v; }
+    function num(v: var, digits: int): string {
+        return (typeof v === "number" && isFinite(v)? v : 0).toFixed(digits);
+    }
+    // How well a lens fits the picture (`lens_from_video::Match`), the same for a known profile and an estimate. Said
+    // the way the user sees it: how far the picture of the video is from what the profile says, in pixels. Inside, that's
+    // how far the lens moves when the fit is let go of it (`lens_from_video::check_profile`). `clip`: the name of the
+    // clip it was judged on, when that's another clip of the same camera setup and not the video that's loaded
+    function matchText(m: var, clip: string): string {
+        if (!m) return "";
+        const color = { good: "#3cc42f", single: "#f6a10c", loose: "#f6a10c", poor: "#d82626" }[m.verdict] || styleTextColor;
+        const name = "<b>" + clip + "</b>";
+        const verdict = clip? { good:   qsTr("Fits the clip %1").arg(name),
+                                single: qsTr("Fits the one part of the clip %1 that could tell").arg(name),
+                                loose:  qsTr("Fits the clip %1 only roughly").arg(name),
+                                poor:   qsTr("Doesn't fit the clip %1").arg(name) }[m.verdict]
+                            : { good:   qsTr("Fits this video"),
+                                single: qsTr("Fits the one part of this video that could tell"),
+                                loose:  qsTr("Fits this video only roughly"),
+                                poor:   qsTr("Doesn't fit this video") }[m.verdict];
+        let text = "<font color=\"" + color + "\">●</font> <b>" + (verdict || "") + "</b><br><small>";
+        if (clip) text += qsTr("That is another clip shot with the same camera setup: this video has no part apart from the one the lens was estimated from.") + " ";
+        if (m.verdict == "single") text += qsTr("It was judged on one part only, and one part is one opinion.") + " ";
+        if (m.verdict == "loose") text += qsTr("The middle of the frame agrees with it, the corners or the rolling shutter less so.") + " ";
+        if (m.fragments > 0) {
+            text += qsTr("It fits %1 of the %2 parts of the clip checked. The picture differs from it by about %3 px on average and %4 px in the corners; a profile that fits is within about %5 px.")
+                        .arg(m.fragments_fitting).arg(m.fragments).arg(root.num(m.moved, 0)).arg(root.num(m.moved_corner, 0)).arg(root.num(m.limit, 0));
+        }
+        if (m.fragments_unable > 0) text += " " + qsTr("%1 of the parts looked at couldn't tell one lens from another: the camera moves too steadily there, or never turns.").arg(m.fragments_unable);
+        if (m.readout_ms !== null && m.readout_ms !== undefined) {
+            text += " " + (m.readout_measured? qsTr("Rolling shutter readout time measured: %1 ms.") : qsTr("The profile's own rolling shutter readout time: %1 ms.")).arg(root.num(Math.abs(m.readout_ms), 1));
+        }
+        return text + "</small>";
+    }
+    // Why "Find lens from the video" couldn't (`Controller::find_lens_from_video`'s `failed`), in words
+    function findLensFailure(r: var): string {
+        const stabilized = qsTr("which the stabilization applies on top of the lens profile, and finding the lens from the picture doesn't take into account.");
+        const reasons = {
+            "busy":               qsTr("Another search for the lens of this video is still running."),
+            "no_video":           qsTr("Video is not loaded"),
+            "too_short":          qsTr("The clip is too short."),
+            "horizontal_readout": qsTr("The rolling shutter of this project runs along the rows of the frame. Only one that runs down or up the frame can be found from the picture."),
+            "digital_zoom":       qsTr("The clip was shot with a digital zoom,") + " " + stabilized,
+            "lens_metadata":      qsTr("The camera wrote the lens of each frame into the file,") + " " + stabilized,
+            "lens_breathing":     qsTr("The file has the lens breathing of each frame,") + " " + stabilized,
+            "sensor_shift":       qsTr("The camera moved its sensor or its lens to stabilize the picture,") + " " + stabilized,
+            "mesh":               qsTr("The file has the camera's distortion mesh,") + " " + stabilized,
+            "nothing_tracked":    qsTr("Nothing could be followed in the picture."),
+            "no_start":           qsTr("There is no lens to start from."),
+            "too_few_tracks":     qsTr("Too little could be followed in the picture: too few frames, or nothing in them to hold on to."),
+            "no_translation":     qsTr("The camera only turned and didn't move through space: nothing in such a picture tells the focal length."),
+            "no_verdict":         qsTr("The picture couldn't be fitted: the fit found nowhere to go."),
+        };
+        return reasons[r.failed] || r.detail || r.failed;
+    }
+    // Why an estimate isn't to be trusted (`lens_from_video::doubts`), in words
+    function findLensDoubts(codes: var): string {
+        const reasons = {
+            "focal_not_held":  qsTr("this fragment doesn't hold its focal length (the camera has to move through space, not only turn)"),
+            "little_parallax": qsTr("the camera barely moved through space in it"),
+            "poor_fit":        qsTr("the tracks don't fit the result well (things moving on their own, motion blur, or a crop that changes from frame to frame because of in-camera stabilization)"),
+            "few_points":      qsTr("there was little in the picture to track"),
+        };
+        return (codes || []).map(c => reasons[c] || c).join("; ");
+    }
+    // Loads what was found ("found") or estimated ("estimated") into the project, with what it comes with
+    function useFoundLens(which: string, r: var): void {
+        root.selected_manually = true;
+        controller.apply_found_lens(which);
+        root.applyFound(which, r, false);
+    }
+    // What a lens found comes with besides the profile: the readout time measured on the video, and the medium it was
+    // found in - when the lens fits and the picture was sure of them (`apply_readout`, `apply_medium`). `asked`: the
+    // user asked for the readout time, over the one the file states
+    function applyFound(which: string, r: var, asked: bool): void {
+        const readout = which == "estimated"? r.readout_ms : (r.match? r.match.readout_ms : null);
+        // A readout time of 0 is one too: a global shutter
+        if ((r.apply_readout || asked) && typeof readout === "number" && isFinite(readout)) window.stab.setFrameReadoutTime(Math.abs(readout), readout < 0? 1 : 0);
+        // An estimate is made for the medium the user said it was shot in
+        if (which == "estimated" || r.apply_medium) root.setUnderwater(!!r.under_water);
+    }
+    property var calibratorWnd: null;
+    // `mode`: the calibrator's - 0 or less on a calibration target, 1 from the video
+    function openCalibrator(mode: int): void {
+        if (!calibratorWnd) {
+            ui_tools.init_calibrator();
+            calibratorWnd = Qt.createComponent("../Calibrator.qml").createObject(main_window)
+            calibratorWnd.show();
+            calibratorWnd.closing.connect(function(e) {
+                calibratorWnd.destroy();
+                calibratorWnd = null;
+            })
+        }
+        calibratorWnd.mode = Math.max(0, mode);
+        calibratorWnd.raise();
+        calibratorWnd.requestActivate();
+    }
 
     FileDialog {
         id: fileDialog;
@@ -178,7 +283,8 @@ MenuItem {
                         window.motionData.opened = false;
                     }
 
-                    officialInfo.show = !obj.official && !settings.value("rated-profile-" + checksum, false);
+                    root.isEstimated = !!obj.estimated_from_video;
+                    officialInfo.show = !obj.official && !root.isEstimated && !settings.value("rated-profile-" + checksum, false);
                     officialInfo.canRate = true;
                     officialInfo.thankYou = false;
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
@@ -253,6 +359,7 @@ MenuItem {
         if (!controller.lens_loaded) root.lensCleared();
     }
     function lensCleared(): void {
+        root.isEstimated = false;
         focalLengthOnly.syncNone();
         info.model = ({});
         officialInfo.show = false;
@@ -280,25 +387,177 @@ MenuItem {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
-    SearchField {
-        id: search;
-        placeholderText: qsTr("Search...");
-        height: 25 * dpiScale;
+    Row {
         width: parent.width;
-        topPadding: 5 * dpiScale;
-        profilesMenu: root;
-        onSelected: (item) => {
-            const lensPathOrId = item[1];
-            if (lensPathOrId.endsWith(".gyroflow")) {
-                window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
-            } else {
-                root.selected_manually = true;
-                controller.load_lens_profile(lensPathOrId);
+        spacing: 5 * dpiScale;
+        SearchField {
+            id: search;
+            placeholderText: qsTr("Search...");
+            height: 25 * dpiScale;
+            width: parent.width - autoSearch.width - parent.spacing;
+            topPadding: 5 * dpiScale;
+            profilesMenu: root;
+            onSelected: (item) => {
+                const lensPathOrId = item[1];
+                if (lensPathOrId.endsWith(".gyroflow")) {
+                    window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
+                } else {
+                    root.selected_manually = true;
+                    controller.load_lens_profile(lensPathOrId);
+                }
+            }
+            popup.lv.delegate: LensProfileSearchDelegate {
+                popup: search.popup;
+                profilesMenu: root;
             }
         }
-        popup.lv.delegate: LensProfileSearchDelegate {
-            popup: search.popup;
-            profilesMenu: root;
+        // Which of the known profiles of the camera is the lens of this video, judged by the picture - and whether it was
+        // shot in air or under water: with the lens known, the picture tells (`lens_from_video::find_known`)
+        Button {
+            id: autoSearch;
+            anchors.bottom: parent.bottom;
+            text: qsTr("Auto");
+            height: 25 * dpiScale;
+            leftPadding: 10 * dpiScale;
+            rightPadding: 10 * dpiScale;
+            tooltip: qsTr("Find which of the known lens profiles of this camera is the lens of this video, from its picture, and whether it was shot in air or under water.");
+            enabled: window.videoArea.vid.loaded && !controller.lens_from_video_in_progress && !controller.sync_in_progress;
+            onClicked: lensSearch.run();
+        }
+    }
+    QtObject {
+        id: lensSearch;
+        property bool waiting: false;
+        // The last search's result (`Controller::find_lens_from_video`)
+        property var result: null;
+        function run(): void {
+            lensSearch.result = null;
+            lensSearch.waiting = true;
+            controller.find_lens_from_video("", false, "auto", settings.value("calibratedBy", "") || controller.get_username());
+        }
+    }
+    Connections {
+        target: controller;
+        function onLens_from_video_progress(progress: real, status: string): void {
+            if (!lensSearch.waiting) return;
+            window.videoArea.videoLoader.active = progress < 1;
+            window.videoArea.videoLoader.progress = progress < 1? progress : -1;
+            window.videoArea.videoLoader.additional = "";
+            window.videoArea.videoLoader.text = progress < 1? (status == "tracking"? qsTr("Following the picture %1...") : qsTr("Trying the known lens profiles %1...")) : "";
+            window.videoArea.videoLoader.cancelable = true;
+        }
+        function onLens_from_video_result(json: string): void {
+            const r = JSON.parse(json);
+            // The calibrator's estimate reports to the same controller: that one isn't this panel's
+            if (!r || r.mode != "known" || !lensSearch.waiting) return;
+            lensSearch.waiting = false;
+            if (r.cancelled) return;
+            if (r.failed) {
+                messageBox(Modal.Error, qsTr("The lens could not be found from this video: %1").arg(root.findLensFailure(r)), [ { text: qsTr("Ok"), accent: true } ]);
+                return;
+            }
+            lensSearch.result = r;
+        }
+    }
+    // What was found is the lens of the video it was found for: another video starts with nothing found
+    Connections {
+        target: window.videoArea;
+        function onLoadedFileUrlChanged(): void { lensSearch.result = null; }
+    }
+    // What the search found: the profile that fits, or else the nearest one, and how well it fits
+    Column {
+        id: foundCard;
+        width: parent.width;
+        spacing: 5 * dpiScale;
+        visible: !!lensSearch.result;
+        readonly property var found: lensSearch.result? lensSearch.result.found : null;
+        readonly property bool good: !!found && found.match && found.match.verdict == "good";
+        // It holds where it could be judged, be it on one part only
+        readonly property bool fits: !!found && found.match && (found.match.verdict == "good" || found.match.verdict == "single");
+        // A readout time was measured, and the file states one of its own
+        readonly property bool fileReadout: fits && !!lensSearch.result.readout_from_file && found.match.readout_measured && typeof found.match.readout_ms === "number";
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            textFormat: Text.StyledText;
+            visible: !!foundCard.found;
+            text: {
+                const f = foundCard.found;
+                if (!f) return "";
+                const medium = f.media_tried > 1? (f.under_water? qsTr("shot under water") : qsTr("shot in air")) + (f.medium_sure? "" : " (" + qsTr("not sure") + ")")
+                                                : (f.under_water? qsTr("under water") : qsTr("in air"));
+                // A profile of another mode of the camera, brought to this frame
+                const how = { scaled: qsTr("scaled to this frame"), cropped: qsTr("cropped to this frame") }[f.how];
+                return (foundCard.good? qsTr("Found") : qsTr("Nearest")) + ": <b>" + f.name + "</b>" + (how? " (" + how + ")" : "") + ", " + medium + "<br>" +
+                       (f.estimated? "<small>" + qsTr("This profile was itself estimated from a video, not calibrated on a calibration target.") + "</small><br>" : "") +
+                       root.matchText(f.match, "");
+            }
+        }
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            textFormat: Text.StyledText;
+            font.pixelSize: 12 * dpiScale;
+            visible: !!lensSearch.result && !foundCard.fits;
+            text: {
+                const r = lensSearch.result;
+                if (!r) return "";
+                const m = foundCard.found? foundCard.found.match : null;
+                const why = r.no_translation? qsTr("In the fragments looked at, the camera only turned and didn't move through space: nothing in such a picture tells the lens.")
+                          : !r.fragments_with_scene? qsTr("Too little could be followed in the fragments looked at.")
+                          : m && m.fragments == 0 && m.fragments_unable > 0? qsTr("No part of the clip looked at could tell one lens from another: the camera moves too steadily in them, or never turns.")
+                          : qsTr("None of the known profiles of this camera holds on this video.");
+                return why + " " + qsTr("The lens can be estimated from the picture itself, in the lens calibrator.");
+            }
+        }
+        // The file states its own readout time, and that one is kept: the one measured is the user's to take
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            font.pixelSize: 12 * dpiScale;
+            visible: foundCard.fileReadout;
+            text: qsTr("The file states its own rolling shutter readout time, which is kept.");
+        }
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter;
+            spacing: 10 * dpiScale;
+            Button {
+                text: qsTr("Use this profile");
+                accent: foundCard.good;
+                visible: !!foundCard.found && !foundCard.found.already_loaded;
+                enabled: !controller.lens_from_video_in_progress;
+                onClicked: { root.useFoundLens("found", foundCard.found); lensSearch.result = null; }
+            }
+            BasicText {
+                text: qsTr("This profile is the one in use.");
+                visible: !!foundCard.found && foundCard.found.already_loaded;
+                anchors.verticalCenter: parent.verticalCenter;
+            }
+            // The profile is in use already: what it was found with can still be taken
+            LinkButton {
+                text: foundCard.found && foundCard.found.apply_medium && foundCard.found.apply_readout? qsTr("Use the medium and the readout time found")
+                    : foundCard.found && foundCard.found.apply_medium? qsTr("Use the medium found") : qsTr("Use the readout time found");
+                visible: !!foundCard.found && foundCard.found.already_loaded && (foundCard.found.apply_medium || foundCard.found.apply_readout);
+                anchors.verticalCenter: parent.verticalCenter;
+                onClicked: root.applyFound("found", foundCard.found, false);
+            }
+            LinkButton {
+                text: qsTr("Use the measured readout time");
+                visible: foundCard.fileReadout;
+                anchors.verticalCenter: parent.verticalCenter;
+                onClicked: root.applyFound("found", foundCard.found, true);
+            }
+            LinkButton {
+                text: qsTr("Estimate from the video");
+                visible: !foundCard.good;
+                anchors.verticalCenter: parent.verticalCenter;
+                onClicked: root.openCalibrator(1);
+            }
+            LinkButton {
+                text: qsTr("Close");
+                anchors.verticalCenter: parent.verticalCenter;
+                onClicked: lensSearch.result = null;
+            }
         }
     }
     Row {
@@ -314,19 +573,15 @@ MenuItem {
             iconName: "plus";
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;
-            property var calibratorWnd: null;
-            onClicked: {
-                if (!calibratorWnd) {
-                    ui_tools.init_calibrator();
-                    calibratorWnd = Qt.createComponent("../Calibrator.qml").createObject(main_window)
-                    calibratorWnd.show();
-                    calibratorWnd.closing.connect(function(e) {
-                        calibratorWnd.destroy();
-                        calibratorWnd = null;
-                    })
-                }
-            }
+            tooltip: qsTr("Calibrate a lens on a calibration target, or find it from the picture of this video.");
+            onClicked: root.openCalibrator(-1);
         }
+    }
+
+    InfoMessageSmall {
+        type: InfoMessage.Info;
+        show: root.isEstimated;
+        text: qsTr("This profile was found from the picture of a video, not calibrated on a calibration target. Check it on the picture, and don't submit it to the lens profile database.");
     }
 
     // The checkbox below is here for a file with no profile, and in Advanced (`focalLengthOnlyAdvanced`) over an unofficial one

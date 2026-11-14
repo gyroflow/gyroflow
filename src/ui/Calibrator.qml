@@ -42,6 +42,12 @@ Window {
 
     property alias videoArea: videoArea;
     property alias lensCalib: lensCalib;
+    property alias lensFromVideo: lensFromVideo;
+    // How the profile is made: 0 on a calibration target, 1 from the picture of the project's video. It opens on a
+    // calibration target unless asked otherwise (`LensProfile.openCalibrator`): the other one works on the project's
+    // video, and isn't where a calibrator should find itself on its own
+    property int mode: 0;
+    onModeChanged: if (modeTabs.currentIndex != mode) modeTabs.currentIndex = mode;
 
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;
@@ -236,6 +242,14 @@ Window {
             implicitWidth: settings.value("calibPanelSize", defaultWidth);
             onWidthChanged: settings.setValue("calibPanelSize", width);
 
+            Tabs {
+                id: modeTabs;
+                tabs: [QT_TRANSLATE_NOOP("Tabs", "Calibration target"), QT_TRANSLATE_NOOP("Tabs", "From the video")];
+                tabsIcons: ["chessboard", "video"];
+                tabsIconsSize: [20, 20];
+                Component.onCompleted: currentIndex = calibrator_window.mode;
+                onCurrentIndexChanged: calibrator_window.mode = currentIndex;
+            }
             Menu.VideoInformation {
                 id: vidInfo;
                 isCalibrator: true;
@@ -248,6 +262,11 @@ Window {
             }
             Menu.LensCalibrate {
                 id: lensCalib;
+                visible: calibrator_window.mode == 0;
+            }
+            Menu.LensFromVideo {
+                id: lensFromVideo;
+                visible: calibrator_window.mode == 1;
             }
         }
 
