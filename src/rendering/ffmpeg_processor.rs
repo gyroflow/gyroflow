@@ -128,8 +128,53 @@ impl FrameTimestamps {
     }
 }
 
+/// Run `f`, a codec call of a pipeline that works on CUDA (`cuda`), under the CRM decoder's CUDA lock: no CUDA call of
+/// the process may overlap its develop calls (`gyroflow_core::gpu::cuda_exclusion`). Only the FFmpeg call itself: the
+/// CRM decoder and the player's rendering of its frames wait for the lock, so the frame callback, the processing and
+/// any wait (a paused job) stay outside
+pub(super) fn on_cuda<R, F: FnOnce() -> R>(cuda: bool, f: F) -> R {
+    if cuda { gyroflow_core::gpu::cuda_exclusion::exclusive(f) } else { f() }
+}
+
+/// Holds a value whose release is CUDA work (a frame decoded or uploaded on CUDA) and drops it under the CRM decoder's
+/// CUDA lock (`on_cuda`)
+pub(super) struct DropOnCuda<T> {
+    value: Option<T>,
+    cuda: bool,
+}
+impl<T> DropOnCuda<T> {
+    pub(super) fn new(value: T, cuda: bool) -> Self { Self { value: Some(value), cuda } }
+}
+impl<T> std::ops::Deref for DropOnCuda<T> {
+    type Target = T;
+    fn deref(&self) -> &T { self.value.as_ref().unwrap() }
+}
+impl<T> std::ops::DerefMut for DropOnCuda<T> {
+    fn deref_mut(&mut self) -> &mut T { self.value.as_mut().unwrap() }
+}
+impl<T> Drop for DropOnCuda<T> {
+    fn drop(&mut self) {
+        let value = self.value.take();
+        on_cuda(self.cuda, move || drop(value));
+    }
+}
+
+/// The decoder, the encoder and the frames they hold are CUDA resources when the pipeline works on CUDA: released under
+/// the CRM decoder's CUDA lock
+impl Drop for FfmpegProcessor<'_> {
+    fn drop(&mut self) {
+        if self.uses_cuda() {
+            let video = &mut self.video;
+            let held = (video.decoder.take(), video.encoder.take(), std::mem::take(&mut video.buffers));
+            on_cuda(true, move || drop(held));
+        }
+    }
+}
+
 pub struct FfmpegProcessor<'a> {
     pub gpu_decoding: bool,
+    /// The decoder decodes on CUDA (NVDEC)
+    decoder_on_cuda: bool,
     pub gpu_device: Option<String>,
     pub video_codec: Option<String>,
 
@@ -317,9 +362,12 @@ impl<'a> FfmpegProcessor<'a> {
         let codec = decoder_ctx.codec().ok_or(FFmpegError::DecoderNotFound)?;
 
         let mut hw_backend = String::new();
+        let mut decoder_on_cuda = false;
         if gpu_decoding {
-            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, unsafe { codec.as_ptr() }, &mut decoder_ctx, hwaccel_device.as_deref())?;
+            // Creating a CUDA device is CUDA work too
+            let hw = gyroflow_core::gpu::cuda_exclusion::exclusive(|| ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, unsafe { codec.as_ptr() }, &mut decoder_ctx, hwaccel_device.as_deref()))?;
             log::debug!("Selected HW backend {:?} ({}) with format {:?}", hw.1, hw.2, hw.3);
+            decoder_on_cuda = hw.1 == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA;
             hw_backend = hw.2;
         }
         gpu_decoding = !hw_backend.is_empty();
@@ -327,6 +375,7 @@ impl<'a> FfmpegProcessor<'a> {
         Ok(Self {
             _file: file,
             gpu_decoding,
+            decoder_on_cuda,
             gpu_device: if !gpu_decoding { None } else { Some(hw_backend) },
             video_codec: None,
 
@@ -356,7 +405,7 @@ impl<'a> FfmpegProcessor<'a> {
                     options: Dictionary::new(),
                     ..EncoderParams::default()
                 },
-                decoder: Some(decoder_ctx.decoder().open_as(codec)?.video()?),
+                decoder: Some(on_cuda(decoder_on_cuda, || decoder_ctx.decoder().open_as(codec))?.video()?),
                 ..VideoTranscoder::default()
             },
 
@@ -366,6 +415,8 @@ impl<'a> FfmpegProcessor<'a> {
     }
 
     pub fn render(&mut self, output_folder: &str, output_filename: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
+        let cuda = self.uses_cuda();
+        self.video.cuda = cuda;
         let output_url = filesystem::get_file_url(output_folder, output_filename, true);
         let mut file = FfmpegPathWrapper::new(&output_url, true).map_err(|e| FFmpegError::CannotOpenOutputFile((output_url.to_string(), e)))?;
 
@@ -670,7 +721,7 @@ impl<'a> FfmpegProcessor<'a> {
                         {
                             let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
                             packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
-                            if let Err(err) = decoder.send_packet(&packet) {
+                            if let Err(err) = on_cuda(cuda, || decoder.send_packet(&packet)) {
                                 if self.gpu_decoding && FFMPEG_LOG.read().contains("failed to decode picture") {
                                     return Err(FFmpegError::GPUDecodingFailed);
                                 }
@@ -746,7 +797,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         // Flush encoders and decoders.
         {
-            self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
+            on_cuda(cuda, || self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof().map_err(FFmpegError::from))?;
             // self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.flush();
             // Once the video of the last range ended, the decoder holds only frames past it (decoded ahead), and none of them
             // goes in the output: the audio ends where that video ended
@@ -756,7 +807,7 @@ impl<'a> FfmpegProcessor<'a> {
                     self.frame_ts.end_range();
                 }
             }
-            self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
+            on_cuda(cuda, || self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof().map_err(FFmpegError::from))?;
             if let Err(e) = self.video.receive_and_process_encoded_packets(&mut octx, &mut self.ost_time_bases) {
                 log::error!("Failed to flush last packet: {e:?}");
             }
@@ -782,6 +833,8 @@ impl<'a> FfmpegProcessor<'a> {
     }
 
     pub fn start_decoder_only(&mut self, mut ranges: Vec<(f64, f64)>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
+        let cuda = self.uses_cuda();
+        self.video.cuda = cuda;
         let mut start_ms = None;
         let mut end_ms = None;
 
@@ -819,7 +872,7 @@ impl<'a> FfmpegProcessor<'a> {
                     let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
                     packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
 
-                    if let Err(err) = decoder.send_packet(&packet) {
+                    if let Err(err) = on_cuda(cuda, || decoder.send_packet(&packet)) {
                         ::log::error!("Decoder error {:?}", err);
                         if self.gpu_decoding && FFMPEG_LOG.read().contains("failed to decode picture") {
                             return Err(FFmpegError::GPUDecodingFailed);
@@ -856,10 +909,17 @@ impl<'a> FfmpegProcessor<'a> {
         }
 
         // Flush decoder.
-        self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
+        on_cuda(cuda, || self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof().map_err(FFmpegError::from))?;
         self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts)?;
 
         Ok(())
+    }
+
+    /// The decoder or the encoder works on CUDA: NVDEC, NVENC, or CUDA frames
+    fn uses_cuda(&self) -> bool {
+        self.decoder_on_cuda
+            || self.video.encoder_params.hw_device_type == Some(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA)
+            || self.video_codec.as_deref().is_some_and(|c| c.contains("nvenc"))
     }
 
     pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video_converter::Converter, &mut ffmpeg_video::RateControl) -> Result<(), FFmpegError> + 'a {

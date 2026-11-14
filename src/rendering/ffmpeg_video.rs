@@ -4,6 +4,7 @@
 use ffmpeg_next::{ ffi, codec, decoder, encoder, format, frame, picture, software, util, Dictionary, Packet, Rational, Error, rescale::Rescale };
 
 use super::ffmpeg_processor::Status;
+use super::ffmpeg_processor::{ on_cuda, DropOnCuda };
 use super::ffmpeg_processor::FFmpegError;
 use super::ffmpeg_processor::FrameTimestamps;
 use super::ffmpeg_video_converter::Converter;
@@ -61,6 +62,8 @@ pub struct VideoTranscoder<'a> {
     pub decode_only: bool,
     pub gpu_decoding: bool,
     pub gpu_encoding: bool,
+    /// The decoder or the encoder works on CUDA: their calls take the CRM decoder's CUDA lock (`on_cuda`)
+    pub cuda: bool,
     pub clone_frames: bool,
 
     pub converter: Converter,
@@ -197,10 +200,12 @@ impl<'a> VideoTranscoder<'a> {
 
         let decoder = self.decoder.as_mut().ok_or(FFmpegError::DecoderNotFound)?;
 
-        let mut frame = frame::Video::empty();
+        let cuda = self.cuda;
+        let mut decoded = DropOnCuda::new(frame::Video::empty(), cuda);
+        let mut frame = &mut *decoded;
         let mut sw_frame = &mut self.buffers.sw_frame;
 
-        while decoder.receive_frame(&mut frame).is_ok() {
+        while on_cuda(cuda, || decoder.receive_frame(&mut frame)).is_ok() {
             let time_base = self.encoder_params.time_base.unwrap();
 
             if let Some(mut ts) = frame.timestamp() {
@@ -225,7 +230,8 @@ impl<'a> VideoTranscoder<'a> {
                             hw_formats = Some(unsafe { super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr()) });
                             // log::debug!("Hardware transfer formats from GPU: {:?}", hw_formats);
                             // retrieve data from GPU to CPU
-                            ffmpeg!(ffi::av_hwframe_transfer_data(sw_frame.as_mut_ptr(), frame.as_mut_ptr(), 0); FromHWTransferError);
+                            let err = on_cuda(cuda, || unsafe { ffi::av_hwframe_transfer_data(sw_frame.as_mut_ptr(), frame.as_mut_ptr(), 0) });
+                            if err < 0 { return Err(FFmpegError::FromHWTransferError(err)); }
                             ffmpeg!(ffi::av_frame_copy_props(sw_frame.as_mut_ptr(), frame.as_mut_ptr()); FromHWTransferError);
                             &mut sw_frame
                         } else {
@@ -397,7 +403,10 @@ impl<'a> VideoTranscoder<'a> {
 
                             // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 
-                            let result = Self::init_encoder(final_frame, &self.encoder_params, decoder, size, bitrate, octx, self.output_index.unwrap_or_default(), &hw_upload_format);
+                            // Opens the encoder, NVENC's on a CUDA device
+                            let output_index = self.output_index.unwrap_or_default();
+                            let encoder_params = &self.encoder_params;
+                            let result = on_cuda(cuda, || Self::init_encoder(final_frame, encoder_params, decoder, size, bitrate, octx, output_index, &hw_upload_format));
 
                             // let mut output = String::new();
                             // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
@@ -424,16 +433,18 @@ impl<'a> VideoTranscoder<'a> {
 
                         ts = rate_control.out_timestamp_us;
 
-                        let mut output_hw_frame;
+                        // The uploaded frame is the device's memory: released under the lock too
+                        let mut output_hw_frame = DropOnCuda::new(None::<frame::Video>, cuda);
 
                         if let Some(hw_upload_format) = hw_upload_format {
                             log::debug!("Uploading frame to the device, hw_upload_format {:?}, final_frame.format: {:?}", hw_upload_format, final_frame.format());
 
-                            output_hw_frame = Some(frame::Video::empty());
+                            *output_hw_frame = Some(frame::Video::empty());
 
                             // Upload back to GPU
-                            unsafe {
-                                let frame_ptr = output_hw_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?.as_mut_ptr();
+                            let frame_ptr = output_hw_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?;
+                            on_cuda(cuda, || unsafe {
+                                let frame_ptr = frame_ptr.as_mut_ptr();
                                 let err = ffi::av_hwframe_get_buffer((*encoder.as_mut_ptr()).hw_frames_ctx, frame_ptr, 0);
                                 if err < 0 {
                                     return Err(FFmpegError::ToHWBufferError(err));
@@ -446,7 +457,8 @@ impl<'a> VideoTranscoder<'a> {
                                     return Err(FFmpegError::ToHWTransferError(err));
                                 }
                                 Self::copy_frame_props(frame_ptr, final_frame.as_ptr());
-                            }
+                                Ok(())
+                            })?;
                             final_frame = output_hw_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?;
                         }
 
@@ -457,9 +469,10 @@ impl<'a> VideoTranscoder<'a> {
 
                             if self.clone_frames {
                                 // TODO: ideally this should be a buffer pool per thread, but we need to figure out which thread ffmpeg actually used for that frame
-                                encoder.send_frame(&final_frame.clone())?;
+                                let clone_frames_copy = DropOnCuda::new(final_frame.clone(), cuda);
+                                on_cuda(cuda, || encoder.send_frame(&*clone_frames_copy))?;
                             } else {
-                                encoder.send_frame(final_frame)?;
+                                on_cuda(cuda, || encoder.send_frame(final_frame))?;
                             }
                             ts += rate_control.repeat_interval;
 
@@ -467,7 +480,7 @@ impl<'a> VideoTranscoder<'a> {
                             let octx = octx.as_mut().unwrap();
                             let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
                             let mut encoded = Packet::empty();
-                            while encoder.receive_packet(&mut encoded).is_ok() {
+                            while on_cuda(cuda, || encoder.receive_packet(&mut encoded)).is_ok() {
                                 Self::write_packet(&mut encoded, octx, self.output_index.unwrap_or_default(), time_base, ost_time_bases, &mut self.header_written)?;
                             }
                         }
@@ -497,7 +510,8 @@ impl<'a> VideoTranscoder<'a> {
         if !self.decode_only {
             let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
             let mut encoded = Packet::empty();
-            while self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?.receive_packet(&mut encoded).is_ok() {
+            let cuda = self.cuda;
+            while { let encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?; on_cuda(cuda, || encoder.receive_packet(&mut encoded)).is_ok() } {
                 Self::write_packet(&mut encoded, octx, self.output_index.unwrap_or_default(), time_base, ost_time_bases, &mut self.header_written)?;
             }
             // Nothing was encoded, the file still needs a header to be valid

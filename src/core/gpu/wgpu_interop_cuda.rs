@@ -15,9 +15,10 @@ use CUmemLocationType::*;
 use CUmemAllocationGranularity_flags::*;
 use CUmemAccess_flags::*;
 
+// Every CUDA call runs under the CRM decoder's lock while it develops on CUDA (`cuda_exclusion`)
 macro_rules! cuda {
     ($cfn:ident.$func:ident($($arg:tt)*)) => {
-        let err = unsafe { ($cfn.$func)($($arg)*) };
+        let err = super::cuda_exclusion::exclusive(|| unsafe { ($cfn.$func)($($arg)*) });
         if err != CUresult::CUDA_SUCCESS {
             log::error!("Call to {} failed: {:?}", stringify!($func), err);
         }
@@ -55,7 +56,7 @@ unsafe impl Send for CudaSharedMemory { }
 pub fn get_current_cuda_device() -> i32 {
     let mut dev = 0;
     if let Ok(cuda) = CUDA.as_ref() {
-        unsafe { (cuda.cudaGetDevice)(&mut dev); }
+        super::cuda_exclusion::exclusive(|| unsafe { (cuda.cudaGetDevice)(&mut dev); });
     }
     dev
 }
@@ -64,7 +65,8 @@ pub fn get_current_cuda_device() -> i32 {
 pub fn current_device_uuid() -> Option<[u8; 16]> {
     let cuda = CUDA.as_ref().ok()?;
     let mut uuid = CUuuid::default();
-    let err = unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, get_current_cuda_device()) };
+    let device = get_current_cuda_device();
+    let err = super::cuda_exclusion::exclusive(|| unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, device) });
     (err == CUresult::CUDA_SUCCESS).then(|| uuid.bytes.map(|x| x as u8))
 }
 
@@ -135,13 +137,13 @@ fn on_host<'a>(desc: &BufferDescription, buffer: &'a mut [u8]) -> BufferDescript
 
 fn copy_to_host(dst: &mut [u8], src: CUdeviceptr) -> Result<(), GyroflowCoreError> {
     let cuda = CUDA.as_ref().map_err(|e| GyroflowCoreError::Cuda(e.to_string()))?;
-    let err = unsafe { (cuda.cuMemcpyDtoH_v2)(dst.as_mut_ptr() as *mut c_void, src, dst.len()) };
+    let err = super::cuda_exclusion::exclusive(|| unsafe { (cuda.cuMemcpyDtoH_v2)(dst.as_mut_ptr() as *mut c_void, src, dst.len()) });
     if err != CUresult::CUDA_SUCCESS { return Err(GyroflowCoreError::Cuda(format!("cuMemcpyDtoH_v2: {err:?}"))); }
     Ok(())
 }
 fn copy_from_host(dst: CUdeviceptr, src: &[u8]) -> Result<(), GyroflowCoreError> {
     let cuda = CUDA.as_ref().map_err(|e| GyroflowCoreError::Cuda(e.to_string()))?;
-    let err = unsafe { (cuda.cuMemcpyHtoD_v2)(dst, src.as_ptr() as *const c_void, src.len()) };
+    let err = super::cuda_exclusion::exclusive(|| unsafe { (cuda.cuMemcpyHtoD_v2)(dst, src.as_ptr() as *const c_void, src.len()) });
     if err != CUresult::CUDA_SUCCESS { return Err(GyroflowCoreError::Cuda(format!("cuMemcpyHtoD_v2: {err:?}"))); }
     // From pageable memory the call returns once the data is staged, not on the device yet
     cuda_synchronize();
@@ -251,11 +253,11 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
 
     let cuda = CUDA.as_ref()?;
     let mut dev = 0;
-    unsafe { (cuda.cudaGetDevice)(&mut dev); }
+    super::cuda_exclusion::exclusive(|| unsafe { (cuda.cudaGetDevice)(&mut dev); });
     let location = CUmemLocation { type_: CU_MEM_LOCATION_TYPE_DEVICE, id: dev };
 
     let mut uuid = CUuuid::default();
-    unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, dev); }
+    super::cuda_exclusion::exclusive(|| unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, dev); });
     log::debug!("Device #{dev} UUID: {}", uuid.bytes.iter().map(|x| format!("{:02x}", x)).collect::<String>());
 
     let mut device_ptr: CUdeviceptr = 0u64;

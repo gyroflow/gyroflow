@@ -10,6 +10,7 @@ pub mod wgpu_interop;
 #[cfg(any(target_os = "macos", target_os = "ios"))]      pub mod wgpu_interop_metal;
 #[cfg(target_os = "windows")]                            pub mod wgpu_interop_directx;
 #[cfg(any(target_os = "windows", target_os = "linux"))]  pub mod wgpu_interop_cuda;
+pub mod cuda_exclusion;
 
 pub mod drawing;
 use std::hash::Hasher;

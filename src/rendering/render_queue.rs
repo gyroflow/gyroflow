@@ -1307,7 +1307,10 @@ impl RenderQueue {
                         let fetch_thumb = |video_url: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
-                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, Some(sequence_options()))?;
+                                let mut options = sequence_options();
+                                // A 50 px thumbnail: a CRM clip at its smallest decode level
+                                if video_url.to_ascii_lowercase().ends_with(".crm") { options.set("scale", "1/4"); }
+                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, Some(options))?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 

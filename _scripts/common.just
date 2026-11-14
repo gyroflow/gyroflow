@@ -51,7 +51,7 @@ export MACOSX_DEPLOYMENT_TARGET := "10.15"
 # (github.com/gyroflow/mdk-crm, at MdkCrmRev) against it. MDK plugins only work with the libmdk they
 # were built against, so the desktop builds take libmdk from there too (MDK_SDK, read by qml-video-rs).
 MdkSdk := ExtDir / "mdk-sdk/"
-MdkCrmRev := "23b720052b6478daab4958997e801b99f498856b"
+MdkCrmRev := "f8c83947b1d9053b961600b31be860c0902dfb3a"
 # ――――――――――――――――――――――――――――――――――――――― MDK ―――――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――

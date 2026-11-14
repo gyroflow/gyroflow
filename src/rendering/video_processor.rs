@@ -29,7 +29,9 @@ impl<'a> VideoProcessor<'a> {
     pub fn get_video_info(url: &str, options: Option<Dictionary>) -> Result<crate::rendering::ffmpeg_processor::VideoInfo, ffmpeg_next::Error> {
         let filename = gyroflow_core::filesystem::get_filename(url);
         if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") || filename.to_lowercase().ends_with(".crm") {
-            let mut mdk = MDKProcessor::from_file(url, None, false);
+            // Only the media info is read here, so a CRM clip is decoded at its smallest level
+            let options = filename.to_lowercase().ends_with(".crm").then(|| { let mut d = Dictionary::new(); d.set("scale", "1/4"); d });
+            let mut mdk = MDKProcessor::from_file(url, options, false);
 
             let (tx, rx) = futures_intrusive::channel::shared::oneshot_channel();
 

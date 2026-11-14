@@ -36,6 +36,7 @@ impl MDKProcessor {
         let mut format = ffmpeg_next::format::Pixel::RGBA;
         let filename = gyroflow_core::filesystem::get_filename(url);
 
+        let has_scale = decoder_options.as_ref().is_some_and(|x| x.get("scale").is_some());
         let mut options: String = decoder_options.map(|x| x.into_iter().map(|x| format!("{}={}", x.0, x.1)).join(":")).unwrap_or_default();
         if !options.is_empty() { options.insert(0, ':'); }
 
@@ -48,7 +49,10 @@ impl MDKProcessor {
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }
         if filename.to_ascii_lowercase().ends_with("crm") {
-            custom_decoder = format!("CRM:gpu=auto{}", options);
+            // qml-video-rs gives processing players a 64x64 surface, which MDK hands the CRM reader as `scale=64x64`, so
+            // without a scale of its own (`WxH`: the smallest decode level that covers it) the clip is read at 1/4
+            let full = if has_scale { "" } else { ":scale=1/1" };
+            custom_decoder = format!("CRM:gpu=auto{}{}", options, full);
         }
         ::log::info!("Custom decoder: {custom_decoder}");
 

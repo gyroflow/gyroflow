@@ -283,11 +283,12 @@ pub fn render<F, F2, F3>(stab: Arc<StabilizationManager>, progress: F, input_fil
     log::debug!("interpolation: {:?}", &interpolation);
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let possible_encoders = get_possible_encoders(&render_options.codec, render_options.use_gpu);
-    let encoder = match ffmpeg_hw::find_encoder_that_works(&possible_encoders, hwaccel_device) {
+    // Probing opens the GPU encoders, NVENC's on CUDA: under the CRM decoder's CUDA lock (gyroflow_core::gpu::cuda_exclusion)
+    let encoder = match gyroflow_core::gpu::cuda_exclusion::exclusive(|| ffmpeg_hw::find_encoder_that_works(&possible_encoders, hwaccel_device)) {
         Some(encoder) => encoder,
         // The GPU can't encode it, and there's no software encoder in the build, nor one to download like the GPL ones
         None if render_options.codec == "AV1" => return Err(FFmpegError::NoWorkingEncoder(render_options.codec.clone())),
-        None => ffmpeg_hw::find_working_encoder(&possible_encoders, hwaccel_device),
+        None => gyroflow_core::gpu::cuda_exclusion::exclusive(|| ffmpeg_hw::find_working_encoder(&possible_encoders, hwaccel_device)),
     };
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
@@ -1136,7 +1137,8 @@ unsafe fn show_help_children(mut class: *const ffi::AVClass, flags: c_int) {
 }
 
 pub fn get_default_encoder(codec: &str, gpu: bool) -> String {
-    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, gpu), None);
+    // Probing opens the GPU encoders, NVENC's on CUDA: under the CRM decoder's CUDA lock (gyroflow_core::gpu::cuda_exclusion)
+    let encoder = gyroflow_core::gpu::cuda_exclusion::exclusive(|| ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, gpu), None));
     encoder.0.to_string()
 }
 /// The encoders `codec` is rendered with here, on the GPU and on the CPU. `None` when none works. It may open the GPU encoders, see `ffmpeg_hw::needs_probe`
@@ -1146,7 +1148,7 @@ pub fn get_working_encoders(codec: &str) -> (Option<&'static str>, Option<&'stat
         get_possible_encoders(codec, use_gpu).into_iter().filter(|x| x.1 == use_gpu && ffmpeg_next::encoder::find_by_name(x.0).is_some()).collect()
     };
     (
-        ffmpeg_hw::find_encoder_that_works(&encoders(true),  None).map(|x| x.0),
+        gyroflow_core::gpu::cuda_exclusion::exclusive(|| ffmpeg_hw::find_encoder_that_works(&encoders(true),  None).map(|x| x.0)),
         ffmpeg_hw::find_encoder_that_works(&encoders(false), None).map(|x| x.0)
     )
 }
