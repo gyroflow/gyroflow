@@ -377,6 +377,7 @@ fn interpolate_mesh(base: i32, width: f32, height: f32, pos: vec2<f32>) -> vec2<
 // The pipeline carries a ray as an angle vector: |.| is the angle from the axis in radians, the direction
 // is the azimuth. See stabilization/projection.rs - nothing diverges at 90° the way a z=1 plane point does
 fn ray_unproject(n: vec2<f32>, proj: i32) -> vec2<f32> {
+    if (proj == 5) { return dir_to_ray(equirect_to_dir(n)); }               // equirect
     let r = length(n);
     if (r < 1e-12) { return vec2<f32>(0.0, 0.0); }
     var theta = atan(r);                                                    // rectilinear
@@ -389,7 +390,7 @@ fn ray_unproject(n: vec2<f32>, proj: i32) -> vec2<f32> {
 // Where a ray of angle `theta` lands on the output plane, under the output projection
 fn ray_radius(theta: f32, proj: i32) -> f32 {
     if (proj == 1) { return 2.0 * tan(theta * 0.5); }
-    if (proj == 2) { return theta; }
+    if (proj == 2 || proj == 5) { return theta; }
     if (proj == 3) { return 2.0 * sin(theta * 0.5); }
     if (proj == 4) { return sin(theta); }
     if (theta < 1.5707) { return tan(theta); }
@@ -409,7 +410,7 @@ fn blend_residual(theta: f32, u: vec2<f32>, t: f32, a: f32, flags: i32) -> f32 {
 // The ray angle that lands at a given output radius, inverse of `ray_radius`
 fn ray_theta(r: f32, proj: i32) -> f32 {
     if (proj == 1) { return 2.0 * atan(r * 0.5); }
-    if (proj == 2) { return r; }
+    if (proj == 2 || proj == 5) { return r; }
     if (proj == 3) { return 2.0 * asin(min(r * 0.5, 1.0)); }
     if (proj == 4) { return asin(min(r, 1.0)); }
     return atan(r);
@@ -418,6 +419,17 @@ fn ray_to_dir(ray: vec2<f32>) -> vec3<f32> {
     let theta = length(ray);
     if (theta < 1e-12) { return vec3<f32>(ray.x, ray.y, 1.0); }
     return vec3<f32>(ray * (sin(theta) / theta), cos(theta));
+}
+fn dir_to_ray(d: vec3<f32>) -> vec2<f32> {
+    let rxy = length(d.xy);
+    if (rxy < 1e-12) { return vec2<f32>(0.0, 0.0); }
+    return d.xy * (atan2(rxy, d.z) / rxy);
+}
+// The equirect plane (longitude across, latitude down, in radians) to a direction: +z at the middle, +x at
+// +90 degrees, up (-y) at the top. Straight behind is an angle vector of length pi, which the encoding carries
+fn equirect_to_dir(n: vec2<f32>) -> vec3<f32> {
+    let cl = cos(n.y);
+    return vec3<f32>(cl * sin(n.x), sin(n.y), cl * cos(n.x));
 }
 
 fn rotate_and_distort(ray: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
@@ -554,7 +566,9 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     var stretch = 1.0;
     if (params.input_horizontal_stretch > 0.01) { stretch = 1.0 / params.input_horizontal_stretch; }
     let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
-    let out_f = params.f * stretch / params.fov;
+    var out_f = params.f * stretch / params.fov;
+    // The equirect's plane is the sphere's, not the lens's: all of it 360 x 180 degrees at zoom (`fov`) 1
+    if (params.output_projection == 5) { out_f = vec2<f32>(f32(params.output_width) / 6.2831853, f32(params.output_height) / 3.1415927) / max(params.fov, 1e-6); }
     let a = params.lens_correction_amount;
     let n_raw = (out_pos - out_c) / out_f;
     var n = n_raw;

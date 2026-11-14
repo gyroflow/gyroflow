@@ -690,7 +690,10 @@ impl Stabilization {
                         let mut xsum = Vector4::<f32>::from_element(0.0);
                         for xp in 0..I {
                             let pixel = if sx + xp >= params.source_rect[0] && sx + xp < params.source_rect[0] + params.source_rect[2] {
-                                let px1: &T = bytemuck::from_bytes(&input[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]);
+                                // The row's start is before the pixel's when the tap left of the frame's first pixel is
+                                // outside it (`sx` is -1 on row 0): added up as signed, or a debug build overflows there
+                                let at = (src_index + (params.bytes_per_pixel * xp) as isize) as usize;
+                                let px1: &T = bytemuck::from_bytes(&input[at..at + params.bytes_per_pixel as usize]);
                                 let src_px = PixelType::to_float(*px1);
                                 // draw_pixel(&mut src_px, sx + xp, sy + yp, true, params.width, params, drawing);
                                 src_px
@@ -725,9 +728,8 @@ impl Stabilization {
                 // projection reads. It no longer depends on the lens correction amount - the blend happens
                 // in ray space - so the `1/(1-amount)` focal fudge that used to sit here is gone, and this
                 // is now exactly the camera matrix `FrameTransform::get_new_k` builds for the point path
-                let stretch = if params.input_horizontal_stretch > 0.01 { 1.0 / params.input_horizontal_stretch } else { 1.0 };
                 let out_c = Vector2::new(params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-                let out_f = Vector2::new(params.f[0] * stretch / params.fov, params.f[1] * stretch / params.fov);
+                let out_f = { let f = projection::output_focal(params); Vector2::new(f.0, f.1) };
 
                 // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
                 let fill_bg = (params.flags & 4) == 4;
@@ -881,7 +883,7 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
 
     // Optical flow matches real image features in the camera's own frame: no rotation into an output camera,
     // no field clamp, no zoom - just the lens, undone
-    undistort_points_to_rays(distorted, &kernel_params, Matrix3::identity(), None, params, None, None, None, false)
+    undistort_points_to_rays(distorted, &kernel_params, Matrix3::identity(), None, None, params, None, None, None, false)
         .into_iter()
         .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
         .collect()
@@ -903,7 +905,7 @@ pub fn undistort_points_for_optical_motion(distorted: &[(f32, f32)], timestamp_m
     let shifts = shifts.map(|s| if s.len() == 1 { vec![s[0]; full.len()] } else { s });
 
     let kernel_params = point_kernel_params(params, camera_matrix, distortion_coeffs, 0.0, timestamp_ms);
-    undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, params, shifts.as_deref(), mesh.as_deref(), breathing.as_deref(), false)
+    undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, None, params, shifts.as_deref(), mesh.as_deref(), breathing.as_deref(), false)
         .into_iter()
         .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
         .collect()
@@ -944,7 +946,11 @@ fn point_kernel_params(params: &ComputeParams, camera_matrix: Matrix3<f64>, dist
 ///
 /// The half of the point path that is about the camera and not about the picture: [`undistort_points`] goes
 /// on to project these onto the output plane, the sync reads them as bearings.
-fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelParams, rotation: Matrix3<f64>, rot_per_point: Option<&[Matrix3<f64>]>, params: &ComputeParams, shift_per_point: Option<&[(f32, f32, f32, f32, f32)]>, mesh: Option<&[f64]>, breathing_per_point: Option<&[f32]>, clamp_to_field: bool) -> Vec<Option<(f32, f32)>> {
+///
+/// `lens_offset` is a rig lens's offset over the stitching distance, in the lens's axes
+/// ([`super::RigLens::kernel_parts`]): the ray the lens saw a point of the stitching sphere along is taken back
+/// to the ray from the rig's center, before the rotation. `None` for the lens's own rays
+fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelParams, rotation: Matrix3<f64>, rot_per_point: Option<&[Matrix3<f64>]>, lens_offset: Option<Vector3<f64>>, params: &ComputeParams, shift_per_point: Option<&[(f32, f32, f32, f32, f32)]>, mesh: Option<&[f64]>, breathing_per_point: Option<&[f32]>, clamp_to_field: bool) -> Vec<Option<(f32, f32)>> {
     let f = (kernel_params.f[0], kernel_params.f[1]);
     let c = (kernel_params.c[0], kernel_params.c[1]);
     // Only the picture's own outline gets the edge-of-field stand-in below; a caller measuring real image
@@ -1050,10 +1056,16 @@ fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelPara
         };
 
         // Rotate into the output camera; the rest of the way - onto its image plane - is the caller's
-        ray.map(|ray| {
+        ray.and_then(|ray| {
             let d = projection::ray_to_dir(ray);
-            let pr = rot * nalgebra::Vector3::new(d.0, d.1, d.2);
-            projection::dir_to_ray((pr[0], pr[1], pr[2]))
+            let mut d = nalgebra::Vector3::new(d.0, d.1, d.2);
+            if let Some(t) = lens_offset {
+                // The kernel's `M·d - t` undone: the lens's unit ray back to the rig center's
+                let o = super::compute_params::ray_from_lens_offset(nalgebra::convert(d), t)?;
+                d = nalgebra::convert(o);
+            }
+            let pr = rot * d;
+            Some(projection::dir_to_ray((pr[0], pr[1], pr[2])))
         })
     }).collect()
 }
@@ -1069,8 +1081,10 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
 
     let kernel_params = point_kernel_params(params, camera_matrix, *distortion_coeffs, field_limit, timestamp_ms);
     let field_limit = kernel_params.field_limit;
-    let amount = lens_correction_amount as f32;
     let proj = params.output_projection;
+    // An equirectangular output is always fully corrected, as the render draws it (`FrameTransform::at_timestamp`)
+    let amount = if proj == projection::EQUIRECT { 1.0 } else { lens_correction_amount as f32 };
+    let lens_offset = if params.rig_lens.is_identity() { None } else { Some(params.rig_lens.kernel_parts(false).1).filter(|t| t.norm_squared() > 0.0) };
 
     let refr = kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0;
     // Where the blend's source leg ends: the lens's field limit - under water, Snell's window, the inverse
@@ -1085,6 +1099,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
     // the lens-correction blend in the direction where it is a closed form (see `super::projection`).
     // `R` carries the refraction, because the render applies it on this side of the blend too
     let blend_forward = |ray_out: (f32, f32)| -> (f32, f32) {
+        if proj == projection::EQUIRECT { return projection::project(ray_out, proj); }
         let mut theta = (ray_out.0 * ray_out.0 + ray_out.1 * ray_out.1).sqrt();
         if theta < 1e-12 { return (0.0, 0.0); }
         let u = (ray_out.0 / theta, ray_out.1 / theta);
@@ -1102,7 +1117,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         ((1.0 - amount) * p.0 + amount * u.0 * rp, (1.0 - amount) * p.1 + amount * u.1 * rp)
     };
 
-    let rays = undistort_points_to_rays(distorted, &kernel_params, rotation, rot_per_point.as_deref(), params, shift_per_point.as_deref(), mesh.as_deref(), breathing_per_point.as_deref(), clamp_to_field);
+    let rays = undistort_points_to_rays(distorted, &kernel_params, rotation, rot_per_point.as_deref(), lens_offset, params, shift_per_point.as_deref(), mesh.as_deref(), breathing_per_point.as_deref(), clamp_to_field);
 
     rays.into_iter().map(|ray| {
         let Some(ray_out) = ray else { return INVALID_POINT };

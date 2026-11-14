@@ -48,6 +48,13 @@ impl FrameTransform {
         frame_readout_time * scale
     }
     fn get_new_k(params: &ComputeParams, camera_matrix: &Matrix3<f64>, fov: f64) -> Matrix3<f64> {
+        if params.output_projection == super::projection::EQUIRECT {
+            // The whole sphere at zoom 1, whatever the lens: `fov` is the zoom alone here (`equirect_zoom`)
+            let f = super::projection::equirect_focal((params.output_width as f32, params.output_height as f32), fov as f32);
+            return Matrix3::new(f.0 as f64, 0.0, params.output_width as f64 / 2.0,
+                                0.0, f.1 as f64, params.output_height as f64 / 2.0,
+                                0.0, 0.0, 1.0);
+        }
         let horizontal_ratio = if params.lens.input_horizontal_stretch > 0.01 { params.lens.input_horizontal_stretch } else { 1.0 };
 
         let img_dim_ratio = 1.0 / horizontal_ratio;
@@ -68,6 +75,13 @@ impl FrameTransform {
         let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(if params.fovs.len() > 1 { params.fovs.last().unwrap() } else { &1.0 }) * fov_scale } else { 1.0 }.max(0.001);
         fov *= params.width as f64 / params.output_width.max(1) as f64;
         fov
+    }
+    /// The zoom of an equirectangular output: how much of the sphere it shows, 1 being all of it (see
+    /// `projection::equirect_focal`). The FOV setting and the adaptive zoom, as for the other projections, but not
+    /// what only makes sense of a lens's own frame - the source-to-output size ratio, the lens profile's optimal FOV,
+    /// the focal length stabilization's compensation: the sphere's scale is the sphere's
+    pub fn equirect_zoom(params: &ComputeParams, frame: usize, use_fovs: bool, timestamp_ms: f64) -> f64 {
+        Self::get_fov(params, frame, use_fovs, timestamp_ms, false) * params.output_width.max(1) as f64 / params.width.max(1) as f64
     }
 
     /// Rescales the camera matrix to the frame's effective focal length (`ComputeParams::focal_lengths`, see
@@ -299,7 +313,9 @@ impl FrameTransform {
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         let background_margin = params.keyframes.value_at_video_timestamp(&KeyframeType::BackgroundMargin, timestamp_ms).unwrap_or(params.background_margin);
         let background_feather = params.keyframes.value_at_video_timestamp(&KeyframeType::BackgroundFeather, timestamp_ms).unwrap_or(params.background_margin_feather);
-        let lens_correction_amount = params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, timestamp_ms).unwrap_or(params.lens_correction_amount);
+        let equirect = params.output_projection == super::projection::EQUIRECT;
+        // An equirectangular output is always fully corrected: the blend is between radial projections
+        let lens_correction_amount = if equirect { 1.0 } else { params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, timestamp_ms).unwrap_or(params.lens_correction_amount) };
         let adaptive_zoom_center_x = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.0);
         let mut adaptive_zoom_center_y = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.1);
 
@@ -333,6 +349,10 @@ impl FrameTransform {
             } else {
                 ui_fov /= adj;
             }
+        }
+        if equirect {
+            fov = Self::equirect_zoom(params, frame, true, timestamp_ms);
+            ui_fov = fov;
         }
 
         let scaled_k = camera_matrix;
@@ -378,6 +398,10 @@ impl FrameTransform {
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
+
+        // A rig's lens: the matrices take the output ray into the rig's camera, and this into the lens's
+        let (lens_from_rig, lens_offset) = params.rig_lens.kernel_parts(params.framebuffer_inverted);
+        let rig_lens = !params.rig_lens.is_identity();
 
         // Lens breathing: the camera matrix has the frame's own (`effective_camera_matrix`), each row gets its ratio to it
         let breathing = file_metadata.lens_breathing_at(frame).map(|b| (b, b.focal_at_centre())).filter(|(_, c)| c.is_finite() && *c > 0.0);
@@ -425,6 +449,9 @@ impl FrameTransform {
             } else {
                 Self::kernel_rotation(&quat, &image_rotation, params.framebuffer_inverted)
             };
+            // A rig's lens: the ray in the rig's camera into the lens's (`kernel_rotation` takes the output ray into
+            // the source camera, which for a rig's lens is the rig's)
+            let i_r = if rig_lens { nalgebra::convert::<_, Matrix3<f32>>(lens_from_rig) * i_r } else { i_r };
             // Lens breathing: the row's focal length against the frame's, which the camera matrix has. The focus moving
             // during the readout gives every row its own (`gyro_source::sony::breathing`); it's a change of the source
             // lens's focal length, so it's applied where the lens images the ray, on the source side of the rotation
@@ -460,7 +487,7 @@ impl FrameTransform {
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
             k:             distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<f32>>().try_into().unwrap(),
             fov:           fov as f32,
-            field_limit:   field_limit as f32,
+            field_limit:   params.rig_lens.field_limit(field_limit) as f32,
             output_projection: params.output_projection,
             lens_correction_amount:   lens_correction_amount as f32,
             input_vertical_stretch:   input_vertical_stretch as f32,
@@ -468,8 +495,15 @@ impl FrameTransform {
             background_mode:          params.background_mode as i32,
             background_margin:        background_margin as f32,
             background_margin_feather:background_feather as f32,
-            translation2d: [(adaptive_zoom_center_x * params.width as f64 / fov) as f32, (adaptive_zoom_center_y * params.height as f64 / fov) as f32],
-            translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
+            translation2d: if equirect {
+                // A part of the sphere, off its middle: in output widths and heights, as the zoom sees them
+                [(adaptive_zoom_center_x * params.output_width as f64 / fov) as f32, (adaptive_zoom_center_y * params.output_height as f64 / fov) as f32]
+            } else {
+                [(adaptive_zoom_center_x * params.width as f64 / fov) as f32, (adaptive_zoom_center_y * params.height as f64 / fov) as f32]
+            },
+            // The rig lens's offset (`RigLens`): the kernel adds it to the turned unit ray, so that the lens sees the
+            // point of the stitching sphere along `M·d - t/R`. Zero for every flat clip
+            translation3d: [-lens_offset.x as f32, -lens_offset.y as f32, -lens_offset.z as f32, 0.0],
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
             ..Default::default()
@@ -500,7 +534,12 @@ impl FrameTransform {
         // not of the base projection: measurements at fov = 1 (zoom polygon, sync, features) must not include it, or
         // the zoom would fit the frame around the crop and undo it, see zooming::calculate_fovs
         let fl_compensation = if use_fovs { crate::smoothing::focal_length::compensation_at(params, frame) } else { 1.0 };
-        let fov = Self::get_fov(params, frame, use_fovs, timestamp_ms, false) * fl_compensation;
+        let fov = if params.output_projection == super::projection::EQUIRECT {
+            Self::equirect_zoom(params, frame, use_fovs, timestamp_ms)
+        } else {
+            Self::get_fov(params, frame, use_fovs, timestamp_ms, false) * fl_compensation
+        };
+        let field_limit = params.rig_lens.field_limit(field_limit);
 
         let scaled_k = camera_matrix;
         let new_k = Self::get_new_k(params, &camera_matrix, fov);
@@ -524,6 +563,9 @@ impl FrameTransform {
         let lookup = gyro.lookup_for_frame(frame);
         let quat1 = gyro.org_quat_at(timestamp_ms, &lookup).inverse();
         let smoothed_quat1 = gyro.smoothed_quat_at(timestamp_ms, &lookup);
+        // Points are always the right way up
+        let (lens_from_rig, _) = params.rig_lens.kernel_parts(false);
+        let rig_lens = !params.rig_lens.is_identity();
 
         // Only compute 1 matrix if not using rolling shutter correction; it stands for the whole frame, so the
         // per-row data (sensor and lens shift, lens breathing) is looked up at the centre row, like `at_timestamp` does
@@ -553,6 +595,8 @@ impl FrameTransform {
             if params.suppress_rotation {
                 r = Matrix3::identity();
             }
+            // A rig's lens: its ray into the rig's camera first (the offset is `undistort_points`'s)
+            if rig_lens { r = r * lens_from_rig.transpose(); }
 
             // The rotation alone: `undistort_points` projects the rotated ray itself and applies `new_k`
             // to the projected point, so the output camera matrix must not be folded in here. The row's
