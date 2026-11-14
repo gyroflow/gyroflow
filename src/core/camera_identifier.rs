@@ -205,6 +205,14 @@ impl CameraIdentifier {
                        .replace("hero13", "hero11")
                        .replace("hero11blackmini", "hero11black")
     }
+    pub fn normalize_with_db(&mut self, db: &crate::camera_database::CameraDatabase) {
+        if !self.brand.is_empty() {
+            let (b, m) = db.normalize_camera(&self.brand, &self.model);
+            self.brand = b;
+            self.model = m;
+            self.identifier = self.get_identifier();
+        }
+    }
 
     fn get_identifier(&self) -> String {
         if self.brand.is_empty() || self.model.is_empty() || self.lens_info.is_empty() { return String::new(); }
