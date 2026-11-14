@@ -47,6 +47,9 @@ impl MDKProcessor {
             format = ffmpeg_next::format::Pixel::BGRA;
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }
+        if filename.to_ascii_lowercase().ends_with("crm") {
+            custom_decoder = format!("CRM:gpu=auto{}", options);
+        }
         ::log::info!("Custom decoder: {custom_decoder}");
 
         mdk.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder.clone()));

@@ -13,7 +13,7 @@ pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
 /// (`braw_clip_timing`)
 pub fn get_video_metadata<T: Read + Seek>(stream: &mut T, filesize: u64, url: &str) -> std::result::Result<telemetry_parser::util::VideoMetadata, crate::GyroflowCoreError> {
     let filename = crate::filesystem::get_filename(url);
-    let extensions = ["mp4", "mov", "braw", "insv", "360", "mxf"];
+    let extensions = ["mp4", "mov", "braw", "crm", "insv", "360", "mxf"];
     if !extensions.into_iter().any(|ext| filename.to_ascii_lowercase().ends_with(ext)) {
         return Err(crate::GyroflowCoreError::UnsupportedFormat(filename));
     }

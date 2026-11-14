@@ -26,6 +26,9 @@ clippy *param:
 install-deps *param:
     just -f _scripts/{{BaseFile}}.just install-deps {{param}}
 
+mdk *param:
+    just -f _scripts/{{BaseFile}}.just mdk {{param}}
+
 deploy *param:
     just -f _scripts/{{BaseFile}}.just deploy {{param}}
 

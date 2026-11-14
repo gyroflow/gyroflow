@@ -143,7 +143,7 @@ Window {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "png", "jpg", "exr", "dng", "braw", "r3d" ];
+        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "png", "jpg", "exr", "dng", "braw", "r3d", "crm" ];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];

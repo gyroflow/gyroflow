@@ -46,6 +46,14 @@ export DYLD_FALLBACK_LIBRARY_PATH := if os() == "macos" { if path_exists(`xcode-
 export MACOSX_DEPLOYMENT_TARGET := "10.15"
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
 
+# ――――――――――――――――――――――――――――――――――――――― MDK ―――――――――――――――――――――――――――――――――――――――――――
+# `just mdk` (run by install-deps) fetches the MDK SDK into MdkSdk and builds the Canon CRM plugin
+# (github.com/gyroflow/mdk-crm, at MdkCrmRev) against it. MDK plugins only work with the libmdk they
+# were built against, so the desktop builds take libmdk from there too (MDK_SDK, read by qml-video-rs).
+MdkSdk := ExtDir / "mdk-sdk/"
+MdkCrmRev := "23b720052b6478daab4958997e801b99f498856b"
+# ――――――――――――――――――――――――――――――――――――――― MDK ―――――――――――――――――――――――――――――――――――――――――――
+
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
 LlvmLibDir := if os() == "linux" { `d=""; for x in $(ls -d /usr/lib/llvm-*/lib 2>/dev/null | sort -V); do v=${x#/usr/lib/llvm-}; v=${v%/lib}; [ "$v" -ge 13 ] 2>/dev/null && d=$x; done; if [ -z "$d" ]; then v=$(llvm-config --version 2>/dev/null | cut -d. -f1); [ "${v:-0}" -ge 13 ] 2>/dev/null && d=$(llvm-config --libdir 2>/dev/null); fi; echo "$d"` } else { "" }
 export LIBCLANG_PATH := if os() == "macos" {

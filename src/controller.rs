@@ -425,6 +425,9 @@ impl Controller {
         if filename.to_ascii_lowercase().ends_with("r3d") || filename.to_ascii_lowercase().ends_with("nev") {
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }
+        if filename.to_ascii_lowercase().ends_with("crm") {
+            custom_decoder = format!("CRM:gpu=auto{}", options); // The Canon SDK develops on the GPU only
+        }
         if !custom_decoder.is_empty() {
             ::log::debug!("Custom decoder: {custom_decoder}");
         }
@@ -3242,7 +3245,7 @@ impl Filesystem {
         let folder = filesystem::get_folder(&current_url);
         let filename = filesystem::get_filename(&current_url);
 
-        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "braw", "r3d", "nev" ];
+        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "braw", "r3d", "nev", "crm" ];
 
         let list: Vec<(String, String)> = filesystem::list_folder(&folder)
             .into_iter()

@@ -18,7 +18,7 @@ pub struct VideoProcessor<'a> {
 impl<'a> VideoProcessor<'a> {
     pub fn from_file( url: &str, gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
         let filename = gyroflow_core::filesystem::get_filename(url);
-        if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") {
+        if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") || filename.to_lowercase().ends_with(".crm") {
             Ok(Self { inner: Processor::Mdk(MDKProcessor::from_file(url, decoder_options, gpu_decoding)) })
         } else {
             Ok(Self { inner: Processor::Ffmpeg(FfmpegProcessor::from_file(url, gpu_decoding, gpu_decoder_index, decoder_options)?) })
@@ -28,7 +28,7 @@ impl<'a> VideoProcessor<'a> {
     /// `options` for FFmpeg's demuxer, eg. an image sequence's (`rendering::image_sequence_options`)
     pub fn get_video_info(url: &str, options: Option<Dictionary>) -> Result<crate::rendering::ffmpeg_processor::VideoInfo, ffmpeg_next::Error> {
         let filename = gyroflow_core::filesystem::get_filename(url);
-        if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") {
+        if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") || filename.to_lowercase().ends_with(".crm") {
             let mut mdk = MDKProcessor::from_file(url, None, false);
 
             let (tx, rx) = futures_intrusive::channel::shared::oneshot_channel();

@@ -6,6 +6,8 @@ FFmpegLinuxArch  := if Arch == "aarch64" { "arm64"       } else { "amd64" }
 ArchName         := if Arch == "aarch64" { "arm64"       } else { "x86_64" }
 PackageSuffix    := if Arch == "aarch64" { "linux-arm64" } else { "linux64" }
 
+export MDK_SDK := MdkSdk
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,7 +20,7 @@ install-deps:
     echo "Installing dependencies $LIBCLANG_PATH {{AptGetExists}}"
     if [ "{{AptGetExists}}" == "true" ]; then
         sudo apt-get install -y p7zip-full python3-pip python3-venv clang libclang-dev bison pkg-config gperf curl unzip zip git
-        sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
+        sudo apt-get install -y libc++-dev libc++abi-dev cmake ninja-build libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
         sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
         sudo apt-get install -y libfontconfig1 libfreetype6
         sudo apt-get install -y libstdc++-12-dev || true
@@ -124,10 +126,37 @@ install-deps:
 
     popd
 
+    # MDK SDK and the CRM plugin built against it
+    just -f "{{justfile()}}" mdk
+
     if [ "{{AptGetExists}}" == "false" ]; then
         echo "Warning: apt-get not found, so build dependencies could not be automatically installed."
         echo "  Make sure you have installed all required build dependencies using your system's package manager."
     fi
+
+# Fetch the current MDK nightly into ext/mdk-sdk and build the CRM plugin against it (see common.just).
+# The plugin needs clang and libc++, as libmdk uses libc++.
+[no-cd]
+mdk *param:
+    #!/bin/bash
+    set -e
+    if [ "$IN_DOCKER" == "1" ] && ! command -v clang++-20 > /dev/null; then
+        # Debian 10's clang is too old for MDK's C++23 headers
+        sudo apt-get install -y gnupg
+        curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/llvm.gpg > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/buster/ llvm-toolchain-buster-20 main" | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install -y clang-20 libc++-20-dev libc++abi-20-dev
+    fi
+    if ! cmake --version 2>/dev/null | head -1 | awk '{ split($3, v, "."); exit !(v[1] > 3 || (v[1] == 3 && v[2] >= 20)) }'; then
+        if [ ! -x "{{ExtDir}}/cmake/bin/cmake" ]; then
+            echo "Downloading CMake 3.31"
+            mkdir -p "{{ExtDir}}/cmake"
+            curl -fsSL "https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-$(uname -m).tar.gz" | tar xz -C "{{ExtDir}}/cmake" --strip-components=1
+        fi
+        export PATH="{{ExtDir}}/cmake/bin:$PATH"
+    fi
+    python3 "{{ProjectDir}}/_scripts/mdk.py" --os linux --arch {{Arch}} --ext "{{ExtDir}}" --crm-rev {{MdkCrmRev}} {{param}}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Development ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -325,6 +354,7 @@ deploy *param:
     cp -f "$CARGO_TARGET/libmdk.so.0"                      "$TARGET/lib/"
     cp -f "$CARGO_TARGET/libmdk-braw.so"                   "$TARGET/lib/"
     cp -f "$CARGO_TARGET/libmdk-r3d.so"                    "$TARGET/lib/"
+    if [ -f "$CARGO_TARGET/libmdk-crm.so" ]; then cp -f "$CARGO_TARGET/libmdk-crm.so" "$TARGET/lib/"; fi
     #cp -f "$CARGO_TARGET/libffmpeg.so.6"                  "$TARGET/"
 
     cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavcodec.so.63"         "$TARGET/lib/"

@@ -65,6 +65,12 @@
 			<key>LSHandlerRank</key>         <string>None</string>
 		</dict>
 		<dict>
+			<key>CFBundleTypeExtensions</key><array><string>CRM</string></array>
+			<key>CFBundleTypeName</key>      <string>CRM</string>
+			<key>CFBundleTypeRole</key>      <string>Viewer</string>
+			<key>LSHandlerRank</key>         <string>None</string>
+		</dict>
+		<dict>
 			<key>CFBundleTypeExtensions</key><array><string>MTS</string></array>
 			<key>CFBundleTypeName</key>      <string>MTS</string>
 			<key>CFBundleTypeRole</key>      <string>Viewer</string>

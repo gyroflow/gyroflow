@@ -2,6 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 mod braw;
+mod crm;
 pub mod r3d;
 mod ffmpeg_gpl;
 
@@ -44,6 +45,7 @@ fn get_sdk_path() -> Result<std::path::PathBuf> {
 pub fn requires_install(filename: &str) -> bool {
     if filename.to_lowercase().ends_with(".braw") { return !braw::BrawSdk::is_installed(); }
     if filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") { return !r3d::REDSdk::is_installed(); }
+    if filename.to_lowercase().ends_with(".crm") { return !crm::CanonSdk::is_installed(); }
     if filename == "ffmpeg_gpl" { return !FfmpegGpl::is_installed(); }
 
     false
@@ -54,6 +56,8 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
         (braw::BrawSdk::get_download_url(sdkbase), "Blackmagic RAW SDK")
     } else if filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") {
         (r3d::REDSdk::get_download_url(sdkbase), "RED SDK")
+    } else if filename.to_lowercase().ends_with(".crm") {
+        (crm::CanonSdk::get_download_url(sdkbase), "Canon RAW SDK")
     } else if filename == "ffmpeg_gpl" {
         (FfmpegGpl::get_download_url(sdkbase), "FFmpeg GPL codecs (x264, x265)")
     } else {

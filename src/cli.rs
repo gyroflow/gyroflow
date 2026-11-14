@@ -361,7 +361,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             if let Err(e) = watch_folder(watch, |path| {
                 if !path.contains(&suffix) {
                     log::info!("New file detected: {}", path);
-                    let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr", "dng", "braw" ];
+                    let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr", "dng", "braw", "crm" ];
                     let ext = std::path::Path::new(&path).extension().map(|x| x.to_string_lossy().to_ascii_lowercase()).unwrap_or_default();
                     if extensions.contains(&ext.as_str()) {
                         let queue = unsafe { &mut *queue.as_ptr() };
