@@ -1,13 +1,17 @@
 // "Find the lens from the video" end to end on a video, without the GUI: the frames come from ffmpeg (scaled, gray),
 // are tracked as the app tracks them, and go through the same steps - the known profiles of the camera on three
-// fragments, then an estimate of a fragment.
+// fragments, then an estimate of a fragment, checked on the fragments it wasn't made from.
+// Not the app's own path to the frames: the app decodes and scales them itself, and times each by the video's own
+// timestamps, where the frames here are ffmpeg's (`scale=...:flags=area`) at the nominal frame rate. The numbers of
+// the two differ by what that is worth.
 // cargo run --release --manifest-path <abs>/src/core/Cargo.toml --example lens_from_video -- <video> [options]
 //   --camera <brand> <model>   the camera, for its profiles in the database (resources/camera_presets of the working directory)
 //   --lens <profile.json>      the profile that's loaded: tried first, and what the estimate starts from
 //   --water                    shot under water behind a flat port
 //   --from <s> --to <s>        the fragment to estimate (the first 300 tracked frames of the clip without)
 //   --estimate                 estimate even if a known profile fits
-//   --width <px>               width the frames are tracked at (960)
+//   --air                      shot in air: without either, a known profile is tried both ways
+//   --width <px>               width the frames are tracked at (1920, `lens_from_video::TRACKED_WIDTH`)
 //   --out <profile.json>       where to write the estimated profile
 
 use gyroflow_core::lens_profile::LensProfile;
@@ -30,10 +34,12 @@ fn track(video: &str, size: (usize, usize), fps: f64, range_ms: (f64, f64), widt
     let mut out = ff.stdout.take().unwrap();
     let mut buf = vec![0u8; (tw * th) as usize];
     let mut tracker = Tracker::new(lfv::TRACKED_POINTS, TrackingMethod::Klt, if cfg!(feature = "use-opencv") && std::env::var("KLT_CPU").is_ok() { KltDevice::Cpu } else { KltDevice::Gpu(None) }).expect("tracker");
-    let mut builder = FragmentBuilder::new(size, (tw, th), step as f64 * 1000.0 / fps);
+    let interval = step as f64 * 1000.0 / fps;
+    let mut builder = FragmentBuilder::new(size, (tw, th), interval);
     let mut slot = 0;
     while out.read_exact(&mut buf).is_ok() {
-        builder.push_frame(slot, &tracker.track(tw, th, tw as usize, &buf).expect("tracking"));
+        // ffmpeg hands the frames over without their times: taken at the nominal frame rate
+        builder.push_frame(range_ms.0 + slot as f64 * interval, &tracker.track(tw, th, tw as usize, &buf).expect("tracking"));
         slot += 1;
     }
     let _ = ff.wait();
@@ -68,24 +74,25 @@ fn main() {
     });
     let mut db = LensProfileDatabase::default();
     if !camera[0].is_empty() { db.load_all(); }
-    let candidates = lfv::candidates(&db, (&camera[0], &camera[1], ""), size, fps, loaded.as_ref());
-    for c in &candidates { println!("candidate: {} - f {:.0} {:.0} c {:.0} {:.0} k {:.3?} readout {:?}", c.name, c.lens.fx, c.lens.fy, c.lens.cx, c.lens.cy, c.lens.k, c.readout_ms); }
+    let candidates = lfv::candidates(&db, (&camera[0], &camera[1], ""), size, fps, loaded.as_ref(), 1.0);
+    for c in &candidates { println!("candidate: {} - f {:.0} {:.0} c {:.0} {:.0} k {:.3?} readout {:?}", c.label(), c.lens.fx, c.lens.fy, c.lens.cx, c.lens.cy, c.lens.k, c.readout_ms); }
 
     let never = || false;
     let t = Instant::now();
-    let fragments: Vec<Fragment> = lfv::automatic_fragments(duration_ms, fps).into_iter().map(|r| track(video, size, fps, r, width)).collect();
+    let automatic = lfv::automatic_fragments(duration_ms, fps);
+    let fragments: Vec<Fragment> = automatic.iter().map(|r| track(video, size, fps, *r, width)).collect();
     println!("tracked {} fragments in {:.1} s", fragments.len(), t.elapsed().as_secs_f64());
     let t = Instant::now();
     // The medium is the user's to say only for an estimate: a known lens is tried both ways
     let media: Vec<f64> = if flag("--water") { vec![1.33] } else if flag("--air") { vec![1.0] } else { vec![1.0, 1.33] };
-    let known = lfv::find_known(&fragments, &candidates, &media, &never, &|_| ());
-    for r in &known.tried {
+    let known = lfv::find_known(&fragments, &candidates, &media, 1.0, &never, &|_| ());
+    for (r, c) in known.tried.iter().zip(&candidates) {
         let m = r.matching();
-        println!("{}{} [{}{}]: {:?}, holds on {} of {}, moves {:.1} px (corner {:.1}, limit {:.0}), error {:.2}", if r.accepted { "FITS " } else { "" }, r.name,
-            if r.refraction() != 1.0 { "water" } else { "air" }, if r.medium_sure { "" } else { ", unsure" }, m.verdict, m.fragments_fitting, m.fragments, m.moved, m.moved_corner, m.limit, r.result().error);
+        println!("{}{} [{}{}]: {:?}, holds on {} of {} ({} more couldn't tell), moves {:.1} px (corner {:.1}, limit {:.0}), error {:.2}", if r.accepted { "FITS " } else { "" }, c.label(),
+            if r.refraction() != 1.0 { "water" } else { "air" }, if r.medium_sure { "" } else { ", unsure" }, m.verdict, m.fragments_fitting, m.fragments, m.fragments_unable, m.moved, m.moved_corner, m.limit, r.result().error);
         for c in r.result().checks.iter() {
             match c {
-                Some(c) => println!("    moved {:.1} / {:.1} px, readout {:.3} -> {:.3}, error {:.2} -> {:.2}, parallax {:.1}, {} points, weight {:.2}{}", c.moved.median, c.moved.max, c.readout, c.readout_free, c.error, c.error_free, c.scene.parallax, c.scene.points, c.weight(), if c.fits { ": fits" } else { "" }),
+                Some(c) => println!("    moved {:.1} / {:.1} px{}, readout {:.3} -> {:.3}, error {:.2} -> {:.2}, parallax {:.1}, {} points, weight {:.2}{}{}", c.moved.median, c.moved.max, if c.at_rest { " from the fragment's lens at rest" } else { "" }, c.readout, c.readout_free, c.error, c.error_free, c.scene.parallax, c.scene.points, c.weight(), if c.fits { ": fits" } else { "" }, if c.votes() { "" } else { " (the fragment can't tell)" }),
                 None => println!("    no scene"),
             }
         }
@@ -101,8 +108,9 @@ fn main() {
         _ => (0.0, duration_ms),
     };
     let t = Instant::now();
-    let fragment = track(video, size, fps, lfv::fragment_from(range.0, range.1, fps, lfv::MAX_FRAMES), width);
-    println!("estimating from {}, tracked in {:.1} s", start.name, t.elapsed().as_secs_f64());
+    let fitted = lfv::fragment_from(range.0, range.1, fps, lfv::MAX_FRAMES);
+    let fragment = track(video, size, fps, fitted, width);
+    println!("estimating from {}, tracked in {:.1} s", start.label(), t.elapsed().as_secs_f64());
     let t = Instant::now();
     match lfv::estimate(&fragment.tracks(), &start.lens.with_refraction(refraction), fragment.frame_ms, &never, &|_| ()) {
         Ok(e) => {
@@ -114,7 +122,16 @@ fn main() {
                 let d = Lens::new(r[0], r[1], r[2], r[3], [r[4], r[5], r[6], r[7]]).shift_after_tilt(&Lens { refraction: 1.0, ..l }, size);
                 println!("against the reference lens: {:.2} / {:.2} px (median / max)", d.median, d.max);
             }
-            let profile = lfv::profile(&e, size, fps, refraction != 1.0, (&camera[0], &camera[1]), start.profile.as_ref().or(loaded.as_ref()), "lens_from_video example");
+            // Judged as a known profile is, on the parts of the clip it wasn't made from
+            let apart: Vec<Fragment> = lfv::apart_from(&automatic, fitted).into_iter().map(|i| fragments[i].clone()).collect();
+            if apart.is_empty() {
+                println!("not checked on other parts of the clip: it has none apart from the one the lens was estimated from");
+            } else {
+                let m = lfv::check_lens(&apart, &l, Some(e.readout_ms), &never);
+                println!("on {} other part(s) of the clip: {:?}, holds on {} of {} ({} more couldn't tell), {:.1} px from the picture (corner {:.1}, limit {:.0})", apart.len(), m.verdict, m.fragments_fitting, m.fragments, m.fragments_unable, m.moved, m.moved_corner, m.limit);
+            }
+            println!("doubts: {:?}", lfv::doubts(&e));
+            let profile = lfv::profile(&e, Some(e.readout_ms), size, fps, refraction != 1.0, (&camera[0], &camera[1]), start.profile.as_ref().or(loaded.as_ref()), "lens_from_video example");
             if let Some(out) = opt("--out", 1) { std::fs::write(&out[0], profile.get_json().unwrap()).unwrap(); }
         },
         Err(e) => println!("no estimate: {e:?}"),

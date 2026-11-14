@@ -45,6 +45,15 @@ pub enum NoScene {
     TooFewTracks,
     /// The camera turned but didn't move through space
     NoTranslation,
+    /// A scene was made, and the fit of it found no step to take or lost its numbers: it says nothing of the lens,
+    /// least of all that the lens stayed where it was
+    NoVerdict,
+}
+impl NoScene {
+    /// For the UI to put into words (and languages)
+    pub fn code(&self) -> &'static str {
+        match self { Self::TooFewTracks => "too_few_tracks", Self::NoTranslation => "no_translation", Self::NoVerdict => "no_verdict" }
+    }
 }
 
 /// Midpoint of two rays (bearings in each camera's space, cameras world → camera): the point, the angle between the
@@ -83,7 +92,7 @@ fn two_view(a: &[Vector3<f64>], b: &[Vector3<f64>], px: f64) -> Option<(Rotation
         let c = t.cross(&(r * a[i]));
         b[i].dot(&c) / c.norm().max(1e-9)
     };
-    let cost = |r: &Rotation3<f64>, t: &Vector3<f64>| -> f64 { (0..n).map(|i| (epi(r, t, i) / sigma).powi(2).ln_1p()).sum() };
+    let cost = |r: &Rotation3<f64>, t: &Vector3<f64>| -> f64 { (0..n).map(|i| { let e = epi(r, t, i) / sigma; (e * e).ln_1p() }).sum() };
 
     // Rotation alone, the points that don't follow it (near ones, moving ones) weighing less each round
     let mut rot = Rotation3::identity();
@@ -91,7 +100,7 @@ fn two_view(a: &[Vector3<f64>], b: &[Vector3<f64>], px: f64) -> Option<(Rotation
         let res: Vec<f64> = (0..n).map(|i| (b[i] - rot * a[i]).norm()).collect();
         let s = median(res.clone()).max(sigma);
         let mut h = Matrix3::zeros();
-        for i in 0..n { h += a[i] * b[i].transpose() / (1.0 + (res[i] / s).powi(2)); }
+        for i in 0..n { h += a[i] * b[i].transpose() / (1.0 + (res[i] / s) * (res[i] / s)); }
         let svd = h.svd(true, true);
         let (u, vt) = (svd.u?, svd.v_t?);
         let v = vt.transpose();
@@ -121,7 +130,7 @@ fn two_view(a: &[Vector3<f64>], b: &[Vector3<f64>], px: f64) -> Option<(Rotation
                 let moved: Vec<_> = (0..5).map(|k| { let mut d = SMatrix::<f64, 5, 1>::zeros(); d[k] = eps; step(&d) }).collect();
                 for i in 0..n {
                     let e0 = epi(&r, &t, i);
-                    let w = 1.0 / (1.0 + (e0 / sigma).powi(2));
+                    let w = 1.0 / (1.0 + (e0 / sigma) * (e0 / sigma));
                     let j = SMatrix::<f64, 5, 1>::from_fn(|k, _| (epi(&moved[k].0, &moved[k].1, i) - e0) / eps);
                     jtj += j * j.transpose() * w;
                     jtr += j * (e0 * w);
@@ -223,11 +232,13 @@ fn place(points: &[Vector3<f64>], bearings: &[Vector3<f64>], r0: &Rotation3<f64>
 }
 
 /// The scene of these tracks as this lens sees it, with at most `max_points` tracks picked for the fit (the longest,
-/// spread over time and over the frame) and every `hold_out`-th of them held out of it
+/// spread over time and over the frame). Every `hold_out`-th track is held out, from here on: no pose is made from it
+/// here either, so what the held-out tracks say of a fit owes nothing to them
 pub fn rough_scene(tracks: &Tracks, lens: &Lens, max_points: usize, hold_out: usize) -> Result<(Scene, SceneInfo), NoScene> {
     let (nf, nt) = (tracks.frames, tracks.tracks);
     if nf < GAPS[0] + 2 || nt < MIN_COMMON { return Err(NoScene::TooFewTracks); }
     let px = 1.0 / lens.fx;
+    let held: Vec<bool> = (0..nt).map(|k| hold_out > 0 && k % hold_out == 0).collect();
     let bearings: Vec<Vector3<f64>> = tracks.uv.iter().map(|uv| lens.unproject(*uv)).collect();
     let mut of_frame: Vec<Vec<usize>> = vec![Vec::new(); nf];
     for (row, f) in tracks.frame.iter().enumerate() { of_frame[*f as usize].push(row); }
@@ -254,6 +265,8 @@ pub fn rough_scene(tracks: &Tracks, lens: &Lens, max_points: usize, hold_out: us
             let rows = common(a0, a0 + gap);
             if rows.0.len() < MIN_COMMON { break; }
             enough_common = true;
+            // The pose of the pair is of the tracks the fit will have
+            let rows: (Vec<usize>, Vec<usize>) = rows.0.into_iter().zip(rows.1).filter(|(ra, _)| !held[tracks.track[*ra] as usize]).unzip();
             let a: Vec<_> = rows.0.iter().map(|r| bearings[*r]).collect();
             let b: Vec<_> = rows.1.iter().map(|r| bearings[*r]).collect();
             let Some((r, t, inliers)) = two_view(&a, &b, px) else { continue };
@@ -286,7 +299,7 @@ pub fn rough_scene(tracks: &Tracks, lens: &Lens, max_points: usize, hold_out: us
         let rows = &of_frame[f];
         let (r_prev, t_prev) = (rot[prev], tr[prev]);
         rot[f] = r_prev; tr[f] = t_prev;
-        let known: Vec<usize> = rows.iter().copied().filter(|r| angle[tracks.track[*r] as usize] > 0.0).collect();
+        let known: Vec<usize> = rows.iter().copied().filter(|r| { let k = tracks.track[*r] as usize; angle[k] > 0.0 && !held[k] }).collect();
         if known.len() >= 12 {
             let xs: Vec<_> = known.iter().map(|r| point[tracks.track[*r] as usize]).collect();
             let bs: Vec<_> = known.iter().map(|r| bearings[*r]).collect();
@@ -341,10 +354,10 @@ pub fn rough_scene(tracks: &Tracks, lens: &Lens, max_points: usize, hold_out: us
     Ok((Scene {
         size: tracks.size,
         times: if tracks.times.len() == nf { tracks.times.clone() } else { (0..nf).map(|i| i as f64).collect() },
-        rotations: rot.iter().map(|r| r.scaled_axis()).collect(),
+        rotations: rot.iter().map(super::bundle::rotation_vector).collect(),
         translations: tr,
         points: chosen.iter().map(|k| point[*k]).collect(),
-        held_out: (0..chosen.len()).map(|i| hold_out > 0 && i % hold_out == 0).collect(),
+        held_out: chosen.iter().map(|k| held[*k]).collect(),
         sightings,
     }, info))
 }

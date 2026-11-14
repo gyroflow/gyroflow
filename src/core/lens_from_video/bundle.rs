@@ -12,9 +12,10 @@
 //!   of the size of the cameras and the lens. Cauchy loss by reweighting.
 //! - Every n-th track is held out of the fit: its point is fitted with the cameras and the lens fixed, and its
 //!   reprojection error says how well they do on tracks they haven't seen.
-//! - It stops when the lens stops moving over the frame, not when the cost does: that's what the fit is for.
+//! - It has come to rest when the lens has stopped moving over the frame and the cost has stopped falling: the lens
+//!   alone also stands still under heavy damping, with the cost still on its way down.
 
-use nalgebra::{ DMatrix, DVector, Matrix2x3, Matrix2x6, Matrix3, Matrix6, Matrix6x3, Rotation3, SMatrix, Vector2, Vector3, Vector6 };
+use nalgebra::{ DMatrix, DVector, Matrix2x3, Matrix2x6, Matrix3, Matrix6, Matrix6x3, Rotation3, SMatrix, UnitQuaternion, Vector2, Vector3, Vector6 };
 use rayon::prelude::*;
 use super::lens::Lens;
 
@@ -61,6 +62,13 @@ fn apply_globals(lens: &Lens, tau: f64, d: &[f64; GLOBALS]) -> (Lens, f64) {
     (l, tau + d[9])
 }
 
+/// The rotation vector of a rotation. By way of the quaternion: `Rotation3::scaled_axis` takes the angle from an
+/// `acos` of the trace, which rounding can put a hair past 1 for a rotation next to none - and the fit then carries
+/// a NaN
+pub(super) fn rotation_vector(r: &Rotation3<f64>) -> Vector3<f64> {
+    UnitQuaternion::from_rotation_matrix(r).scaled_axis()
+}
+
 /// One sighting of a point
 #[derive(Clone, Copy, Debug)]
 pub struct Sighting {
@@ -95,8 +103,8 @@ pub struct FitOptions {
     pub cameras: bool,
     /// Fit the held-out points too (see `Bundle::check`)
     pub all_points: bool,
-    /// The fit is done when the lens moves less than this over the frame (median, pixels) and the readout less than
-    /// 0.001 of the frame interval, twice in a row
+    /// The fit has come to rest when the lens moves less than this over the frame (median, pixels), the readout less
+    /// than 0.001 of the frame interval and the cost falls by less than 0.0001 of itself, twice in a row
     pub tolerance: f64,
 }
 impl FitOptions {
@@ -105,11 +113,26 @@ impl FitOptions {
     pub fn points_only(mut self) -> Self { self.cameras = false; self }
 }
 
+/// How a fit ended
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Outcome {
+    pub cost: f64,
+    /// Steps that lowered the cost. With none the fit never left where it started, and that it stayed there says
+    /// nothing: no step was found, whether there was one to take or not
+    pub steps: usize,
+    /// It came to rest (`FitOptions::tolerance`), rather than ran out of iterations or was cancelled
+    pub settled: bool,
+}
+impl Outcome {
+    /// It moved, and what it has is a number
+    pub fn sound(&self) -> bool { self.steps > 0 && self.cost.is_finite() }
+}
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize)]
 pub struct HeldOut {
-    /// Reprojection error of the held-out tracks, rms of the errors capped at 6 px
+    /// Reprojection error of the held-out tracks, rms of the errors capped at 6 px of a 2.7K frame (`Bundle::check`)
     pub rms: f64,
-    /// Share of their sightings within a pixel
+    /// Share of their sightings within a pixel of a 2.7K frame
     pub within_1px: f64,
 }
 
@@ -190,7 +213,7 @@ impl Bundle {
             let d = times[hi] - times[lo];
             if hi == lo || !(d > 0.0) { return (Vector3::zeros(), Vector3::zeros()); }
             let rel = r[hi] * r[lo].inverse();
-            (rel.scaled_axis() / d, (translations[hi] - rel * translations[lo]) / d)
+            (rotation_vector(&rel) / d, (translations[hi] - rel * translations[lo]) / d)
         }).unzip()
     }
 
@@ -217,9 +240,9 @@ impl Bundle {
         r.iter().zip(used).filter(|(_, u)| **u).map(|(r, _)| loss * loss * (r.norm_squared() / (loss * loss)).ln_1p()).sum()
     }
 
-    /// Fits what `options` frees, from this lens and readout time (in frame intervals). Returns them and the cost.
+    /// Fits what `options` frees, from this lens and readout time (in frame intervals). Returns them and how it ended.
     /// `cancelled` is asked every iteration; cancelled, the fit returns what it has
-    pub fn fit(&mut self, mut lens: Lens, mut tau: f64, options: &FitOptions, cancelled: &(dyn Fn() -> bool + Sync)) -> (Lens, f64, f64) {
+    pub fn fit(&mut self, mut lens: Lens, mut tau: f64, options: &FitOptions, cancelled: &(dyn Fn() -> bool + Sync)) -> (Lens, f64, Outcome) {
         let loss = options.loss;
         let used: Vec<bool> = if options.all_points { vec![true; self.sightings.len()] } else { self.test.iter().map(|t| !t).collect() };
         let gi = options.free.indices();
@@ -238,9 +261,12 @@ impl Bundle {
 
         let mut lambda = 1e-3;
         let mut calm = 0;
+        let (mut steps, mut settled) = (0, false);
         let mut motion = Self::motion(&self.times, &self.rotations, &self.translations);
         let mut r = self.residuals(&lens, tau, &self.rotations, &self.translations, &motion, &self.points);
         let mut c0 = Self::cost(&r, &used, loss);
+        // Nothing to go down from: a pose or a point that isn't a number. No step could be told from another
+        if !c0.is_finite() { return (lens, tau, Outcome { cost: c0, steps: 0, settled: false }); }
 
         for it in 0..options.iterations {
             if cancelled() { break; }
@@ -384,7 +410,7 @@ impl Bundle {
                     points[p] += vi[p] * g;
                 }
                 let (rotations, translations) = if options.cameras {
-                    ((0..nc).map(|c| (Rotation3::new(Vector3::new(dc[6 * c], dc[6 * c + 1], dc[6 * c + 2])) * Rotation3::new(self.rotations[c])).scaled_axis()).collect::<Vec<_>>(),
+                    ((0..nc).map(|c| rotation_vector(&(Rotation3::new(Vector3::new(dc[6 * c], dc[6 * c + 1], dc[6 * c + 2])) * Rotation3::new(self.rotations[c])))).collect::<Vec<_>>(),
                      (0..nc).map(|c| self.translations[c] + Vector3::new(dc[6 * c + 3], dc[6 * c + 4], dc[6 * c + 5])).collect::<Vec<_>>())
                 } else {
                     (self.rotations.clone(), self.translations.clone())
@@ -393,7 +419,8 @@ impl Bundle {
                 let motion2 = if options.cameras { Self::motion(&self.times, &rotations, &translations) } else { motion.clone() };
                 let r2 = if lens2.is_finite() { self.residuals(&lens2, tau2, &rotations, &translations, &motion2, &points) } else { Vec::new() };
                 let c1 = if r2.is_empty() { f64::INFINITY } else { Self::cost(&r2, &used, loss) };
-                if c1 < c0 {
+                // A cost that isn't a number is no lower cost
+                if c1.is_finite() && c1 < c0 {
                     accepted = Some((rotations, translations, points, lens2, tau2, motion2, r2, c1));
                     break;
                 }
@@ -409,23 +436,27 @@ impl Bundle {
                 self.rotations = rotations; self.translations = translations; self.points = points;
                 lens = lens2; tau = tau2; motion = motion2; r = r2; c0 = c1;
                 lambda = (lambda / 4.0).max(1e-7);
+                steps += 1;
             }
             log::trace!("lens from video: it {it} cost {c0:.0} f {:.1},{:.1} c {:.1},{:.1} k {:?} tau {tau:.4} moved {moved:.3} px", lens.fx, lens.fy, lens.cx, lens.cy, lens.k);
-            calm = if (moved < options.tolerance && dtau < 1e-3 && (ng > 0 || rel < 1e-4)) || rel < 1e-5 { calm + 1 } else { 0 };
-            if calm >= 2 && it >= 3 { break; }
+            // The lens standing still isn't rest by itself: under heavy damping it barely moves while the cost still falls
+            calm = if (moved < options.tolerance && dtau < 1e-3 && rel < 1e-4) || rel < 1e-5 { calm + 1 } else { 0 };
+            if calm >= 2 && it >= 3 { settled = true; break; }
         }
-        (lens, tau, c0)
+        (lens, tau, Outcome { cost: c0, steps, settled })
     }
 
-    /// The held-out tracks: their points fitted with the cameras and the lens as they are, then their reprojection error
-    pub fn check(&mut self, lens: &Lens, tau: f64, loss: f64) -> HeldOut {
+    /// The held-out tracks: their points fitted with the cameras and the lens as they are, then their reprojection
+    /// error. `px`: pixels of this frame per pixel of a 2.7K one (`px_scale`) - the error comes back in pixels of a
+    /// 2.7K frame, capped and counted there, so it means the same for a frame of any size
+    pub fn check(&mut self, lens: &Lens, tau: f64, loss: f64, px: f64) -> HeldOut {
         let options = FitOptions { all_points: true, ..FitOptions::new(Free::NONE, 5, loss).points_only() };
         self.fit(*lens, tau, &options, &|| false);
         let motion = Self::motion(&self.times, &self.rotations, &self.translations);
-        let e: Vec<f64> = self.residuals(lens, tau, &self.rotations, &self.translations, &motion, &self.points).iter().zip(&self.test).filter(|(_, t)| **t).map(|(r, _)| r.norm()).collect();
+        let e: Vec<f64> = self.residuals(lens, tau, &self.rotations, &self.translations, &motion, &self.points).iter().zip(&self.test).filter(|(_, t)| **t).map(|(r, _)| r.norm() / px).collect();
         if e.is_empty() { return HeldOut { rms: f64::INFINITY, within_1px: 0.0 }; }
         HeldOut {
-            rms: (e.iter().map(|e| e.min(6.0).powi(2)).sum::<f64>() / e.len() as f64).sqrt(),
+            rms: (e.iter().map(|e| e.min(6.0) * e.min(6.0)).sum::<f64>() / e.len() as f64).sqrt(),
             within_1px: e.iter().filter(|e| **e < 1.0).count() as f64 / e.len() as f64,
         }
     }
@@ -526,13 +557,77 @@ fn cholesky(mut a: DMatrix<f64>) -> Option<DMatrix<f64>> {
 mod tests {
     use super::*;
 
+    /// Wider than two blocks: the panel below a block and the update of what's left are both at work
     #[test]
     fn cholesky_solves() {
-        let n = 40;
-        let m = DMatrix::from_fn(n, n, |i, j| ((i * 7 + j * 3) % 11) as f64 / 11.0);
-        let a = &m * m.transpose() + DMatrix::identity(n, n) * 0.5;
-        let x0 = DVector::from_fn(n, |i, _| i as f64 - 3.0);
-        let x = solve(a.clone(), &a * &x0);
-        assert!((x - x0).amax() < 1e-8);
+        for n in [40, 150] {
+            let m = DMatrix::from_fn(n, n, |i, j| ((i * 7 + j * 3) % 11) as f64 / 11.0);
+            let a = &m * m.transpose() + DMatrix::identity(n, n) * 0.5;
+            let x0 = DVector::from_fn(n, |i, _| i as f64 - 3.0);
+            let x = solve(a.clone(), &a * &x0);
+            let off = (x - x0).amax();
+            assert!(off < 1e-6, "{n}: {off}");
+            let l = cholesky(a.clone()).unwrap();
+            let lower = l.lower_triangle();
+            assert!((&lower * lower.transpose() - &a).amax() < 1e-9, "{n}");
+        }
+    }
+
+    /// A small scene seen through `lens`: a camera going forward and sideways, every 5th point held out
+    fn scene(lens: &Lens) -> Scene {
+        let size = (2704, 1520);
+        let cameras = 14;
+        let (rotations, translations): (Vec<Vector3<f64>>, Vec<Vector3<f64>>) = (0..cameras).map(|c| {
+            let t = c as f64;
+            let r = Rotation3::new(Vector3::new(0.02 * (0.6 * t).sin(), 0.03 * (0.4 * t).cos(), 0.01 * t));
+            (rotation_vector(&r), -(r * Vector3::new(0.2 * (0.5 * t).sin(), 0.1 * (0.3 * t).cos(), 0.08 * t)))
+        }).unzip();
+        let points: Vec<Vector3<f64>> = (0..120).map(|i| {
+            let i = i as f64;
+            Vector3::new(6.0 * (i * 0.37).sin(), 3.5 * (i * 0.91).cos(), 4.0 + 9.0 * (0.5 + 0.5 * (i * 0.13).sin()))
+        }).collect();
+        let mut sightings = Vec::new();
+        for (p, x) in points.iter().enumerate() {
+            for c in 0..cameras {
+                let uv = lens.project(&(Rotation3::new(rotations[c]) * x + translations[c]));
+                if uv[0] > 0.0 && uv[1] > 0.0 && uv[0] < size.0 as f64 && uv[1] < size.1 as f64 { sightings.push(Sighting { cam: c as u32, point: p as u32, uv }); }
+            }
+        }
+        Scene { size, times: (0..cameras).map(|c| c as f64).collect(), rotations, translations, held_out: (0..points.len()).map(|p| p % 5 == 0).collect(), points, sightings }
+    }
+
+    /// The held-out tracks take no part in a fit: moved 40 px away, they leave it exactly where it was
+    #[test]
+    fn held_out_tracks_are_out_of_the_fit() {
+        let truth = Lens::new(1766.95, 1773.07, 1311.74, 774.68, [0.05352, -0.00625, 0.02390, -0.01311]);
+        let mut start = truth; start.fx *= 1.02; start.fy *= 1.02;
+        let clean = scene(&truth);
+        let mut spoiled = clean.clone();
+        // One way in one frame and the other in the next: no point is seen there
+        for s in spoiled.sightings.iter_mut() { if spoiled.held_out[s.point as usize] { let d = if s.cam % 2 == 0 { 40.0 } else { -40.0 }; s.uv[0] += d; s.uv[1] -= d; } }
+        assert!(spoiled.sightings.iter().zip(&clean.sightings).any(|(a, b)| a.uv != b.uv));
+        let options = FitOptions::new(Free::ALL, 8, 1.5);
+        let (mut a, mut b) = (Bundle::new(clean), Bundle::new(spoiled));
+        let (fa, fb) = (a.fit(start, 0.0, &options, &|| false), b.fit(start, 0.0, &options, &|| false));
+        assert!(fa.2.sound() && fa.0 != start, "{fa:?}");
+        assert_eq!((fa.0, fa.1, fa.2.cost), (fb.0, fb.1, fb.2.cost));
+        assert_eq!(a.poses(), b.poses());
+        // And they're what the check is made on: the error is theirs
+        let (ea, eb) = (a.check(&fa.0, fa.1, 1.5, 1.0).rms, b.check(&fb.0, fb.1, 1.5, 1.0).rms);
+        assert!(ea < 1.0 && eb > 5.0, "{ea} {eb}");
+    }
+
+    /// A fit that has nothing to go down from, or finds no step, says so: it doesn't pass for one that stayed put
+    #[test]
+    fn a_fit_that_took_no_step_is_not_sound() {
+        let truth = Lens::new(1766.95, 1773.07, 1311.74, 774.68, [0.05352, -0.00625, 0.02390, -0.01311]);
+        let mut broken = scene(&truth);
+        broken.translations[3].x = f64::NAN;
+        let (lens, _, outcome) = Bundle::new(broken).fit(truth, 0.0, &FitOptions::new(Free::ALL, 5, 1.5), &|| false);
+        assert!(!outcome.sound() && outcome.steps == 0 && lens == truth, "{outcome:?}");
+        // The rotation vector of a rotation next to none is a number
+        let tiny = Rotation3::new(Vector3::new(1e-9, -2e-9, 5e-10));
+        assert!(rotation_vector(&(tiny * tiny.inverse())).iter().all(|x| x.is_finite()));
+        assert!((rotation_vector(&Rotation3::new(Vector3::new(0.3, -0.2, 0.1))) - Vector3::new(0.3, -0.2, 0.1)).norm() < 1e-12);
     }
 }

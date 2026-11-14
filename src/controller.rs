@@ -44,6 +44,42 @@ struct CalibrationItem {
     pub is_forced: bool,
 }
 
+/// A lens "Find lens from the video" has for the user to take: the profile; what loads it from the database, when
+/// there's an id that loads exactly this lens; the lens that was tested, in the clip's frame, for what gets loaded to
+/// be held against; and whether it's the profile that was loaded all along
+#[derive(Clone)]
+pub struct LensFromVideoFound {
+    profile: core::lens_profile::LensProfile,
+    id: String,
+    lens: core::lens_from_video::Lens,
+    already_loaded: bool,
+    /// The file states its own readout time: the one this profile carries stays with the profile (and goes with it to
+    /// a file), and the project keeps the file's unless the user asks otherwise
+    keep_readout: bool,
+}
+
+/// The fragments of a search, kept for an estimate to be checked on: the setup they're of
+/// (`Controller::lens_from_video_setup`), their clip - its url, and its name for the user - where in it they are
+/// (ms), and the medium the search found the clip was shot in, when it was sure
+#[derive(Clone)]
+pub struct LensFromVideoFragments {
+    setup: String,
+    url: String,
+    name: String,
+    ranges: Vec<(f64, f64)>,
+    refraction: Option<f64>,
+    fragments: Arc<Vec<core::lens_from_video::Fragment>>,
+}
+
+/// What a finished "Find lens from the video" leaves with the controller
+#[derive(Default)]
+pub struct LensFromVideoDone {
+    nearest: Option<core::lens_from_video::Candidate>,
+    found: Option<LensFromVideoFound>,
+    estimated: Option<LensFromVideoFound>,
+    kept: Option<LensFromVideoFragments>,
+}
+
 #[derive(Default, QObject)]
 pub struct Controller {
     base: qt_base_class!(trait QObject),
@@ -68,6 +104,8 @@ pub struct Controller {
     apply_found_lens: qt_method!(fn(&mut self, which: QString)),
     /// Saves that lens to a profile file, without loading it
     save_found_lens: qt_method!(fn(&mut self, which: QString, url: QUrl) -> bool),
+    /// Stops it, and nothing else that's running
+    cancel_lens_from_video: qt_method!(fn(&mut self)),
     lens_from_video_in_progress: qt_property!(bool; NOTIFY lens_from_video_in_progress_changed),
     lens_from_video_in_progress_changed: qt_signal!(),
     lens_from_video_progress: qt_signal!(progress: f64, status: QString),
@@ -374,15 +412,17 @@ pub struct Controller {
     replaced_lens_profile: Option<core::lens_profile::LensProfile>,
 
     /// The lens "Find lens from the video" last found nearest to the clip's, which an estimate starts from, with the
-    /// frame it was found for: another file's lens would start the fit in the wrong place, and is no lens of this one
-    lens_from_video_start: Option<((usize, usize), core::lens_from_video::Candidate)>,
-    /// The known profile it found last and the lens it estimated last, until the user takes one (`apply_found_lens`).
-    /// The known one with the id that loads it from the database, when there is one that loads exactly that lens
-    lens_from_video_found: Option<(core::lens_profile::LensProfile, String)>,
-    lens_from_video_estimated: Option<core::lens_profile::LensProfile>,
-    /// The fragments of the automatic attempt, tracked for a search, kept for an estimate to be checked on: the frame
-    /// size of the video they're of, and the fragments
-    lens_from_video_fragments: Option<((usize, usize), Arc<Vec<core::lens_from_video::Fragment>>)>,
+    /// setup it was found for (`lens_from_video_setup`): another camera's or mode's lens would start the fit in the
+    /// wrong place
+    lens_from_video_start: Option<(String, core::lens_from_video::Candidate)>,
+    /// The known profile it found last and the lens it estimated last, until the user takes one (`apply_found_lens`),
+    /// each with the video it was found for: it's that video's lens, and no other's
+    lens_from_video_found: Option<(String, LensFromVideoFound)>,
+    lens_from_video_estimated: Option<(String, LensFromVideoFound)>,
+    /// The fragments of the automatic attempt, tracked for a search, kept for an estimate to be checked on
+    lens_from_video_fragments: Option<LensFromVideoFragments>,
+    /// Cancels the job that's running, and only it
+    lens_from_video_cancel: Arc<AtomicBool>,
 
     pub stabilizer: Arc<StabilizationManager>,
 }
@@ -1106,34 +1146,63 @@ impl Controller {
         self.request_recompute();
     }
 
+    /// What "Find lens from the video" keeps from one clip to the next goes by the camera's setup: the identifier lens
+    /// profiles are matched by (brand, model, lens or field of view, setting, frame size and rate). The frame size
+    /// alone doesn't tell two modes of a camera apart - and telling them apart is what the search is for. A file that
+    /// names no camera is its own setup: what's kept of it is for that file only
+    fn lens_from_video_setup(&self) -> String {
+        let id = self.stabilizer.camera_id.read().as_ref().map(|c| c.identifier.clone()).unwrap_or_default();
+        if id.is_empty() { format!("file:{}", self.stabilizer.input_file.read().url) } else { format!("camera:{id}") }
+    }
+
     /// "Find lens from the video", see `core::lens_from_video`. Two steps, each the user's to start:
-    /// - the search (`estimate` false): the known profiles of this camera, nearest first, tried on the fragments of the
+    /// - the search (`estimate` false): the known profiles of this camera, all of them, tried on the fragments of the
     ///   clip in `medium` - "air", "water", or "auto" for both, the medium then decided by the picture;
-    /// - the estimate (`estimate` true): the lens of one fragment, from the nearest lens the search found, in `medium`
-    ///   ("water" or else air: the picture can't tell when nothing is known of the lens), then checked on the fragments
-    ///   of the clip the way a known profile is, so the two can be compared. `calibrated_by` names who made it.
+    /// - the estimate (`estimate` true): the lens of one fragment, from the nearest lens a search found, in `medium`
+    ///   ("water" or else air: the picture can't tell when nothing is known of the lens), then checked the way a known
+    ///   profile is, on parts of the clip it wasn't made from. `calibrated_by` names who made it.
     /// `fragment`: empty for the start, middle and end of the clip (the search) or the clip from its start (the
     /// estimate); else where to start, as a fraction of the clip (the playhead).
     ///
-    /// Nothing is loaded into the project: the lens found waits for `apply_found_lens`. `lens_from_video_result` gets
-    /// json: `mode` ("known" or "estimate"), and
-    /// - either `failed` (what went wrong), or `cancelled`, or
+    /// Nothing is loaded into the project: the lens found waits for `apply_found_lens`. Every call ends in one
+    /// `lens_from_video_result`, json: `mode` ("known" or "estimate"), and
+    /// - either `failed` - a code for the UI to put into words (`busy`, `no_video`, `too_short`, `horizontal_readout`,
+    ///   what `lens_from_video::unmodelled` and `NoScene::code` say, `nothing_tracked`, `no_start`, or `error` with
+    ///   the decoder's own words in `detail`) - or `cancelled`, or
     /// - for "known": `fragments`, `fragments_with_scene`, `no_translation`, and `found`, the profile that fits or else
-    ///   the nearest one (`name`, `loadable`, `already_loaded`, `under_water`, `medium_sure`, and its `match`)
-    /// - for "estimate": `estimated` (`name`, `fx`, `fy`, `readout_ms`, `error` - how far the held-out tracks are,
-    ///   px - `error_before`, `within_1px`, `firmness`, `parallax`, `frames`, `under_water`, `doubtful` - why not to
-    ///   trust it, empty when nothing - and its `match`)
+    ///   the nearest one: `name`, `how` (`lens_from_video::How`), `loadable`, `already_loaded`, `estimated` (it was
+    ///   itself estimated from a video), `under_water`, `medium_sure`, `media_tried`, its `match`, and what taking it
+    ///   sets besides the lens: `apply_medium`, `apply_readout`
+    /// - for "estimate": `estimated`: `name`, `fx`, `fy`, `readout_ms`, `error` - how far the held-out tracks are,
+    ///   px at 2.7K - `error_before`, `within_1px`, `firmness`, `parallax`, `frames`, `under_water`, `doubts` - codes
+    ///   of why not to trust it (`lens_from_video::doubts`) - `apply_readout`, and `match` with `checked_parts`, the
+    ///   parts of the clip it was checked on (0, and no `match`: the clip has none apart from what it was made from)
+    ///   and `checked_clip`, the name of the clip those parts are of when it's another one of the same setup
     ///
-    /// A `match` (`core::lens_from_video::Match`): `verdict` ("good", "loose", "poor"), `fragments_fitting`,
-    /// `fragments`, `moved`, `moved_corner` and `limit` (px of the video), `readout_ms`
+    /// A `match` (`core::lens_from_video::Match`): `verdict` ("good", "single", "loose", "poor"), `fragments_fitting`,
+    /// `fragments`, `fragments_unable`, `moved`, `moved_corner` and `limit` (px of the video), `readout_ms`,
+    /// `readout_measured`. Readout times are the project's (`FrameTransform::readout_scale`), negative from the
+    /// bottom up; `readout_from_file` says the file states its own, which isn't replaced unless the user asks
     fn find_lens_from_video(&mut self, fragment: QString, estimate: bool, medium: QString, calibrated_by: QString) {
         use core::lens_from_video as lfv;
-        if self.lens_from_video_in_progress { return; }
-        let (size, fps, duration_ms) = { let p = self.stabilizer.params.read(); (p.size, p.fps, p.duration_ms) };
-        if size.0 == 0 || size.1 == 0 || !(fps > 0.0) || !(duration_ms > 0.0) {
-            self.error(QString::from("An error occurred: %1"), QString::from("Video is not loaded"), QString::default());
-            return;
-        }
+        use core::stabilization::FrameTransform;
+        let mode = if estimate { "estimate" } else { "known" };
+        let fail = |this: &mut Self, code: &str| this.lens_from_video_result(QString::from(serde_json::json!({ "mode": mode, "failed": code }).to_string()));
+        if self.lens_from_video_in_progress { return fail(self, "busy"); }
+        let (size, fps, duration_ms, current, horizontal) = { let p = self.stabilizer.params.read(); (p.size, p.fps, p.duration_ms, p.light_refraction_coefficient, p.frame_readout_direction.is_horizontal()) };
+        if size.0 == 0 || size.1 == 0 || !(fps > 0.0) || !(duration_ms > 0.0) { return fail(self, "no_video"); }
+        // The fit reads the picture from the top down or the bottom up: a sensor read along its rows is another model
+        if horizontal { return fail(self, "horizontal_readout"); }
+        let clip = rendering::LensClip::of(&self.stabilizer);
+        // What the render adds to the lens from the file's metadata, and the fit doesn't know of
+        let (unmodelled, readout_scale, readout_from_file) = {
+            let gyro = self.stabilizer.gyro.read();
+            let md = gyro.file_metadata.read();
+            (lfv::unmodelled(&md), FrameTransform::readout_scale(&clip.params, duration_ms / 2.0, &md), md.frame_readout_time.is_some())
+        };
+        if let Some(code) = unmodelled { return fail(self, code); }
+        let readout_scale = if readout_scale.is_finite() && readout_scale > 0.0 { readout_scale } else { 1.0 };
+
         let medium = medium.to_string();
         let media: Vec<f64> = match (estimate, medium.as_str()) {
             (false, "auto") => vec![1.0, 1.33],
@@ -1148,68 +1217,94 @@ impl Controller {
             (false, Some(at)) => vec![lfv::fragment_from(at, duration_ms, fps, lfv::CHECK_FRAMES)],
             (true, at) => vec![lfv::fragment_from(at.unwrap_or(0.0), duration_ms, fps, lfv::MAX_FRAMES)],
         };
-        if ranges.iter().all(|(a, b)| b - a < 100.0) {
-            self.error(QString::from("An error occurred: %1"), QString::from("The clip is too short"), QString::default());
-            return;
-        }
+        if ranges.iter().all(|(a, b)| b - a < 100.0) { return fail(self, "too_short"); }
 
         let camera = self.stabilizer.camera_id.read().as_ref().map(|c| (c.brand.clone(), c.model.clone(), c.lens_info.clone())).unwrap_or_default();
         let loaded = if self.lens_loaded { Some(self.stabilizer.lens.read().clone()) } else { None };
-        // What was found for another file is no lens of this one
-        let start = self.lens_from_video_start.clone().filter(|(for_size, _)| *for_size == size).map(|(_, c)| c);
-        let kept = self.lens_from_video_fragments.clone().filter(|(for_size, _)| *for_size == size).map(|(_, f)| f);
+        let setup = self.lens_from_video_setup();
+        let url = clip.input_file.url.clone();
+        let name = filesystem::get_filename(&url);
+        // What was found for another setup is no lens of this one
+        let start = self.lens_from_video_start.clone().filter(|(of, _)| *of == setup).map(|(_, c)| c);
+        let kept = self.lens_from_video_fragments.clone().filter(|k| k.setup == setup);
         let calibrated_by = calibrated_by.to_string();
 
         self.lens_from_video_in_progress = true;
         self.lens_from_video_in_progress_changed();
-        self.cancel_flag.store(false, SeqCst);
+        // The job's own: cancelling it cancels nothing else, and starting it doesn't clear a cancel something else
+        // hasn't seen yet
+        self.lens_from_video_cancel = Arc::new(AtomicBool::new(false));
         rendering::clear_log();
 
         let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (progress, status): (f64, String)| {
             this.lens_from_video_progress(progress, QString::from(status));
         });
-        type Found = (String, Option<lfv::Candidate>, Option<(core::lens_profile::LensProfile, String)>, Option<core::lens_profile::LensProfile>, Option<Arc<Vec<lfv::Fragment>>>);
-        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (result, nearest, found, estimated, fragments): Found| {
-            this.lens_from_video_in_progress = false;
-            this.lens_from_video_in_progress_changed();
-            this.lens_from_video_progress(1.0, QString::default());
-            if let Some(nearest) = nearest { this.lens_from_video_start = Some((size, nearest)); }
-            if found.is_some() { this.lens_from_video_found = found; }
-            if estimated.is_some() { this.lens_from_video_estimated = estimated; }
-            if let Some(fragments) = fragments { this.lens_from_video_fragments = Some((size, fragments)); }
-            this.lens_from_video_result(QString::from(result));
-        });
+        // The job is for the file that was loaded when it started: another file, a project or Clear moves the
+        // generation on (`StabilizationManager::optical_generation`), the job stops and what it has is dropped
+        let (generation, started_at) = (self.stabilizer.optical_generation.clone(), self.stabilizer.optical_generation.load(SeqCst));
+        let stale = { let generation = generation.clone(); move || generation.load(SeqCst) != started_at };
+        let finished = {
+            let (setup, url, stale) = (setup.clone(), url.clone(), stale.clone());
+            util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (mut result, done): (serde_json::Value, LensFromVideoDone)| {
+                this.lens_from_video_in_progress = false;
+                this.lens_from_video_in_progress_changed();
+                this.lens_from_video_progress(1.0, QString::default());
+                if stale() {
+                    result = serde_json::json!({ "mode": result["mode"], "cancelled": true });
+                } else {
+                    if let Some(nearest) = done.nearest { this.lens_from_video_start = Some((setup.clone(), nearest)); }
+                    if let Some(found) = done.found { this.lens_from_video_found = Some((url.clone(), found)); }
+                    if let Some(estimated) = done.estimated { this.lens_from_video_estimated = Some((url.clone(), estimated)); }
+                    if let Some(kept) = done.kept { this.lens_from_video_fragments = Some(kept); }
+                }
+                this.lens_from_video_result(QString::from(result.to_string()));
+            })
+        };
 
         let stabilizer = self.stabilizer.clone();
-        let cancel_flag = self.cancel_flag.clone();
+        let cancel_flag = self.lens_from_video_cancel.clone();
         core::run_threaded(move || {
-            let cancel = cancel_flag.clone();
-            let cancelled = move || cancel.load(SeqCst);
-            let mut out = serde_json::json!({ "mode": if estimate { "estimate" } else { "known" } });
-            let done = |mut out: serde_json::Value, failed: Option<String>, result: (Option<lfv::Candidate>, Option<(core::lens_profile::LensProfile, String)>, Option<core::lens_profile::LensProfile>, Option<Arc<Vec<lfv::Fragment>>>)| {
-                if cancelled() { out["cancelled"] = true.into(); finished((out.to_string(), None, None, None, result.3)); return; }
-                if let Some(failed) = failed { out["failed"] = failed.into(); finished((out.to_string(), None, None, None, result.3)); return; }
-                finished((out.to_string(), result.0, result.1, result.2, result.3));
+            let stop: Arc<dyn Fn() -> bool + Send + Sync> = { let stale = stale.clone(); Arc::new(move || cancel_flag.load(SeqCst) || stale()) };
+            let cancelled = { let stop = stop.clone(); move || stop() };
+            let mut out = serde_json::json!({ "mode": mode, "readout_from_file": readout_from_file });
+            // Whatever a job that was cancelled or failed has got to, none of it is kept
+            let done = |mut out: serde_json::Value, failed: Option<(&str, String)>, result: LensFromVideoDone| {
+                if cancelled() { out["cancelled"] = true.into(); finished((out, LensFromVideoDone::default())); return; }
+                if let Some((code, detail)) = failed {
+                    out["failed"] = code.into();
+                    if !detail.is_empty() { out["detail"] = detail.into(); }
+                    finished((out, LensFromVideoDone::default()));
+                    return;
+                }
+                finished((out, result));
             };
-            let match_json = |m: &lfv::Match| serde_json::to_value(m).unwrap_or_default();
+            let nothing = LensFromVideoDone::default;
+            // A readout time found on the picture's rows, as the project has it; none for one that can't be a readout
+            // time at all - longer than the frame takes
+            let to_project = |ms: Option<f64>| ms.map(|ms| ms / readout_scale).filter(|ms| ms.is_finite() && ms.abs() <= 1000.0 / fps);
+            let match_json = |m: &lfv::Match| {
+                let mut json = serde_json::to_value(m).unwrap_or_default();
+                json["readout_ms"] = to_project(m.readout_ms).into();
+                json
+            };
 
             let candidates = {
                 let db = stabilizer.lens_profile_db.read();
-                lfv::candidates(&db, (&camera.0, &camera.1, &camera.2), size, fps, loaded.as_ref())
+                lfv::candidates(&db, (&camera.0, &camera.1, &camera.2), size, fps, loaded.as_ref(), readout_scale)
             };
             ::log::info!("Lens from video: {} {} fragment(s), {} candidate profile(s), {}", if estimate { "estimate on" } else { "search on" }, ranges.len(), candidates.len(), medium);
-            let track = |ranges: Vec<(f64, f64)>, from: f64, share: f64, what: &'static str| -> Result<Vec<lfv::Fragment>, String> {
+            let track = |ranges: Vec<(f64, f64)>, from: f64, share: f64, what: &'static str| -> Result<Vec<lfv::Fragment>, (&'static str, String)> {
                 let progress = progress.clone();
-                let f = rendering::track_lens_fragments(&stabilizer, ranges, cancel_flag.clone(), move |p| progress((from + p * share, what.into())))?;
-                if f.iter().all(|f| f.is_empty()) { return Err("Nothing could be tracked in the video".into()); }
+                let f = rendering::track_lens_fragments(&clip, ranges, stop.clone(), move |p| progress((from + p * share, what.into()))).map_err(|e| ("error", e))?;
+                if f.iter().all(|f| f.is_empty()) { return Err(("nothing_tracked", String::new())); }
                 Ok(f)
             };
 
             if !estimate {
-                let fragments = match track(ranges, 0.0, 0.5, "tracking") { Ok(f) => Arc::new(f), Err(e) => return done(out, Some(e), (None, None, None, None)) };
+                let fragments = match track(ranges, 0.0, 0.5, "tracking") { Ok(f) => Arc::new(f), Err(e) => return done(out, Some(e), nothing()) };
                 let known = {
                     let progress = progress.clone();
-                    lfv::find_known(&fragments, &candidates, &media, &cancelled, &move |p| progress((0.5 + 0.5 * p, "trying the known profiles".into())))
+                    lfv::find_known(&fragments, &candidates, &media, current, &cancelled, &move |p| progress((0.5 + 0.5 * p, "trying".into())))
                 };
                 let best = known.best();
                 out["fragments"] = fragments.len().into();
@@ -1217,85 +1312,117 @@ impl Controller {
                 out["no_translation"] = known.no_translation.into();
                 out["found"] = serde_json::Value::Null;
                 let mut found = None;
-                if let Some(i) = best {
+                let mut medium_found = None;
+                // A plain lens to start an estimate from is no profile to offer
+                if let Some(i) = best.filter(|i| candidates[*i].how != lfv::How::Generic) {
                     let (r, c) = (&known.tried[i], &candidates[i]);
                     let m = r.matching();
                     let under_water = r.refraction() != 1.0;
-                    // A profile of this very frame size is loaded from the database as it is; any other lens - one of
-                    // the camera's other modes brought to this frame - becomes a profile of its own
-                    let profile = if c.loadable {
-                        c.profile.clone().unwrap_or_default()
-                    } else {
-                        lfv::profile_of(&c.lens, m.readout_ms, size, fps, under_water, (&camera.0, &camera.1), c.profile.as_ref().or(loaded.as_ref()), &calibrated_by,
-                            &format!("The camera's \"{}\" lens, checked against this video", c.name))
-                    };
-                    out["found"] = serde_json::json!({
-                        "name": r.name, "loadable": c.loadable, "already_loaded": c.is_loaded,
-                        "under_water": under_water, "medium_sure": r.medium_sure, "media_tried": r.media.len(),
-                        "match": match_json(&m),
-                    });
-                    found = Some((profile, if c.loadable { c.id.clone() } else { String::new() }));
+                    let fits = matches!(m.verdict, lfv::Verdict::Good | lfv::Verdict::Single);
+                    if fits && r.medium_sure && r.media.len() > 1 { medium_found = Some(r.refraction()); }
+                    // A profile of this very frame size is loaded from the database as it is; one of the camera's other
+                    // modes brought to this frame becomes a profile of its own, still its calibrator's; the profile
+                    // that's loaded already is left where it is
+                    let profile = if c.loadable || c.is_loaded { c.profile.clone() } else { lfv::brought_profile(c, size, fps) };
+                    if let Some(profile) = profile {
+                        out["found"] = serde_json::json!({
+                            "name": r.name, "how": c.how, "loadable": c.loadable, "already_loaded": c.is_loaded, "estimated": profile.is_estimated_from_footage(),
+                            "under_water": under_water, "medium_sure": r.medium_sure, "media_tried": r.media.len(),
+                            "match": match_json(&m),
+                            // Only a lens that fits says anything of the medium or the readout time, and only a
+                            // readout time measured here is news: the profile's own comes with the profile
+                            "apply_medium": fits && r.medium_sure && r.media.len() > 1,
+                            "apply_readout": fits && m.readout_measured && !readout_from_file && to_project(m.readout_ms).is_some(),
+                        });
+                        found = Some(LensFromVideoFound { profile, id: if c.loadable { c.id.clone() } else { String::new() }, lens: c.lens, already_loaded: c.is_loaded, keep_readout: false });
+                    }
                 }
                 // Kept for an estimate to be checked on, when they're the clip's start, middle and end
-                let keep = (at_ms.is_none()).then(|| fragments.clone());
-                return done(out, None, (best.map(|i| candidates[i].clone()), found, None, keep));
+                let kept = at_ms.is_none().then(|| LensFromVideoFragments { setup: setup.clone(), url: url.clone(), name: name.clone(), ranges: automatic.clone(), refraction: medium_found, fragments: fragments.clone() });
+                return done(out, None, LensFromVideoDone { nearest: best.map(|i| candidates[i].clone()), found, estimated: None, kept });
             }
 
             // The estimate: from the lens the search found nearest, or the camera's nearest profile
-            let Some(start) = start.or_else(|| candidates.first().cloned()) else { return done(out, Some("No lens to start from".into()), (None, None, None, None)); };
+            let Some(start) = start.or_else(|| candidates.first().cloned()) else { return done(out, Some(("no_start", String::new())), nothing()); };
             let refraction = media[0];
-            let fragment = match track(ranges, 0.0, 0.15, "tracking") { Ok(mut f) => f.remove(0), Err(e) => return done(out, Some(e), (None, None, None, None)) };
+            let fitted = ranges[0];
+            let fragment = match track(ranges, 0.0, 0.15, "tracking") { Ok(mut f) => f.remove(0), Err(e) => return done(out, Some(e), nothing()) };
             let result = {
                 let progress = progress.clone();
-                lfv::estimate(&fragment.tracks(), &start.lens.with_refraction(refraction), fragment.frame_ms, &cancelled, &move |p| progress((0.15 + 0.7 * p, "estimating the lens".into())))
+                lfv::estimate(&fragment.tracks(), &start.lens.with_refraction(refraction), fragment.frame_ms, &cancelled, &move |p| progress((0.15 + 0.7 * p, "estimating".into())))
             };
             // A cancelled fit comes back with whatever it had got to (`Bundle::fit` just stops): that is no lens
-            if cancelled() { return done(out, None, (None, None, None, None)); }
-            let e = match result { Ok(e) => e, Err(e) => return done(out, Some(format!("{e:?}")), (None, None, None, None)) };
-            // Checked as a known profile is, on the clip's start, middle and end
-            let checked_on = match kept {
-                Some(f) => f,
-                None => match track(automatic, 0.85, 0.1, "tracking") { Ok(f) => Arc::new(f), Err(e) => return done(out, Some(e), (None, None, None, None)) },
+            if cancelled() { return done(out, None, nothing()); }
+            let e = match result { Ok(e) => e, Err(e) => return done(out, Some((e.code(), String::new())), nothing()) };
+
+            // Checked as a known profile is - on parts of the clip it wasn't made from: a lens stays put on the frames
+            // it was fitted to, right or not. The search's fragments of this clip that are apart from the fitted
+            // stretch; or those tracked now; or, with none in this clip, those of another clip of the same setup shot
+            // in the same medium - which is the stronger check, if anything
+            let apart: Vec<(f64, f64)> = lfv::apart_from(&automatic, fitted).into_iter().map(|i| automatic[i]).collect();
+            let (checked_on, checked_clip): (Vec<lfv::Fragment>, Option<String>) = match &kept {
+                Some(k) if k.url == url && k.ranges == automatic => (lfv::apart_from(&k.ranges, fitted).into_iter().filter_map(|i| k.fragments.get(i).cloned()).collect(), None),
+                _ if !apart.is_empty() => match track(apart, 0.85, 0.1, "tracking") { Ok(f) => (f, None), Err(e) => return done(out, Some(e), nothing()) },
+                Some(k) if k.url != url && k.refraction == Some(refraction) => (k.fragments.to_vec(), Some(k.name.clone())),
+                _ => (Vec::new(), None),
             };
-            progress((0.95, "checking it on the clip".into()));
-            let m = lfv::check_lens(&checked_on, &e.lens, Some(e.readout_ms), &cancelled);
-            if cancelled() { return done(out, None, (None, None, None, Some(checked_on))); }
+            progress((0.95, "checking".into()));
+            let m = (!checked_on.is_empty()).then(|| lfv::check_lens(&checked_on, &e.lens, Some(e.readout_ms), &cancelled));
+            if cancelled() { return done(out, None, nothing()); }
             let under_water = refraction != 1.0;
-            let profile = lfv::profile(&e, size, fps, under_water, (&camera.0, &camera.1), start.profile.as_ref().or(loaded.as_ref()), &calibrated_by);
+            let readout_ms = to_project(Some(e.readout_ms));
+            let profile = lfv::profile(&e, readout_ms, size, fps, under_water, (&camera.0, &camera.1), start.profile.as_ref().or(loaded.as_ref()), &calibrated_by);
             out["estimated"] = serde_json::json!({
-                "name": profile.get_display_name(), "fx": e.lens.fx, "fy": e.lens.fy, "readout_ms": e.readout_ms,
+                "name": profile.get_display_name(), "fx": e.lens.fx, "fy": e.lens.fy, "readout_ms": readout_ms,
                 "error": e.error, "error_before": e.error_before, "within_1px": e.within_1px, "firmness": e.firmness,
-                "parallax": e.scene.parallax, "frames": e.scene.frames, "under_water": under_water, "doubtful": lfv::doubts(&e),
-                "match": match_json(&m),
+                "parallax": e.scene.parallax, "frames": e.scene.frames, "under_water": under_water, "doubts": lfv::doubts(&e),
+                "apply_readout": !readout_from_file && readout_ms.is_some(),
+                "match": m.as_ref().map(|m| match_json(m)), "checked_parts": checked_on.len(), "checked_clip": checked_clip,
             });
-            done(out, None, (None, None, Some(profile), Some(checked_on)));
+            let lens = lfv::Lens { refraction: 1.0, ..e.lens };
+            done(out, None, LensFromVideoDone { nearest: None, found: None, estimated: Some(LensFromVideoFound { profile, id: String::new(), lens, already_loaded: false, keep_readout: readout_from_file }), kept: None });
         });
     }
 
-    /// Loads into the project the lens "Find lens from the video" found ("found") or estimated ("estimated"). A known
-    /// profile of the clip's frame size is loaded from the database by its id, as if picked from the list
+    /// Stops "Find lens from the video", and nothing else
+    fn cancel_lens_from_video(&mut self) {
+        self.lens_from_video_cancel.store(true, SeqCst);
+    }
+
+    /// Loads into the project the lens "Find lens from the video" found ("found") or estimated ("estimated") for the
+    /// video that's loaded - one found for another video isn't this one's, and nothing is done. A known profile of
+    /// the clip's frame size is loaded from the database by its id, as if picked from the list
     fn apply_found_lens(&mut self, which: QString) {
-        match which.to_string().as_str() {
-            "found" => {
-                let Some((profile, id)) = self.lens_from_video_found.clone() else { return; };
-                if id.is_empty() { self.load_lens_profile_from_video(profile); } else { self.load_lens_profile(QString::from(id)); }
-            },
-            "estimated" => {
-                if let Some(profile) = self.lens_from_video_estimated.clone() { self.load_lens_profile_from_video(profile); }
-            },
-            _ => { }
+        let url = self.stabilizer.input_file.read().url.clone();
+        let found = match which.to_string().as_str() {
+            "found" => self.lens_from_video_found.clone(),
+            "estimated" => self.lens_from_video_estimated.clone(),
+            _ => None,
+        };
+        let Some((_, found)) = found.filter(|(of, _)| *of == url) else { return; };
+        if found.already_loaded { return; }
+        if !found.id.is_empty() { self.load_lens_profile(QString::from(found.id.clone())); }
+        // Loading a profile fits it to the video (`LensProfile::adapt_to_video`), which can take another of its
+        // settings - another frame rate's crop - for the one that was tested. What goes into the project is the lens
+        // that was tested: when what got loaded draws another, the tested profile is set as it is
+        let size = self.stabilizer.params.read().size;
+        let same = !found.id.is_empty() && core::lens_from_video::Lens::from_profile_for(&self.stabilizer.lens.read(), size).is_some_and(|l| l.shift(&found.lens, size).max < 0.5);
+        if !same {
+            let mut profile = found.profile;
+            // The UI takes the readout time of any profile it loads for the project's (`lens_profile_loaded`)
+            if found.keep_readout { profile.frame_readout_time = None; profile.frame_readout_direction = None; }
+            // A known profile brought to this frame is one the user took for this video, as a profile opened from a
+            // file is (`LensProfile::load_from_data`): the database has no such profile to collect ratings for
+            if !profile.is_estimated_from_footage() { profile.official = true; }
+            self.set_lens_profile_from_video(profile);
         }
     }
 
-    /// A lens found from the video, as the project's lens: an unofficial profile it replaces can be gone back to
-    /// (`restore_lens_profile`), and the readout time and its direction reach the UI with the profile itself, as with
-    /// any profile that carries them
-    fn load_lens_profile_from_video(&mut self, mut profile: core::lens_profile::LensProfile) {
-        let (size, fps, camera_id) = {
-            let p = self.stabilizer.params.read();
-            (p.size, p.fps, self.stabilizer.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default())
-        };
-        profile.adapt_to_video(size, fps, &camera_id);
+    /// A lens found from the video, as the project's lens, as it is: not fitted to the video again
+    /// (`LensProfile::adapt_to_video`), which it was made or tested for. An unofficial profile it replaces can be gone
+    /// back to (`restore_lens_profile`), and the readout time and its direction reach the UI with the profile itself,
+    /// as with any profile that carries them
+    fn set_lens_profile_from_video(&mut self, profile: core::lens_profile::LensProfile) {
         let json = profile.get_json().unwrap_or_default();
         let replaced = std::mem::replace(&mut *self.stabilizer.lens.write(), profile);
         if self.lens_loaded && !replaced.official && !replaced.is_estimated_from_footage() {
@@ -1310,8 +1437,8 @@ impl Controller {
     fn save_found_lens(&mut self, which: QString, url: QUrl) -> bool {
         let url = util::qurl_to_encoded(url);
         let profile = match which.to_string().as_str() {
-            "found" => self.lens_from_video_found.as_ref().map(|x| x.0.clone()),
-            "estimated" => self.lens_from_video_estimated.clone(),
+            "found" => self.lens_from_video_found.as_ref().map(|x| x.1.profile.clone()),
+            "estimated" => self.lens_from_video_estimated.as_ref().map(|x| x.1.profile.clone()),
             _ => None,
         };
         let Some(mut profile) = profile else { return false; };
@@ -1696,6 +1823,7 @@ impl Controller {
     fn cancel_current_operation(&mut self) {
         self.cancel_flag.store(true, SeqCst);
         self.telemetry_cancel_flag.store(true, SeqCst);
+        self.lens_from_video_cancel.store(true, SeqCst);
     }
 
     /// Cancels the telemetry load in progress, if any, and returns the id and cancel flag of a new one.
