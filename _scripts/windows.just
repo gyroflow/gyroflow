@@ -269,7 +269,10 @@ deploy:
     xcopy /Y "$OpenCVDir\opencv_flan*.dll"       "$TargetDir\"
     xcopy /Y "$OpenCVDir\opencv_imgpro*.dll"     "$TargetDir\"
     xcopy /Y "$OpenCVDir\opencv_vide*.dll"       "$TargetDir\"
-    xcopy /Y "$OpenCVDir\z.dll"                  "$TargetDir\"
+    # zlib, which opencv_core loads: vcpkg has named it zlib1.dll, z.dll and libz.dll over time
+    $zlib = Get-ChildItem "$OpenCVDir\*" -Include zlib1.dll, z.dll, libz.dll
+    if (!$zlib) { throw "No zlib DLL found in $OpenCVDir" }
+    $zlib | Copy-Item -Destination "$TargetDir\"
     del "$TargetDir\opencv_*videoio*"
 
     # Copy Gyroflow

@@ -133,8 +133,11 @@ jobs:
         env:
           MS_STORE_SIGNING_PASS: ${{ secrets.MS_STORE_SIGNING_PASS }}
         run: |
+          # PowerShell goes on after a failed command: without the checks, a failed step still ships its bundle
           just install-deps
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           just deploy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") { just bundle }
 
       - name: Build Gyroflow (Windows arm64)
@@ -144,7 +147,9 @@ jobs:
           FORCE_ARCH: aarch64
         run: |
           just install-deps
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           just deploy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") { just bundle }
 
       - name: Build Gyroflow (Android)
@@ -158,6 +163,7 @@ jobs:
           $Env:JAVA_HOME = $Env:JAVA_HOME_21_X64
           Get-ChildItem Env:
           just android install-deps
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           just android deploy
 
       - name: Build Gyroflow (iOS)
