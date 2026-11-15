@@ -80,7 +80,9 @@ fn entry() {
 
     let mut open_file = String::new();
     let mut open_preset = String::new();
-    if cli::run(&mut open_file, &mut open_preset) {
+    let mut open_files = Vec::new();
+    let mut add_to_queue = false;
+    if cli::run(&mut open_file, &mut open_preset, &mut open_files, &mut add_to_queue) {
         return;
     }
 
@@ -251,6 +253,8 @@ fn entry() {
 
     engine.set_property("openFileOnStart".into(), QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(&open_file))).into());
     engine.set_property("loadPresetOnStart".into(), QString::from(open_preset).into());
+    engine.set_property("openFilesOnStart".into(), QVariantList::from_iter(open_files.iter().map(|x| QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(x))))).into());
+    engine.set_property("addToQueueOnStart".into(), add_to_queue.into());
 
     engine.set_property("defaultInitializedDevice".into(), QString::default().into());
     if let Some((name, list_name)) = core::gpu::initialize_contexts() {

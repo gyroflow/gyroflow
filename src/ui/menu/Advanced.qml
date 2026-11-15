@@ -22,6 +22,7 @@ MenuItem {
         property alias marginPixels: marginPixels.value;
         property alias featherPixels: featherPixels.value;
         property alias defaultSuffix: defaultSuffix.text;
+        property alias cliBehavior: cliBehavior.currentIndex;
         property alias playSounds: playSounds.checked;
         property alias r3dConvertFormat: r3dConvertFormat.currentIndex;
         property alias r3dColorMode: r3dColorMode.currentIndex;
@@ -392,6 +393,21 @@ MenuItem {
             text: "_stabilized";
             width: parent.width;
             onTextChanged: render_queue.default_suffix = text;
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        visible: !isMobile;
+        text: qsTr("Default CLI behavior");
+        tooltip: qsTr("What Gyroflow does with the files it's started with, eg. from the \"Open with\" menu or when they're dropped on its icon.\nA command line with any option (eg. -f) isn't affected by this setting.");
+
+        ComboBox {
+            id: cliBehavior;
+            // The command line reads the index (`files_action` in cli.rs)
+            model: [QT_TRANSLATE_NOOP("Popup", "Render file"), QT_TRANSLATE_NOOP("Popup", "Open in the app"), QT_TRANSLATE_NOOP("Popup", "Add to render queue")];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 0;
         }
     }
     CheckBox {
