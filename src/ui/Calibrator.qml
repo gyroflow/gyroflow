@@ -245,8 +245,9 @@ Window {
             Tabs {
                 id: modeTabs;
                 tabs: [QT_TRANSLATE_NOOP("Tabs", "Calibration target"), QT_TRANSLATE_NOOP("Tabs", "From the video")];
-                tabsIcons: ["chessboard", "video"];
-                tabsIconsSize: [20, 20];
+                // No icons: with one, "Calibration target" doesn't fit the tab at the panel's default width
+                tabsIcons: ["", ""];
+                tabsIconsSize: [0, 0];
                 Component.onCompleted: currentIndex = calibrator_window.mode;
                 onCurrentIndexChanged: calibrator_window.mode = currentIndex;
             }

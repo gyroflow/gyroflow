@@ -1377,7 +1377,8 @@ impl Controller {
                 "error": e.error, "error_before": e.error_before, "within_1px": e.within_1px, "firmness": e.firmness,
                 "parallax": e.scene.parallax, "frames": e.scene.frames, "under_water": under_water, "doubts": lfv::doubts(&e),
                 "apply_readout": !readout_from_file && readout_ms.is_some(),
-                "match": m.as_ref().map(|m| match_json(m)), "checked_parts": checked_on.len(), "checked_clip": checked_clip,
+                // The estimate's readout time is stated with the estimate: the one it was checked with is that very one
+                "match": m.as_ref().map(|m| { let mut json = match_json(m); json["readout_ms"] = serde_json::Value::Null; json }), "checked_parts": checked_on.len(), "checked_clip": checked_clip,
             });
             let lens = lfv::Lens { refraction: 1.0, ..e.lens };
             done(out, None, LensFromVideoDone { nearest: None, found: None, estimated: Some(LensFromVideoFound { profile, id: String::new(), lens, already_loaded: false, keep_readout: readout_from_file }), kept: None });
