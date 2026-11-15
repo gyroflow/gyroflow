@@ -17,6 +17,8 @@ pub mod external_sdk;
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 pub mod nle_plugins;
 mod cli;
+#[cfg(target_os = "linux")]
+mod linux_fontconfig;
 mod resources;
 #[cfg(not(compiled_qml))]
 mod resources_qml;
