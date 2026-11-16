@@ -237,6 +237,11 @@ impl LensProfileDatabase {
         }
     }
 
+    /// Every profile, with the key `get_by_id` finds it by
+    pub fn profiles(&self) -> impl Iterator<Item = (&String, &LensProfile)> {
+        self.map.iter()
+    }
+
     pub fn get_all_filenames(&self) -> Vec<String> {
         self.map.values().map(|x| {
             let mut path = x.path_to_file.clone();

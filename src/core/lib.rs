@@ -7,6 +7,7 @@ pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
 pub mod calibration;
+pub mod lens_from_video;
 pub mod synchronization;
 pub mod stabilization;
 pub mod camera_identifier;

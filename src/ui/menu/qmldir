@@ -2,6 +2,7 @@ module menu
 Advanced 1.0 Advanced.qml
 Export 1.0 Export.qml
 LensCalibrate 1.0 LensCalibrate.qml
+LensFromVideo 1.0 LensFromVideo.qml
 LensProfile 1.0 LensProfile.qml
 MotionData 1.0 MotionData.qml
 Stabilization 1.0 Stabilization.qml

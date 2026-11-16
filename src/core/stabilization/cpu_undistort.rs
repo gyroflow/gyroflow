@@ -426,11 +426,7 @@ impl Stabilization {
 
             // Refraction (underwater): Snell's law on the angle itself, exact for any field. Past the critical angle - or behind the flat port - no ray enters the housing at all: Snell's window ends there
             if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 && rxy > 1e-12 {
-                let sin_d = theta.sin() * params.light_refraction_coefficient;
-                if sin_d >= 1.0 || _w <= 0.0 { return None; }
-                let theta_d = sin_d.asin();
-                let (s, c) = (theta_d.sin() / rxy, theta_d.cos());
-                _x *= s; _y *= s; _w = c;
+                (_x, _y, _w) = super::distortion_models::refract(_x, _y, _w, params.light_refraction_coefficient)?;
             }
 
             let mut uv = distortion_model.distort_point(_x, _y, _w, &params);

@@ -35,6 +35,9 @@ pub trait Real: Copy + PartialOrd
     fn from_f64(v: f64) -> Self;
     fn sqrt(self) -> Self;
     fn atan2(self, x: Self) -> Self;
+    fn sin(self) -> Self;
+    fn cos(self) -> Self;
+    fn asin(self) -> Self;
 }
 macro_rules! impl_real {
     ($($t:ty),*) => {$(
@@ -42,6 +45,9 @@ macro_rules! impl_real {
             #[inline(always)] fn from_f64(v: f64) -> Self { v as $t }
             #[inline(always)] fn sqrt(self) -> Self { <$t>::sqrt(self) }
             #[inline(always)] fn atan2(self, x: Self) -> Self { <$t>::atan2(self, x) }
+            #[inline(always)] fn sin(self) -> Self { <$t>::sin(self) }
+            #[inline(always)] fn cos(self) -> Self { <$t>::cos(self) }
+            #[inline(always)] fn asin(self) -> Self { <$t>::asin(self) }
         }
     )*};
 }
@@ -50,6 +56,38 @@ impl_real!(f32, f64);
 /// A constant in the model's precision
 #[inline(always)]
 pub fn c<T: Real>(v: f64) -> T { T::from_f64(v) }
+
+/// Refraction at a flat port under water: the ray in the water → the ray in the housing, by Snell's law on the angle
+/// itself, exact for any field. `n`: the refraction index of the water against the air in the housing. `None` past the
+/// critical angle or behind the port, where no ray enters the housing at all: Snell's window ends there. The lens
+/// then draws the ray it gets as it would in air, so its parameters stay those of the lens in air.
+///
+/// Written once, as the models' projections are (see `Real`): the render draws with it in `f32`
+/// (`cpu_undistort::rotate_and_distort`), and `lens_from_video` fits through it in `f64`
+#[inline(always)]
+pub fn refract<T: Real>(x: T, y: T, z: T, n: T) -> Option<(T, T, T)> {
+    let rxy = (x * x + y * y).sqrt();
+    // The ray along the axis goes straight through
+    if rxy < c(1e-12) { return if z > c(0.0) { Some((x, y, z)) } else { None }; }
+    let theta = rxy.atan2(z);
+    let sin_d = theta.sin() * n;
+    if sin_d >= c(1.0) || z <= c(0.0) { return None; }
+    let theta_d = sin_d.asin();
+    let (s, w) = (theta_d.sin() / rxy, theta_d.cos());
+    Some((x * s, y * s, w))
+}
+
+/// The other way: the ray in the housing → the ray in the water it came from. A ray at or past 90° to the axis in the
+/// housing has none behind a flat port, and is taken at 90°
+#[inline(always)]
+pub fn unrefract<T: Real>(x: T, y: T, z: T, n: T) -> (T, T, T) {
+    let rxy = (x * x + y * y).sqrt();
+    if rxy < c(1e-12) { return (x, y, z); }
+    let sin_h = if z > c(0.0) { rxy.atan2(z).sin() } else { c(1.0) };
+    let theta_w = (sin_h / n).asin();
+    let (s, w) = (theta_w.sin() / rxy, theta_w.cos());
+    (x * s, y * s, w)
+}
 
 macro_rules! impl_models {
     ($($name:ident => $class:ty,)*) => {

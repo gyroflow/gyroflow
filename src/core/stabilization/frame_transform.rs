@@ -31,14 +31,23 @@ pub struct FrameTransform {
 }
 
 impl FrameTransform {
-    pub(crate) fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
-        let mut frame_readout_time = params.frame_readout_time.abs();
+    /// The part of the project's frame readout time that the picture's rows take, at this time: the file's metadata
+    /// can give the readout time of more rows than the picture has (a 16:9 picture from a 3:2 sensor), and the
+    /// project's is then for those. 1 for a file that says nothing of it. A readout time measured on the picture
+    /// (`lens_from_video`) is divided by this to become the project's
+    pub fn readout_scale(params: &ComputeParams, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
         let mut scale = 1.0;
         telemetry_parser::try_block!({
             let keys = file_metadata.lens_keys_of_frame(params.frame_at_timestamp(timestamp_ms).max(0) as usize);
             let val = file_metadata.lens_params_closest_in(keys, (timestamp_ms * 1000.0).round() as i64, 100000, |v| v.has_readout_scale())?; // closest within 100ms
             scale = val.readout_scale()?;
         });
+        scale
+    }
+
+    pub(crate) fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
+        let mut frame_readout_time = params.frame_readout_time.abs();
+        let scale = Self::readout_scale(params, timestamp_ms, file_metadata);
         if can_invert && params.framebuffer_inverted && !params.frame_readout_direction.is_horizontal() {
             frame_readout_time *= -1.0;
         }
