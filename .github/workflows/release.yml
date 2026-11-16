@@ -38,6 +38,37 @@ jobs:
           path: '${{ github.workspace }}/ext/'
           key: ${{ matrix.targets.type }}-gyroflow-ext-0
 
+      # The MDK nightly at times has ABI headers and an SDK from different builds, and the CRM plugin can't be built
+      # against those. _scripts/mdk.py then keeps the SDK already in ext/mdk-sdk. The cache above gets evicted too
+      # often to count on, so the SDK is also kept as an artifact of the default branch's runs ("Save the MDK SDK"
+      # below), and the newest one is put in ext/mdk-sdk here, unless the cache brought a newer one.
+      - name: Last MDK SDK that matched its ABI headers
+        if: ${{ contains(fromJSON('["linux", "macos", "macstore", "windows"]'), matrix.targets.type) }}
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT: mdk-sdk-${{ startsWith(matrix.targets.type, 'mac') && 'macos' || matrix.targets.type }}
+          BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          fetched() { sed -n 's/.*"fetched": *"\([^"]*\)".*/\1/p' "$1" 2>/dev/null || true; }
+          # Only artifacts of this repository's own runs on the default branch: a pull request from a fork can upload one too
+          id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=$ARTIFACT&per_page=100" --jq "[.artifacts[] | select(.expired == false and .workflow_run.head_branch == \"$BRANCH\" and .workflow_run.head_repository_id == .workflow_run.repository_id)] | sort_by(.created_at) | last | .id // empty")
+          if [ -z "$id" ]; then echo "No $ARTIFACT artifact to take"; exit 0; fi
+          rm -rf mdk-stored && mkdir mdk-stored
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" > mdk-stored/artifact.zip
+          unzip -q mdk-stored/artifact.zip -d mdk-stored
+          tar -xf mdk-stored/mdk-sdk.tar -C mdk-stored
+          stored=$(fetched mdk-stored/mdk-sdk/gyroflow-mdk.json)
+          held=$(fetched ext/mdk-sdk/gyroflow-mdk.json)
+          if [ -n "$stored" ] && [[ "$stored" > "$held" ]]; then
+            mkdir -p ext && rm -rf ext/mdk-sdk && mv mdk-stored/mdk-sdk ext/mdk-sdk
+            echo "ext/mdk-sdk now holds the MDK SDK fetched $stored (the cache had: ${held:-none})"
+          else
+            echo "ext/mdk-sdk keeps the MDK SDK fetched $held (the artifact has: ${stored:-nothing readable})"
+          fi
+          rm -rf mdk-stored
+
       - name: Prepare Vulkan SDK
         uses: johnnynunez/setup-vulkan-sdk@v1
         with:
@@ -183,6 +214,19 @@ jobs:
           path: |
             ${{ github.workspace }}/target/${{ matrix.targets.type == 'windows' && 'x86_64-pc-windows-msvc' || 'aarch64-pc-windows-msvc' }}/deploy/deps/gyroflow.pdb
             ${{ github.workspace }}/target/${{ matrix.targets.type == 'windows' && 'x86_64-pc-windows-msvc' || 'aarch64-pc-windows-msvc' }}/deploy/*.pdb
+      # For "Last MDK SDK that matched its ABI headers" in later runs. A tar, for the links in the macOS framework
+      - name: Pack the MDK SDK
+        if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && contains(fromJSON('["linux", "macos", "windows"]'), matrix.targets.type) }}
+        shell: bash
+        run: |
+          if grep -q '"pair": *"matched"' ext/mdk-sdk/gyroflow-mdk.json 2>/dev/null; then tar -cf mdk-sdk.tar -C ext mdk-sdk; fi
+      - name: Save the MDK SDK
+        if: ${{ hashFiles('mdk-sdk.tar') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdk-sdk-${{ matrix.targets.type }}
+          path: mdk-sdk.tar
+          retention-days: 30
       - name: Save Binaries
         uses: actions/upload-artifact@v4
         with:
@@ -196,6 +240,9 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
+        with:
+          # Not the builds' mdk-sdk-* ones
+          pattern: Gyroflow-*
 
       - run: find . -type f
 
