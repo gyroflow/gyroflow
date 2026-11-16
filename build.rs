@@ -248,6 +248,7 @@ fn main() {
             res.set("FileVersion", env!("CARGO_PKG_VERSION"));
             res.set("ProductVersion", env!("CARGO_PKG_VERSION"));
             res.set("ProductName", "Gyroflow");
+            res.set("CompanyName", "Gyroflow");
             res.set("FileDescription", &format!("Gyroflow v{}", env!("CARGO_PKG_VERSION")));
             res.compile().unwrap();
         }
