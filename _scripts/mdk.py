@@ -11,9 +11,13 @@ MDK's own (mdk-braw, mdk-r3d). qml-video-rs builds against the same directory
 through MDK_SDK and copies libmdk and the plugins next to Gyroflow from it.
 
 MDK_CRM_DIR builds the plugin from a local checkout instead of the pinned one.
-In release builds (CI, or IN_DOCKER=1 for Linux) a plugin that fails to build,
-or ABI headers and an SDK that come from different nightly builds, fail the
-script; locally it warns and Gyroflow builds without the plugin.
+
+When the nightly's ABI headers and its SDK come from different builds, the SDK
+already in ext/mdk-sdk is kept, if its own two halves matched, and the plugin
+is built against that one. CI restores ext/ from its cache, so a release build
+gets through such a day with the SDK its cache holds. With nothing to keep, or
+when the plugin fails to build, a release build (CI, or IN_DOCKER=1 for Linux)
+fails; a local build warns and Gyroflow builds without the plugin.
 """
 import argparse
 import email.utils
@@ -48,10 +52,14 @@ CRM_REPO = "https://github.com/gyroflow/mdk-crm.git"
 # build's when the SDK is no older than the ABI headers and at most PAIR_GAP newer, both by the server's
 # Last-Modified and by the archives' own file times (libmdk against the headers' global.h). The archives carry no
 # build id, so two builds less than PAIR_GAP apart can't be told apart.
+# Some builds upload the ABI archive and no SDK (2026-11-16: a build of another branch than master), and the two
+# then stay apart until the next build that uploads both: see fetch_sdk for what is used meanwhile.
 PAIR_GAP = 60 * 60
 CLOCK_SLACK = 2 * 60  # the archives come from different CI runners
 # How long after an ABI upload its SDK may still be on its way
 PUBLISH_WAIT = 45 * 60
+# What the plugin's note says of a mismatched pair in a gyroflow-mdk.json written before it had "pair"
+MISMATCH_NOTE = "different nightly builds"
 
 
 def log(msg):
@@ -61,6 +69,16 @@ def log(msg):
 def strict():
     """Release builds fail instead of building without the plugin."""
     return bool(os.environ.get("CI")) or os.environ.get("IN_DOCKER") == "1"
+
+
+def notice(msg):
+    """A warning that, in a release build, is also printed as a GitHub Actions annotation, which the run's summary
+    page shows. Every release build prints it: the Linux one runs in a container that doesn't see the runner's
+    environment, so it can't tell whether it is on GitHub."""
+    log(f"WARNING: {msg}")
+    if strict():
+        escaped = msg.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print(f"::warning title=MDK::{escaped}", flush=True)
 
 
 def last_modified(headers):
@@ -140,17 +158,53 @@ def extract(archive, dst):
         subprocess.run(["7z", "x", "-y", f"-o{dst}", archive], check=True, stdout=subprocess.DEVNULL)
 
 
-def fetch_sdk(target_os, ext_dir):
-    """Installs the nightly SDK with its ABI headers in ext/mdk-sdk. Returns its path and, when the two archives
-    look like different builds (see PAIR_GAP), why; the plugin must then not be built against them.
+def matched_install(target_os, sdk):
+    """The gyroflow-mdk.json of the SDK installed at `sdk`, when its ABI headers and its SDK were taken for one
+    build's, so that the plugin can be built against it. None when nothing usable is installed, or its halves
+    didn't match."""
+    try:
+        with open(os.path.join(sdk, "gyroflow-mdk.json"), encoding="utf-8") as f:
+            info = json.load(f)
+    except (OSError, ValueError):
+        return None
+    if not isinstance(info, dict):
+        return None
+    pair = info.get("pair")
+    if pair is None:
+        pair = "mismatched" if MISMATCH_NOTE in str(info.get("crm_plugin")) else "matched"
+    if pair != "matched":
+        return None
+    for rel in (os.path.join("include", "abi", "mdk", "FrameReader.h"), LIBMDK[target_os]):
+        if not os.path.isfile(os.path.join(sdk, rel)):
+            return None
+    return info
+
+
+def fetch_sdk(target_os, ext_dir, need_pair=True):
+    """Installs the nightly SDK with its ABI headers in ext/mdk-sdk. Returns (the SDK's path, mismatch, kept).
+
+    mismatch: why the installed ABI headers and SDK look like different builds (see PAIR_GAP), when they do; the
+    plugin must then not be built against them.
+
+    kept: when the nightly's two archives don't match and the plugin is wanted (need_pair), the SDK already in
+    ext/mdk-sdk stays if its own halves matched, and nothing is installed: `kept` is then (that SDK's
+    gyroflow-mdk.json, what is wrong with the nightly). With nothing to keep, a release build fails and a local one
+    installs the nightly, with `mismatch` set.
 
     The headers are downloaded before and after the SDK and must not change in between, which catches a build
     uploaded during the download. Their times against the SDK's catch the rest: a build that has uploaded its ABI
-    archive but not yet its SDK, or one whose SDK upload failed."""
+    archive but not yet its SDK, or one that uploads no SDK at all."""
     work = os.path.join(ext_dir, ".mdk-download")
+    dst = os.path.join(ext_dir, "mdk-sdk")
+    old = os.path.join(ext_dir, ".mdk-sdk-old")
+    if os.path.exists(old):
+        if os.path.exists(dst):
+            shutil.rmtree(old)
+        else:
+            os.rename(old, dst)  # an earlier run stopped between the two renames at the end
     sdk_name = SDK_ARCHIVE[target_os]
     changes = 0
-    deadline = time.time() + PUBLISH_WAIT
+    start = time.time()
     while True:
         shutil.rmtree(work, ignore_errors=True)
         os.makedirs(work)
@@ -167,17 +221,19 @@ def fetch_sdk(target_os, ext_dir):
             time.sleep(60)
             continue
         abi_time = abi_time_after if abi_time is None else abi_time
-        if (abi_time is not None and sdk_time is not None and sdk_time < abi_time - CLOCK_SLACK
-                and time.time() - abi_time < PUBLISH_WAIT):
-            # The ABI archive of a new build is up and its SDK is still on its way
-            log(f"the nightly of {when(abi_time)} is being published; waiting for its SDK")
-            while time.time() < deadline:
-                time.sleep(120)
-                t = remote_modified(sdk_name)
-                if t is not None and t >= abi_time - CLOCK_SLACK:
-                    break
+        if need_pair and abi_time is not None and sdk_time is not None and sdk_time < abi_time - CLOCK_SLACK:
+            # The ABI archive of a newer build is up. Its SDK, if that build uploads one, follows within PUBLISH_WAIT
+            # of it; the whole wait is no longer than that either.
+            deadline = min(start, abi_time) + PUBLISH_WAIT
             if time.time() < deadline:
-                continue
+                log(f"the nightly of {when(abi_time)} is being published; waiting for its SDK")
+                arrived = False
+                while not arrived and time.time() < deadline:
+                    time.sleep(120)
+                    t = remote_modified(sdk_name)
+                    arrived = t is not None and t >= abi_time - CLOCK_SLACK
+                if arrived:
+                    continue
         break
 
     out = os.path.join(work, "out")
@@ -195,10 +251,17 @@ def fetch_sdk(target_os, ext_dir):
                or pair_problem("by build time", file_time(os.path.join("include", "abi", "mdk", "global.h")),
                                file_time(LIBMDK[target_os])))
     if problem:
-        msg = f"the MDK ABI headers and SDK are from different nightly builds ({problem})"
-        if strict():
-            raise SystemExit(f"[mdk] {msg}")
-        log(f"WARNING: {msg}")
+        msg = f"the MDK ABI headers and SDK are from {MISMATCH_NOTE} ({problem})"
+        if not need_pair:
+            log(f"{msg}; no plugin is built for this target, so the SDK is used as it is")
+        else:
+            info = matched_install(target_os, dst)
+            if info:
+                shutil.rmtree(work, ignore_errors=True)
+                return dst, None, (info, problem)
+            if strict():
+                raise SystemExit(f"[mdk] {msg}, and ext/mdk-sdk holds no earlier SDK to build the plugin against")
+            log(f"WARNING: {msg}")
 
     # Fresh modification times: qml-video-rs reruns its build script, and copies
     # this libmdk again, when they change.
@@ -209,13 +272,6 @@ def fetch_sdk(target_os, ext_dir):
             if not os.path.islink(p):
                 os.utime(p, (now, now))
 
-    dst = os.path.join(ext_dir, "mdk-sdk")
-    old = os.path.join(ext_dir, ".mdk-sdk-old")
-    if os.path.exists(old):
-        if os.path.exists(dst):
-            shutil.rmtree(old)
-        else:
-            os.rename(old, dst)  # an earlier run stopped between the two renames below
     had_old = os.path.exists(dst)
     if had_old:
         os.rename(dst, old)
@@ -228,7 +284,7 @@ def fetch_sdk(target_os, ext_dir):
         raise
     shutil.rmtree(old, ignore_errors=True)
     shutil.rmtree(work, ignore_errors=True)
-    return dst, problem
+    return dst, problem, None
 
 
 def abi_info(sdk):
@@ -391,19 +447,32 @@ def main():
     ext_dir = os.path.abspath(a.ext)
     os.makedirs(ext_dir, exist_ok=True)
 
-    sdk, mismatch = fetch_sdk(a.os, ext_dir)
-    version, abi = abi_info(sdk)
-    log(f"MDK {version}, ABI {abi} in {sdk}")
-
     # The Canon SDK exists for Windows x64, Linux x64 and macOS (universal).
     supported = a.os == "macos" or a.arch == "x86_64"
+    sdk, mismatch, kept = fetch_sdk(a.os, ext_dir, need_pair=supported and not a.no_crm)
+    version, abi = abi_info(sdk)
+    now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    info = {"mdk": version, "abi": abi, "pair": mismatch or "matched", "crm_plugin": "not built yet", "fetched": now}
+    if kept:
+        info["fetched"] = kept[0].get("fetched", "at an unknown time")
+        info["nightly_skipped"] = f"{now}: {kept[1]}"
+        notice(f"today's MDK nightly was not used: its ABI headers and its SDK are from different builds ({kept[1]}). "
+               f"Building with MDK {version} (ABI {abi}) fetched {info['fetched']}, which ext/mdk-sdk held")
+    log(f"MDK {version}, ABI {abi} in {sdk}")
+
+    def write_info():
+        with open(os.path.join(sdk, "gyroflow-mdk.json"), "w", encoding="utf-8") as f:
+            json.dump(info, f, indent=2)
+
+    write_info()  # now, so that a plugin build that fails leaves what is known of the SDK
+
     if a.no_crm:
         note = "not built (--no-crm)"
     elif not supported:
         note = f"not built: no Canon SDK for {a.os} {a.arch}"
     elif mismatch:
         # fetch_sdk has already failed a release build for this
-        note = f"not built: the ABI headers and the SDK are from different nightly builds ({mismatch})"
+        note = f"not built: the ABI headers and the SDK are from {MISMATCH_NOTE} ({mismatch})"
         log("WARNING: the CRM plugin was not built; Gyroflow builds without .CRM playback. Run again later.")
     else:
         try:
@@ -414,10 +483,8 @@ def main():
             note = f"not built: {e}"
             log(f"WARNING: the CRM plugin was not built ({e}); Gyroflow builds without .CRM playback")
     log(f"CRM plugin: {note}")
-
-    with open(os.path.join(sdk, "gyroflow-mdk.json"), "w", encoding="utf-8") as f:
-        json.dump({"mdk": version, "abi": abi, "crm_plugin": note,
-                   "fetched": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, f, indent=2)
+    info["crm_plugin"] = note
+    write_info()
 
 
 if __name__ == "__main__":
