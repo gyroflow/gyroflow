@@ -78,6 +78,12 @@ impl Poly3 {
         k[0] *= hugin_scaling.powi(2) / d.powi(3);
     }
 
+    pub fn compute_hugin_scaling(focal: f64, real_focal: Option<f64>, k1: f64, crop_factor: f64, aspect_ratio: f64) -> f64 {
+        let rf = real_focal.unwrap_or_else(|| focal * (1.0 - k1));
+        let hugin_scale_in_millimeters = 36.0_f64.hypot(24.0) / crop_factor.max(1e-6) / aspect_ratio.max(1e-6).hypot(1.0) / 2.0;
+        rf / hugin_scale_in_millimeters
+    }
+
     pub fn id() -> &'static str { "poly3" }
     pub fn name() -> &'static str { "Poly3" }
 
