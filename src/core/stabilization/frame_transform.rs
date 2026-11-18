@@ -47,6 +47,27 @@ impl FrameTransform {
         }
         frame_readout_time * scale
     }
+    /// `params.view_rotation` (yaw, pitch, roll in degrees) as a camera on a tripod: turned about the vertical (yaw),
+    /// then tilted about its own horizontal axis (pitch), then rolled about where it now looks, so the roll turns the
+    /// picture about its middle. In the stabilized (output) camera's axes
+    pub fn view_rotation(params: &ComputeParams) -> crate::gyro_source::Quat64 {
+        use nalgebra::Vector3;
+        use crate::gyro_source::Quat64;
+        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
+        let (yaw, pitch, roll) = params.view_rotation;
+        // Gyroflow's quaternions turn the other way from the picture's axes: + yaw looks right (the picture moves
+        // left), + pitch looks down, + roll turns the camera clockwise (the picture counterclockwise)
+        Quat64::from_axis_angle(&Vector3::y_axis(), -yaw * DEG2RAD)
+            * Quat64::from_axis_angle(&Vector3::x_axis(), -pitch * DEG2RAD)
+            * Quat64::from_axis_angle(&Vector3::z_axis(), -roll * DEG2RAD)
+    }
+    /// The smoothed quaternion (the smooth camera's to the raw one's rotation) with the output camera turned by
+    /// `view_rotation` in its own axes: the turn goes before it, not after (after, it would be in the raw camera's
+    /// axes, which shake)
+    pub fn smoothed_with_view(gyro: &crate::gyro_source::GyroSource, params: &ComputeParams, timestamp_ms: f64, lookup: &crate::gyro_source::MotionLookup) -> crate::gyro_source::Quat64 {
+        Self::view_rotation(params).inverse() * gyro.smoothed_quat_at(timestamp_ms, lookup)
+    }
+
     fn get_new_k(params: &ComputeParams, camera_matrix: &Matrix3<f64>, fov: f64) -> Matrix3<f64> {
         let horizontal_ratio = if params.lens.input_horizontal_stretch > 0.01 { params.lens.input_horizontal_stretch } else { 1.0 };
 
@@ -374,7 +395,7 @@ impl FrameTransform {
         // The motion data of the frame's segment, for every row of it (`GyroSource::lookup_for_frame`)
         let lookup = gyro.lookup_for_frame(frame);
         let quat1 = gyro.org_quat_at(timestamp_ms, &lookup).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at(timestamp_ms, &lookup);
+        let smoothed_quat1 = Self::smoothed_with_view(&gyro, params, timestamp_ms, &lookup);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
@@ -523,7 +544,7 @@ impl FrameTransform {
         // The motion data of the frame's segment, for every row of it (`GyroSource::lookup_for_frame`)
         let lookup = gyro.lookup_for_frame(frame);
         let quat1 = gyro.org_quat_at(timestamp_ms, &lookup).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at(timestamp_ms, &lookup);
+        let smoothed_quat1 = Self::smoothed_with_view(&gyro, params, timestamp_ms, &lookup);
 
         // Only compute 1 matrix if not using rolling shutter correction; it stands for the whole frame, so the
         // per-row data (sensor and lens shift, lens breathing) is looked up at the centre row, like `at_timestamp` does

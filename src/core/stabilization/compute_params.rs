@@ -54,6 +54,9 @@ pub struct ComputeParams {
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
     pub additional_rotation: (f64, f64, f64),
+    /// Where the output camera looks, after the smoothing: yaw, pitch and roll in degrees, as `additional_rotation`
+    /// takes them. Unlike that one it changes no smoothing, so a viewer can turn the camera from frame to frame
+    pub view_rotation: (f64, f64, f64),
     pub additional_translation: (f64, f64, f64),
     pub framebuffer_inverted: bool,
     pub suppress_rotation: bool,
@@ -167,6 +170,7 @@ impl ComputeParams {
             adaptive_zoom_window: params.adaptive_zoom_window,
             adaptive_zoom_center_offset: params.adaptive_zoom_center_offset,
             additional_rotation: params.additional_rotation,
+            view_rotation: (0.0, 0.0, 0.0),
             additional_translation: params.additional_translation,
             adaptive_zoom_method: params.adaptive_zoom_method,
             video_speed: params.video_speed,
@@ -290,6 +294,7 @@ impl std::fmt::Debug for ComputeParams {
          .field("adaptive_zoom_window",      &self.adaptive_zoom_window)
          .field("adaptive_zoom_center_offset", &self.adaptive_zoom_center_offset)
          .field("additional_rotation",       &self.additional_rotation)
+         .field("view_rotation",             &self.view_rotation)
          .field("additional_translation",    &self.additional_translation)
          .field("adaptive_zoom_method",      &self.adaptive_zoom_method)
          .field("fixed_zoom",                &self.fixed_zoom)
