@@ -106,8 +106,8 @@ MenuItem {
             if (additional_data.camera_identifier) {
                 const camera_id = additional_data.camera_identifier;
                 if (camera_id) {
-                    if (camera_id.brand)      { calib.calibrationInfo.camera_brand = camera_id.brand; }
-                    if (camera_id.model)      { calib.calibrationInfo.camera_model = camera_id.model; }
+                    if (camera_id.brand)      { calib.calibrationInfo.camera_brand = controller.normalize_camera_brand(camera_id.brand); }
+                    if (camera_id.model)      { calib.calibrationInfo.camera_model = controller.normalize_camera_model(calib.calibrationInfo.camera_brand || camera_id.brand || "", camera_id.model); }
                     if (camera_id.lens_model) { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_model : camera_id.lens_model; }
                     if (camera_id.lens_info)  { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_info  : camera_id.lens_info;  }
                     if (camera_id.camera_setting) { calib.calibrationInfo.camera_setting = camera_id.camera_setting; }
@@ -125,6 +125,7 @@ MenuItem {
             }
             if (+additional_data.horizontal_stretch > 0.01) xStretch.value = +additional_data.horizontal_stretch;
             if (+additional_data.vertical_stretch   > 0.01) yStretch.value = +additional_data.vertical_stretch;
+            calib.syncCalibratorSelectors();
             calib.updateTable();
             sizeTimer.start();
         }
@@ -221,6 +222,107 @@ MenuItem {
             height: 25 * dpiScale;
             value: 15;
             from: 1;
+        }
+    }
+
+    property var calibBrands: [qsTr("Select brand..."), qsTr("Other")];
+    property var calibModels: [qsTr("Select model..."), qsTr("Other")];
+    property var calibLenses: [qsTr("Select lens..."), qsTr("Other")];
+    property bool syncingCalibSelectors: false;
+
+    function syncCalibratorSelectors(): void {
+        calib.syncingCalibSelectors = true;
+        const brands = controller.get_camera_brands();
+        calib.calibBrands = [qsTr("Select brand...")].concat(brands).concat([qsTr("Other")]);
+        const b = calib.calibrationInfo.camera_brand || "";
+        const m = calib.calibrationInfo.camera_model || "";
+        const l = calib.calibrationInfo.lens_model || "";
+        const bIdx = b ? calib.calibBrands.indexOf(b) : -1;
+        if (bIdx > 0) {
+            calibBrandCombo.currentIndex = bIdx;
+            const models = controller.get_camera_models(b);
+            calib.calibModels = [qsTr("Select model...")].concat(models).concat([qsTr("Other")]);
+            const mIdx = m ? calib.calibModels.indexOf(m) : -1;
+            if (mIdx > 0) {
+                calibModelCombo.currentIndex = mIdx;
+                const lenses = controller.get_camera_lenses(b, m);
+                calib.calibLenses = [qsTr("Select lens...")].concat(lenses).concat([qsTr("Other")]);
+                const lIdx = l ? calib.calibLenses.indexOf(l) : -1;
+                calibLensCombo.currentIndex = lIdx > 0 ? lIdx : (l ? calib.calibLenses.length - 1 : 0);
+            } else {
+                calibModelCombo.currentIndex = m ? calib.calibModels.length - 1 : 0;
+            }
+        } else if (b) {
+            calibBrandCombo.currentIndex = calib.calibBrands.length - 1;
+        }
+        calib.syncingCalibSelectors = false;
+    }
+
+    Column {
+        width: parent.width;
+        spacing: 6 * dpiScale;
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Camera brand");
+            ComboBox {
+                id: calibBrandCombo;
+                width: parent.width;
+                height: 25 * dpiScale;
+                model: calib.calibBrands;
+                Component.onCompleted: calib.syncCalibratorSelectors();
+                onCurrentIndexChanged: {
+                    if (calib.syncingCalibSelectors) return;
+                    const isOther = currentIndex === calib.calibBrands.length - 1;
+                    if (currentIndex > 0 && !isOther) {
+                        const b = calib.calibBrands[currentIndex];
+                        calib.calibrationInfo.camera_brand = b;
+                        calib.calibModels = [qsTr("Select model...")].concat(controller.get_camera_models(b)).concat([qsTr("Other")]);
+                        calibModelCombo.currentIndex = 0;
+                        calib.updateTable();
+                    }
+                }
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Camera model");
+            ComboBox {
+                id: calibModelCombo;
+                width: parent.width;
+                height: 25 * dpiScale;
+                model: calib.calibModels;
+                onCurrentIndexChanged: {
+                    if (calib.syncingCalibSelectors) return;
+                    const isOther = currentIndex === calib.calibModels.length - 1;
+                    if (currentIndex > 0 && !isOther) {
+                        const b = calib.calibrationInfo.camera_brand || "";
+                        const m = calib.calibModels[currentIndex];
+                        calib.calibrationInfo.camera_model = m;
+                        calib.calibLenses = [qsTr("Select lens...")].concat(controller.get_camera_lenses(b, m)).concat([qsTr("Other")]);
+                        calibLensCombo.currentIndex = 0;
+                        calib.updateTable();
+                    }
+                }
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Lens model");
+            ComboBox {
+                id: calibLensCombo;
+                width: parent.width;
+                height: 25 * dpiScale;
+                model: calib.calibLenses;
+                onCurrentIndexChanged: {
+                    if (calib.syncingCalibSelectors) return;
+                    const isOther = currentIndex === calib.calibLenses.length - 1;
+                    if (currentIndex > 0 && !isOther) {
+                        calib.calibrationInfo.lens_model = calib.calibLenses[currentIndex];
+                        calib.updateTable();
+                    }
+                }
+            }
         }
     }
 
