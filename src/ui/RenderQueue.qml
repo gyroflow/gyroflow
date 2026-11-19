@@ -695,10 +695,14 @@ Item {
         anchors.margins: 0 * dpiScale;
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
-        visible: !lv.isDragging;
-        function add(outFolder: string, urls: list<url>): void {
+        visible: root.shown && !lv.isDragging && window.exportSettings != null && window.sync != null;
+
+        function isProject(url: url): bool {
+            return filesystem.get_filename(url).toLowerCase().endsWith(".gyroflow");
+        }
+
+        function add(outFolder: string, urls: list<url>, additional: var): void {
             let foldersWithoutAccess = [];
-            let additional = window.getAdditionalProjectData();
             if (!outFolder) {
                 delete additional.output.output_folder;
                 delete additional.output.output_filename;
@@ -726,16 +730,16 @@ Item {
                     remaining--;
                     let el = messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
                         { text: qsTr("Ok"), clicked: () => {
-                            outputFile.selectFolder(folder, function(_) { if (!remaining) add(outFolder, urls); });
+                            outputFile.selectFolder(folder, function(_) { if (!remaining) add(outFolder, urls, additional); });
                         }},
                     ], undefined, Text.AutoText, "file-access-restriction");
                     if (!el) { // Don't show again triggered
-                        outputFile.selectFolder(folder, function(_) { if (!remaining) add(outFolder, urls); });
+                        outputFile.selectFolder(folder, function(_) { if (!remaining) add(outFolder, urls, additional); });
                     }
                 }
                 return;
             }
-            additional = JSON.stringify(additional);
+            const settingsSnapshot = JSON.stringify(additional);
 
             // Natural sort the URLs
             const ne = str => str.toString().replace(/\d+/g, n => n.padStart(8, "0"));
@@ -743,17 +747,22 @@ Item {
             urls.sort(nc);
 
             for (const url of urls) {
-                const job_id = render_queue.add_file(url.toString(), "", additional);
+                const job_id = isProject(url)
+                    ? render_queue.add_file(url.toString(), "", settingsSnapshot)
+                    : render_queue.add_file_with_current_export(url.toString(), settingsSnapshot);
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();
         }
         onLoadFiles: (urls) => {
             if (!urls.length) return;
-            if (filesystem.get_filename(urls[0]).toLowerCase().endsWith(".gyroflow")) {
-                add("", urls);
+            const additional = window.getAdditionalProjectData();
+            if (isProject(urls[0])) {
+                dt.add("", urls, additional);
             } else {
-                window.videoArea.askForOutputLocation(window.outputFile.folderUrl, "", true, function(outFolder, _, __) { add(outFolder, urls); });
+                window.videoArea.askForOutputLocation(window.outputFile.folderUrl, "", true, function(outFolder, _, __) {
+                    dt.add(outFolder, urls, additional);
+                });
             }
         }
     }
