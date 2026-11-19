@@ -53,7 +53,10 @@ pub fn undistort_fragment(
     #[spirv(spec_constant(id = 103))] flags: u32,
     output: &mut ScalarVec4,
 ) {
-    *output = from_float(undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, coeffs, mesh_data, drawing, input_texture, 0.0, interpolation, distortion_model, digital_distortion_model, flags));
+    // A fragment's coordinate is its pixel's centre, `x + 0.5`, and the kernel takes the pixel itself, as the CPU and
+    // OpenCL hand it over: this sampler has the input's pixel centres on whole coordinates too (the Qt one above samples
+    // a texture by its corners, so it takes the centre as it comes)
+    *output = from_float(undistort(vec2(in_frag_coord.x - 0.5, in_frag_coord.y - 0.5), params, matrices, coeffs, mesh_data, drawing, input_texture, 0.0, interpolation, distortion_model, digital_distortion_model, flags));
 }
 
 #[spirv(vertex)]

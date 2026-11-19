@@ -365,6 +365,13 @@ impl WgpuWrapper {
             lens_model_functions.push_str(digital_lens.as_ref().map(|x| x.wgsl_functions()).unwrap_or(default_digital_lens));
             kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions);
             kernel = kernel.replace("SCALAR", wgpu_format.1);
+            // The partial correction's 2D polish is for a lens with terms that aren't radial only: the others' solve along
+            // the ray's radius is the answer, and their kernel compiles without it
+            if !distortion_model.has_non_radial_terms() {
+                while let Some(pos) = kernel.find("{non_radial}") {
+                    kernel.replace_range(pos..kernel.find("{/non_radial}").unwrap() + 13, "");
+                }
+            }
 
             if !drawing_enabled {
                 drawing_len = 16;

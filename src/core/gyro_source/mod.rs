@@ -582,7 +582,10 @@ impl GyroSource {
                         None => read_lens_tags(tag_map, frame_mapping, size, is_red, is_gyroflow_proto, &mut frame_readout_direction_tag, &mut lens_profile, &mut lens_positions, timestamp_us),
                     };
                     tags.apply(&mut lens_info);
-                    if lens_info.has_geometry() || lens_info.has_descriptive_data() {
+                    // A frame that states its projection (its focal in pixels, its distortion) is the frame's lens even
+                    // without the sensor geometry to place it on: what the per-frame lens lookup asks for
+                    // (`FileMetadata::lens_params_closest_in` with `LensParams::has_projection_data`)
+                    if lens_info.has_geometry() || lens_info.has_projection_data() || lens_info.has_descriptive_data() {
                         lens_params.insert(timestamp_us, lens_info.clone());
                     }
 

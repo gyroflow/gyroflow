@@ -6,6 +6,14 @@ use super::DistortionModel;
 
 use super::types::*;
 
+/// The model has terms that aren't radial (decentering, thin prism), which move a ray off its own azimuth: only then
+/// does the partial correction's solve along the ray's radius leave the 2D map to finish (`polish_blend`). See
+/// `DistortionModel::has_non_radial_terms` in the core
+pub fn lens_has_non_radial_terms(distortion_model: u32) -> bool {
+    let m = distortion_model as i32;
+    m == DistortionModel::OpenCVStandard as i32 || m == DistortionModel::Insta360 as i32 || m == DistortionModel::Insta360V6 as i32
+}
+
 #[inline(never)]
 pub fn lens_undistort(point: Vec2, params: &KernelParams, distortion_model: u32) -> Vec2 {
     if params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0 { return point; }

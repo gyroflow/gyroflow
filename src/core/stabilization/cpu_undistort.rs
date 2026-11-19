@@ -401,12 +401,74 @@ impl Stabilization {
                         },
                         None => u
                     };
+                    // That is still the solve along `u`, with the lens's leg turned by a first-order account of its own,
+                    // and a lens with large terms that aren't radial lands tens of pixels from `nb` that way: Newton on
+                    // the whole 2D map from there, the map `undistort_points` evaluates. A lens without such terms has
+                    // its answer in the solve along `u` already, and the GPU kernels are built without this for it
                     ray = (dir.0 * theta, dir.1 * theta);
+                    if distortion_model.has_non_radial_terms() {
+                        ray = Self::polish_blend(ray, (nb.x, nb.y), a, cap, params, distortion_model);
+                    }
                 }
             }
         }
         ///////////////////////////////////////////////////////////////////
         Some((ray, out_pos))
+    }
+
+    /// Where `ray` lands on the output plane under a partial correction, `(1-a)·D(ray) + a·P(θ)·û`, less `nb`, where it
+    /// should: the whole 2D point `undistort_points` puts it at, the source lens's leg off the ray's radius by whatever
+    /// terms of the lens aren't radial. `D` carries the refraction, as the solve along the radius has it
+    fn blend_offset(ray: (f32, f32), nb: (f32, f32), a: f32, params: &KernelParams, distortion_model: &DistortionModel) -> (f32, f32) {
+        let theta = (ray.0 * ray.0 + ray.1 * ray.1).sqrt();
+        if theta < 1e-12 { return (-nb.0, -nb.1); }
+        let u = (ray.0 / theta, ray.1 / theta);
+        let mut th = theta;
+        if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
+            th = (th.sin() * params.light_refraction_coefficient).clamp(-1.0, 1.0).asin();
+        }
+        let (s, c) = (th.sin(), th.cos());
+        let p = distortion_model.distort_point(u.0 * s, u.1 * s, c, params);
+        let rp = projection::radius_of_theta(theta, params.output_projection);
+        ((1.0 - a) * p.0 + a * u.0 * rp - nb.0, (1.0 - a) * p.1 + a * u.1 * rp - nb.1)
+    }
+
+    /// Newton on [`Self::blend_offset`] from `ray`, the Jacobian by differences since the lens is any model. A step is only
+    /// taken where it brings the blend closer to `nb` and stays inside `cap`, the end of the lens's field (halved until
+    /// it does, four times at most), and never from where the map has turned over: both legs keep their orientation
+    /// on the branch the camera images with. For a lens with radial terms only the solve along the radius already is the
+    /// answer, to a few millionths, and this is mostly one evaluation of the blend
+    fn polish_blend(mut ray: (f32, f32), nb: (f32, f32), a: f32, cap: f32, params: &KernelParams, distortion_model: &DistortionModel) -> (f32, f32) {
+        // A thousandth of a pixel and less, at any focal length a frame is drawn at
+        let tol = 1e-6 * (1.0 + (nb.0 * nb.0 + nb.1 * nb.1).sqrt());
+        let mut e = Self::blend_offset(ray, nb, a, params, distortion_model);
+        let mut err = e.0.abs().max(e.1.abs());
+        for _ in 0..4 {
+            if !(err > tol) { break; } // and a NaN, which no step can mend
+            // The differences step toward the axis, so they never reach past the end of the lens, or of the projection
+            let hx = if ray.0 > 0.0 { -1e-3 } else { 1e-3 };
+            let hy = if ray.1 > 0.0 { -1e-3 } else { 1e-3 };
+            let ex = Self::blend_offset((ray.0 + hx, ray.1), nb, a, params, distortion_model);
+            let ey = Self::blend_offset((ray.0, ray.1 + hy), nb, a, params, distortion_model);
+            let (j00, j10) = ((ex.0 - e.0) / hx, (ex.1 - e.1) / hx);
+            let (j01, j11) = ((ey.0 - e.0) / hy, (ey.1 - e.1) / hy);
+            let det = j00 * j11 - j01 * j10;
+            if !(det > 0.0) { break; }
+            let step = ((j11 * e.0 - j01 * e.1) / det, (j00 * e.1 - j10 * e.0) / det);
+            let mut lambda = 1.0f32;
+            let mut moved = false;
+            for _ in 0..4 {
+                let c = (ray.0 - lambda * step.0, ray.1 - lambda * step.1);
+                if c.0 * c.0 + c.1 * c.1 <= cap * cap {
+                    let ce = Self::blend_offset(c, nb, a, params, distortion_model);
+                    let cerr = ce.0.abs().max(ce.1.abs());
+                    if cerr < err { ray = c; e = ce; err = cerr; moved = true; break; }
+                }
+                lambda *= 0.5;
+            }
+            if !moved { break; }
+        }
+        ray
     }
 
     /// Ray -> source pixel. `ray` is an angle vector (`θ·û`, see [`super::projection`]) in the output

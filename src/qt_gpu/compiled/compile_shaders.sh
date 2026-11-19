@@ -3,8 +3,11 @@ QSB='../../../ext/6.4.3/msvc2019_64/bin/qsb.exe --glsl "120,300 es,310 es,320 es
 
 NO_DIGITAL_LENS="vec2 digital_undistort_point(vec2 uv) { return uv; } vec2 digital_distort_point(vec2 uv) { return uv; }"
 
-DISTORTION_MODELS=( "opencv_fisheye" "opencv_standard" "poly3" "poly5" "ptlens" "insta360" "sony" "generic_polynomial" "gopro" )
+DISTORTION_MODELS=( "opencv_fisheye" "opencv_standard" "poly3" "poly5" "ptlens" "insta360" "insta360_v6" "sony" "generic_polynomial" "gopro" )
 DIGITAL_LENSES=( "" "gopro_superview" "gopro6_superview" "gopro_hyperview" "gopro_warp" "digital_stretch" )
+# The lenses with terms that aren't radial (DistortionModel::has_non_radial_terms): only their shaders keep the
+# partial correction's 2D polish, the {non_radial} sections of undistort.frag
+NON_RADIAL_MODELS=( "opencv_standard" "insta360" "insta360_v6" )
 
 for i in "${DISTORTION_MODELS[@]}"
 do
@@ -35,7 +38,11 @@ do
         fi
 
         FUNCS="$FUNCS `cat ../../core/stabilization/distortion_models/$i.glsl`"
-        SHADER=`cat ../undistort.frag`
+        if [[ " ${NON_RADIAL_MODELS[*]} " == *" $i "* ]]; then
+            SHADER=`cat ../undistort.frag`
+        else
+            SHADER=`sed '/{non_radial}/,/{\/non_radial}/d' ../undistort.frag`
+        fi
 
         echo "${SHADER/LENS_MODEL_FUNCTIONS;/"$FUNCS"}" > tmp.frag
 

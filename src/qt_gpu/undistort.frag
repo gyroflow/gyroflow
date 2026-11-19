@@ -153,6 +153,57 @@ float blend_residual(float theta, vec2 u, float t, float a) {
     vec2 p = distort_point(u.x * s, u.y * s, c);
     return (1.0 - a) * length(p) + a * ray_radius(theta, params.output_projection) - t;
 }
+// {non_radial} The 2D polish of a partial correction, for a lens with terms that aren't radial only (the section is left
+// out of the kernel of every other lens: DistortionModel::has_non_radial_terms)
+// Where `ray` lands on the output plane under a partial correction, `(1-a)*D(ray) + a*P(theta)*u`, less `nb`, where it
+// should: the whole 2D point, the source lens's leg off the ray's radius by whatever terms of the lens aren't radial.
+// `D` carries the refraction, as blend_residual's does
+vec2 blend_offset(vec2 ray, vec2 nb, float a) {
+    float theta = length(ray);
+    if (theta < 1e-12) return -nb;
+    vec2 u = ray / theta;
+    float th = theta;
+    if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+        th = asin(clamp(sin(th) * params.light_refraction_coefficient, -1.0, 1.0));
+    }
+    float s = sin(th), c = cos(th);
+    vec2 p = distort_point(u.x * s, u.y * s, c);
+    return (1.0 - a) * p + a * u * ray_radius(theta, params.output_projection) - nb;
+}
+// Newton on blend_offset from `ray`, the Jacobian by differences since the lens is any model: a step is only taken
+// where it brings the blend closer to `nb` and stays inside `cap`, the end of the lens's field (halved until it does,
+// four times at most), and never from where the map has turned over. For a lens with radial terms only the solve along
+// the radius already is the answer, to a few millionths, and this is mostly one evaluation of the blend. See polish_blend in cpu_undistort.rs
+vec2 polish_blend(vec2 ray, vec2 nb, float a, float cap) {
+    float tol = 1e-6 * (1.0 + length(nb));
+    vec2 e = blend_offset(ray, nb, a);
+    float err = max(abs(e.x), abs(e.y));
+    for (int it = 0; it < 4; ++it) {
+        if (!(err > tol)) break;
+        // The differences step toward the axis, so they never reach past the end of the lens, or of the projection
+        float hx = ray.x > 0.0? -1e-3 : 1e-3;
+        float hy = ray.y > 0.0? -1e-3 : 1e-3;
+        vec2 jx = (blend_offset(vec2(ray.x + hx, ray.y), nb, a) - e) / hx; // (dx/drx, dy/drx)
+        vec2 jy = (blend_offset(vec2(ray.x, ray.y + hy), nb, a) - e) / hy; // (dx/dry, dy/dry)
+        float det = jx.x * jy.y - jy.x * jx.y;
+        if (!(det > 0.0)) break;
+        vec2 step = vec2(jy.y * e.x - jy.x * e.y, jx.x * e.y - jx.y * e.x) / det;
+        float lambda = 1.0;
+        bool moved = false;
+        for (int b = 0; b < 4; ++b) {
+            vec2 c = ray - lambda * step;
+            if (dot(c, c) <= cap * cap) {
+                vec2 ce = blend_offset(c, nb, a);
+                float cerr = max(abs(ce.x), abs(ce.y));
+                if (cerr < err) { ray = c; e = ce; err = cerr; moved = true; break; }
+            }
+            lambda *= 0.5;
+        }
+        if (!moved) break;
+    }
+    return ray;
+}
+// {/non_radial}
 // The ray angle that lands at a given output radius, inverse of `ray_radius`
 float ray_theta(float r, int proj) {
     if (proj == 1) return 2.0 * atan(r * 0.5);
@@ -335,7 +386,14 @@ void main() {
                                 if (dl > 1e-12) dir = dd / dl;
                             }
                         }
+                        // That is still the solve along `u`, with the lens's leg turned by a first-order account of its
+                        // own, and a lens with large terms that aren't radial lands tens of pixels from `nb` that way:
+                        // Newton on the whole 2D map from there, the map the point path evaluates. A lens without such terms has
+                        // its answer in the solve along `u` already, and its kernel is built without this
                         ray = dir * theta;
+                        // {non_radial}
+                        ray = polish_blend(ray, nb, a, cap);
+                        // {/non_radial}
                     }
                 }
             }

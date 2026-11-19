@@ -51,6 +51,56 @@ pub fn blend_residual(theta: f32, u: Vec2, t: f32, a: f32, params: &KernelParams
     let p = lens_distort(vec3(u.x * s, u.y * s, c), params, distortion_model);
     (1.0 - a) * p.length() + a * ray_radius(theta, params.output_projection) - t
 }
+/// Where `ray` lands on the output plane under a partial correction, `(1-a)·D(ray) + a·P(θ)·û`, less `nb`, where it
+/// should: the whole 2D point, the source lens's leg off the ray's radius by whatever terms of the lens aren't radial.
+/// `D` carries the refraction, as [`blend_residual`]'s does
+pub fn blend_offset(ray: Vec2, nb: Vec2, a: f32, params: &KernelParams, distortion_model: u32) -> Vec2 {
+    let theta = ray.length();
+    if theta < 1e-12 { return -nb; }
+    let u = ray / theta;
+    let mut th = theta;
+    if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
+        th = (th.sin() * params.light_refraction_coefficient).clamp(-1.0, 1.0).asin();
+    }
+    let (s, c) = (th.sin(), th.cos());
+    let p = lens_distort(vec3(u.x * s, u.y * s, c), params, distortion_model);
+    p * (1.0 - a) + u * (a * ray_radius(theta, params.output_projection)) - nb
+}
+/// Newton on [`blend_offset`] from `ray`, the Jacobian by differences since the lens is any model: a step is only taken
+/// where it brings the blend closer to `nb` and stays inside `cap`, the end of the lens's field (halved until it does,
+/// four times at most), and never from where the map has turned over. For a lens with radial terms only the solve along
+/// the radius already is the answer, to a few millionths, and this is mostly one evaluation of the blend. See `polish_blend` in cpu_undistort.rs
+pub fn polish_blend(mut ray: Vec2, nb: Vec2, a: f32, cap: f32, params: &KernelParams, distortion_model: u32) -> Vec2 {
+    let tol = 1e-6 * (1.0 + nb.length());
+    let mut e = blend_offset(ray, nb, a, params, distortion_model);
+    let mut err = e.x.abs().max(e.y.abs());
+    let mut it = 0; while it < 4 {
+        if !(err > tol) { break; }
+        // The differences step toward the axis, so they never reach past the end of the lens, or of the projection
+        let hx = if ray.x > 0.0 { -1e-3 } else { 1e-3 };
+        let hy = if ray.y > 0.0 { -1e-3 } else { 1e-3 };
+        let jx = (blend_offset(vec2(ray.x + hx, ray.y), nb, a, params, distortion_model) - e) / hx; // (∂x/∂rx, ∂y/∂rx)
+        let jy = (blend_offset(vec2(ray.x, ray.y + hy), nb, a, params, distortion_model) - e) / hy; // (∂x/∂ry, ∂y/∂ry)
+        let det = jx.x * jy.y - jy.x * jx.y;
+        if !(det > 0.0) { break; }
+        let step = vec2(jy.y * e.x - jy.x * e.y, jx.x * e.y - jx.y * e.x) / det;
+        let mut lambda = 1.0;
+        let mut moved = false;
+        let mut b = 0; while b < 4 {
+            let c = ray - step * lambda;
+            if c.dot(c) <= cap * cap {
+                let ce = blend_offset(c, nb, a, params, distortion_model);
+                let cerr = ce.x.abs().max(ce.y.abs());
+                if cerr < err { ray = c; e = ce; err = cerr; moved = true; break; }
+            }
+            lambda *= 0.5;
+            b += 1;
+        }
+        if !moved { break; }
+        it += 1;
+    }
+    ray
+}
 /// The ray angle that lands at a given output radius, inverse of [`ray_radius`]
 pub fn ray_theta(r: f32, proj: i32) -> f32 {
     if proj == 1 { 2.0 * (r * 0.5).atan() }
@@ -239,7 +289,12 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
                                 if dl > 1e-12 { dir = dd / dl; }
                             }
                         }
+                        // That is still the solve along `u`, with the lens's leg turned by a first-order account of its
+                        // own, and a lens with large terms that aren't radial lands tens of pixels from `nb` that way:
+                        // Newton on the whole 2D map from there, the map the point path evaluates. A lens without
+                        // such terms has its answer in the solve along `u` already
                         ray = dir * theta;
+                        if lens_has_non_radial_terms(distortion_model) { ray = polish_blend(ray, nb, a, cap, params, distortion_model); }
                     }
                 }
             }

@@ -2,6 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 use crate::stabilization::KernelParams;
+use super::{ Real, c };
 
 #[derive(Default, Clone)]
 pub struct Insta360 { }
@@ -12,10 +13,10 @@ impl Insta360 {
         let m2 = m * m;
         m * (1.0 + k1*m2 + k2*m2*m2 + k3*m2*m2*m2)
     }
-    /// `d(radial)/dm`
-    #[inline] fn radial_derivative(m: f32, k1: f32, k2: f32, k3: f32) -> f32 {
+    /// `d(radial)/dm`, in either precision (see `Real`): the render's and [`Self::distortion_derivative`]'s
+    #[inline] fn radial_derivative<T: Real>(m: T, k1: T, k2: T, k3: T) -> T {
         let m2 = m * m;
-        1.0 + 3.0*k1*m2 + 5.0*k2*m2*m2 + 7.0*k3*m2*m2*m2
+        c::<T>(1.0) + c::<T>(3.0)*k1*m2 + c::<T>(5.0)*k2*m2*m2 + c::<T>(7.0)*k3*m2*m2*m2
     }
     /// How far the *sphere* reaches: it folds at `θ = acos(-1/ξ)` (120° for the X5's ξ = 2), and for ξ ≤ 1
     /// it never folds but runs to infinity at `acos(-ξ)`, which [`Self::field_limit`] puts an epsilon short
@@ -90,18 +91,25 @@ impl Insta360 {
         // Past the end of the projection's rising branch there is no ray at all - but only where the
         // sphere's own end *is* that end. Where the polynomial folds first, `radial(m_max)` is a value off
         // the far side of the fold and says nothing about the largest radius the lens images; the solve's
-        // own answer, checked below, is what decides there
+        // own answer, checked below, is what decides there. And only past what the tangential terms add to it:
+        // they carry the image of the sphere's rim out of the circle `radial(m_max)` in some directions, and
+        // the 2D solve below decides there
         let m_max = Self::m_max(xi);
-        if Self::radial_derivative(m_max, k1, k2, k3) > 0.0 && Self::radial(m_max, k1, k2, k3) < r_d { return None; }
+        let mm = m_max * m_max;
+        let sphere_ends = Self::radial_derivative(m_max, k1, k2, k3) > 0.0;
+        if sphere_ends && Self::radial(m_max, k1, k2, k3) + 4.0 * mm * (p1.abs() + p2.abs()) < r_d { return None; }
+        // Between the two only a point the solve reaches is one (`converged`): what it stalls at short of a point out
+        // there is the edge of the image, and the point past it
+        let past_the_rim = sphere_ends && Self::radial(m_max, k1, k2, k3) < r_d;
 
-        // Strip the tangential terms, invert the radial polynomial, re-evaluate them: three passes are
-        // already exact to ~1e-9 of the ray radius, and unlike a fixed-point iteration on the whole
-        // 2D map it stays stable where the projection compresses hardest (the old 200-step loop
-        // silently gave up well inside the valid field, from ~74° on the X5).
+        // Strip the tangential terms, invert the radial polynomial, re-evaluate them: with a camera's own
+        // small terms three passes are already exact to ~1e-9 of the ray radius, and unlike a fixed-point
+        // iteration on the whole 2D map it stays stable where the projection compresses hardest (the old
+        // 200-step loop silently gave up well inside the valid field, from ~74° on the X5).
         let (mut ax, mut ay) = point;
-        let (mut u, mut v, mut m, mut r_s) = (0.0f32, 0.0f32, r_d, r_d);
+        let (mut u, mut v, mut m) = (0.0f32, 0.0f32, r_d);
         for _ in 0..3 {
-            r_s = (ax * ax + ay * ay).sqrt();
+            let r_s = (ax * ax + ay * ay).sqrt();
             m = Self::solve_radial(r_s, m, m_max, k1, k2, k3);
             let s = if r_s > 1e-12 { m / r_s } else { 0.0 };
             u = ax * s;
@@ -110,11 +118,17 @@ impl Insta360 {
             ax = point.0 - (2.0*p1*u*v + p2*(r2 + 2.0*u*u));
             ay = point.1 - (2.0*p2*u*v + p1*(r2 + 2.0*v*v));
         }
+        // Each pass shrinks the error by about the size of the tangential terms, though, and large ones leave it
+        // pixels off: Newton on the whole map finishes from there, inside the sphere's fold
+        let err;
+        ((u, v), err) = super::polish_inverse(point, (u, v), |u, v| Self::map_with_jacobian(u, v, k1, k2, k3, p1, p2), |u, v| u*u + v*v <= mm);
         // `solve_radial` returns the end of the rising branch when `r` is past everything the lens images,
-        // so the radius it actually reached is the test of whether there was a ray here at all. This is the
-        // whole of the rejection wherever the polynomial folds inside the sphere - a ξ ≤ 1 body has no
-        // sphere fold to be bounded by, and asking a folded polynomial for its maximum gives nonsense
-        if (Self::radial(m, k1, k2, k3) - r_s).abs() > 1e-4 * (1.0 + r_s) { return None; }
+        // so how far the map lands from the point is the test of whether there was a ray here at all. This is
+        // the whole of the rejection wherever the polynomial folds inside the sphere - a ξ ≤ 1 body has no
+        // sphere fold to be bounded by, and asking a folded polynomial for its maximum gives nonsense. A point
+        // past a fold of the 2D map has no ray either (an infinite `err`): the camera images the other branch
+        let accept = if past_the_rim { super::converged(point) } else { 1e-4 * (1.0 + r_d) };
+        if !(err <= accept) { return None; }
 
         // Unified sphere -> ray angle. The sphere point is `(u·α, v·α, α - ξ)`, already a unit vector, so
         // the angle falls out of `atan2` - where the old `x/z` went to infinity at 90° and cost an X4/X5
@@ -153,6 +167,22 @@ impl Insta360 {
             y * (1.0 + k1*r2 + k2*r4 + k3*r6) + 2.0*p2*x*y + p1*(r2 + 2.0*y*y)
         )
     }
+    /// The projection of a unified-sphere plane point, as [`Self::distort_point`] has it, and its Jacobian:
+    /// `(x, y, ∂x/∂u, ∂x/∂v, ∂y/∂u, ∂y/∂v)`
+    #[inline]
+    fn map_with_jacobian(u: f32, v: f32, k1: f32, k2: f32, k3: f32, p1: f32, p2: f32) -> (f32, f32, f32, f32, f32, f32) {
+        let r2 = u*u + v*v;
+        let rad = 1.0 + r2 * (k1 + r2 * (k2 + r2 * k3));
+        let drad = k1 + r2 * (2.0*k2 + 3.0*k3*r2); // d(rad)/d(r²)
+        (
+            u * rad + 2.0*p1*u*v + p2*(r2 + 2.0*u*u),
+            v * rad + 2.0*p2*u*v + p1*(r2 + 2.0*v*v),
+            rad + 2.0*u*u*drad + 2.0*p1*v + 6.0*p2*u,
+            2.0*u*v*drad       + 2.0*p1*u + 2.0*p2*v,
+            2.0*u*v*drad       + 2.0*p2*v + 2.0*p1*u,
+            rad + 2.0*v*v*drad + 2.0*p2*u + 6.0*p1*v,
+        )
+    }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     /// The lens's own field end, in radians: the unified sphere folds at `acos(-1/ξ)` - 120° for the X5's
@@ -174,10 +204,8 @@ impl Insta360 {
         let d = c + xi;
         if d.abs() < 1e-9 { return None; }
         let m = theta.sin() / d;
-        let m2 = m * m;
         let dm_dtheta = (1.0 + xi * c) / (d * d);
-        let dr_dm = 1.0 + 3.0*k1*m2 + 5.0*k2*m2*m2 + 7.0*k3*m2*m2*m2;
-        Some(dr_dm * dm_dtheta)
+        Some(Self::radial_derivative(m, k1, k2, k3) * dm_dtheta)
     }
 
     pub fn id() -> &'static str { "insta360" }

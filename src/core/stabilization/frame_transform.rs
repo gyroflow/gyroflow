@@ -167,7 +167,13 @@ impl FrameTransform {
         let digital_zoom = file_metadata.digital_zoom.unwrap_or_default();
 
         if lens.fisheye_params.distortion_coeffs.len() < 4 {
-            if let Some(val) = file_metadata.lens_params_closest_in(keys.clone(), lens_timestamp_us, 100000, |v| v.has_projection_data()) { // closest within 100ms
+            // The closest within 100 ms. A profile without coefficients of its own has no lens but its frames': past that,
+            // the nearest frame's, however far, rather than all-zero coefficients, which are another lens altogether
+            let closest = file_metadata.lens_params_closest_in(keys.clone(), lens_timestamp_us, 100000, |v| v.has_projection_data())
+                .or_else(|| if lens.fisheye_params.distortion_coeffs.is_empty() {
+                    file_metadata.lens_params_closest_in(keys.clone(), lens_timestamp_us, i64::MAX, |v| v.has_projection_data())
+                } else { None });
+            if let Some(val) = closest {
                 let pixel_focal_length = val.pixel_focal_length.map(|f| (f.0 as f64, f.1 as f64)).or_else(|| {
                     let fl_mm = val.focal_length? as f64;
                     focal_length = Some(fl_mm);

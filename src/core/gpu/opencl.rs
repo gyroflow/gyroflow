@@ -204,6 +204,14 @@ impl OclWrapper {
                        .replace("PIXEL_BYTES", &format!("{}", params.bytes_per_pixel))
                        .replace("INTERPOLATION", &format!("{}", params.interpolation));
 
+        // The partial correction's 2D polish is for a lens with terms that aren't radial only: the others' solve along the
+        // ray's radius is the answer, and their kernel compiles without it
+        if !distortion_model.has_non_radial_terms() {
+            while let Some(pos) = kernel.find("{non_radial}") {
+                kernel.replace_range(pos..kernel.find("{/non_radial}").unwrap() + 13, "");
+            }
+        }
+
         for i in 0..31 {
             let v = 1 << i;
             if v == 4 { continue; } // Fill with background can be different per frame

@@ -7,6 +7,7 @@ pub mod poly3;
 pub mod poly5;
 pub mod ptlens;
 pub mod insta360;
+pub mod insta360_v6;
 pub mod sony;
 pub mod generic_polynomial;
 
@@ -69,6 +70,7 @@ impl_models! {
     poly5::Poly5,
     ptlens::PtLens,
     insta360::Insta360,
+    insta360_v6::Insta360V6,
     sony::Sony,
     generic_polynomial::GenericPolynomial,
     gopro::GoPro,

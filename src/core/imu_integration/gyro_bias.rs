@@ -112,15 +112,20 @@ impl GyroBias {
     }
 }
 
-/// Component-wise median of measurement `i` (window centre, bias) and the nearest ones before and after it; the first and the
-/// last take the three nearest. With fewer than three measurements the missing ones are zero, so a measurement always needs
-/// another one to agree
+/// Component-wise median of measurement `i` (window centre, bias) and the two nearest before and after it, or with fewer than
+/// five measurements the nearest one on each side; the first and the last take the nearest ones. With fewer than three
+/// measurements the missing ones are zero, so a measurement always needs another one to agree. Five, not three: on vehicles
+/// and action cameras two neighbouring windows can agree on a bias the model made up (#1298)
 fn median_of_neighbours(measured: &[(f64, Vector3<f64>)], i: usize) -> Vector3<f64> {
     let n = measured.len() as isize;
-    let mid = if n >= 3 { (i as isize).clamp(1, n - 2) } else { i as isize };
+    let r = if n >= 5 { 2 } else { 1 };
+    let mid = if n >= 2 * r + 1 { (i as isize).clamp(r, n - 1 - r) } else { i as isize };
     let at = |k: isize| if k < 0 || k >= n { Vector3::zeros() } else { measured[k as usize].1 };
-    let (a, b, c) = (at(mid - 1), at(mid), at(mid + 1));
-    Vector3::from_fn(|r, _| a[r].min(b[r]).max(a[r].max(b[r]).min(c[r])))
+    Vector3::from_fn(|c, _| {
+        let mut v: Vec<f64> = (mid - r..=mid + r).map(|k| at(k)[c]).collect();
+        v.sort_by(|a, b| a.total_cmp(b));
+        v[v.len() / 2]
+    })
 }
 
 struct Block {
@@ -258,15 +263,28 @@ fn estimate_window(imu: &[TimeIMU], initial: Vector3<f64>) -> Option<Vector3<f64
             let e = s.symmetric_eigen();
             let max_ev = e.eigenvalues.max();
             if !(max_ev > 0.0) { return None; }
-            db = Vector3::zeros();
-            for i in 0..3 {
-                if e.eigenvalues[i] > MIN_RELATIVE_OBSERVABILITY * max_ev {
-                    let v = e.eigenvectors.column(i);
-                    db += v * (v.dot(&rhs) / e.eigenvalues[i]);
+            let solve = |min_ev: f64| {
+                let mut db = Vector3::zeros();
+                for i in 0..3 {
+                    if e.eigenvalues[i] > min_ev {
+                        let v = e.eigenvectors.column(i);
+                        db += v * (v.dot(&rhs) / e.eigenvalues[i]);
+                    }
                 }
+                (db, ((g_u - a_ub * db) / sw).normalize())
+            };
+            let min_ev = MIN_RELATIVE_OBSERVABILITY * max_ev;
+            (db, u) = solve(min_ev);
+            // A direction whose standard error is larger than any bias there can be measures nothing: stepping along it follows
+            // the accelerations, and the bias wandering there keeps the iterations from converging or pushes it over
+            // `MAX_BIAS_DEG_S` (#1298: on a camera that stays upright the axis along gravity is at 40-70 deg/s). Judged by the
+            // residuals after the step: before it they still hold the bias being measured
+            let res = residuals(&blocks, &u, &db);
+            let variance = weighted_rms(&norms(&res), &w).max(0.01 * DEG2RAD).powi(2) * variance_inflation(&res, &w);
+            let min_ev_noise = variance / (MAX_BIAS_DEG_S * DEG2RAD).powi(2);
+            if e.eigenvalues.iter().any(|ev| *ev > min_ev && *ev <= min_ev_noise) {
+                (db, u) = solve(min_ev_noise);
             }
-            u = (g_u - a_ub * db) / sw;
-            u.normalize_mut();
             eig = Some(e);
         }
 

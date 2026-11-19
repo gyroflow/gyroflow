@@ -44,6 +44,27 @@ float solve_radial(float r, float guess, float m_max, float k1, float k2, float 
     return m;
 }
 
+// The projection of a unified-sphere plane point, as distort_point has it
+float2 insta360_plane(float2 uv, __global KernelParams *params) {
+    float k1 = params->k[0], k2 = params->k[1], k3 = params->k[2], p1 = params->k[3], p2 = params->k[4];
+    float r2 = dot(uv, uv);
+    float rad = 1.0f + r2 * (k1 + r2 * (k2 + r2 * k3));
+    return (float2)(uv.x * rad + 2.0f*p1*uv.x*uv.y + p2*(r2 + 2.0f*uv.x*uv.x),
+                    uv.y * rad + 2.0f*p2*uv.x*uv.y + p1*(r2 + 2.0f*uv.y*uv.y));
+}
+// Its Jacobian: (dx/du, dx/dv, dy/du, dy/dv)
+float4 insta360_plane_jacobian(float2 uv, __global KernelParams *params) {
+    float k1 = params->k[0], k2 = params->k[1], k3 = params->k[2], p1 = params->k[3], p2 = params->k[4];
+    float u = uv.x, v = uv.y;
+    float r2 = u*u + v*v;
+    float rad = 1.0f + r2 * (k1 + r2 * (k2 + r2 * k3));
+    float drad = k1 + r2 * (2.0f*k2 + 3.0f*k3*r2); // d(rad)/d(r2)
+    return (float4)(rad + 2.0f*u*u*drad + 2.0f*p1*v + 6.0f*p2*u,
+                    2.0f*u*v*drad       + 2.0f*p1*u + 2.0f*p2*v,
+                    2.0f*u*v*drad       + 2.0f*p2*v + 2.0f*p1*u,
+                    rad + 2.0f*v*v*drad + 2.0f*p2*u + 6.0f*p1*v);
+}
+
 float2 distort_point(float x, float y, float z, __global KernelParams *params) {
     float k1 = params->k[0];
     float k2 = params->k[1];
@@ -83,7 +104,13 @@ float2 undistort_point(float2 p, __global KernelParams *params) {
     // own end is that end; where the polynomial folds first, radial_projection(m_max) is off the far side of
     // the fold and says nothing about the largest radius the lens images
     float m_max = insta360_m_max(xi);
-    if (radial_derivative(m_max, k1, k2, k3) > 0.0f && radial_projection(m_max, k1, k2, k3) < r_d) { return (float2)(-99999.0f, -99999.0f); }
+    // And only past what the terms that aren't radial add to it: they carry the image of the sphere's rim out of that
+    // circle in some directions, and the 2D solve below decides there (see insta360_v6.rs / insta360.rs)
+    bool sphere_ends = radial_derivative(m_max, k1, k2, k3) > 0.0f;
+    if (sphere_ends && radial_projection(m_max, k1, k2, k3) + 4.0f * m_max * m_max * (fabs(p1) + fabs(p2)) < r_d) { return (float2)(-99999.0f, -99999.0f); }
+    // Between the two only a point the solve reaches is one: what it stalls at short of a point out there is the edge of
+    // the image, and the point past it
+    bool past_the_rim = sphere_ends && radial_projection(m_max, k1, k2, k3) < r_d;
 
     // Strip the tangential terms, invert the radial polynomial, re-evaluate them
     float2 a = p;
@@ -98,8 +125,57 @@ float2 undistort_point(float2 p, __global KernelParams *params) {
         a = p - (float2)(2.0f*p1*uv.x*uv.y + p2*(r2 + 2.0f*uv.x*uv.x),
                          2.0f*p2*uv.x*uv.y + p1*(r2 + 2.0f*uv.y*uv.y));
     }
-    // The radius the solve actually reached is the test of whether there was a ray here at all
-    if (fabs(radial_projection(m, k1, k2, k3) - r_s) > 1e-4f * (1.0f + r_s)) { return (float2)(-99999.0f, -99999.0f); }
+    // Large tangential terms leave that pixels off: Newton on the whole map finishes from there, inside the sphere's
+    // fold and never from past a fold of the map (see polish_inverse in distortion_models/mod.rs)
+    float2 e = insta360_plane(uv, params) - p;
+    float err = fmax(fabs(e.x), fabs(e.y));
+    float tol = 5e-7f * (1.0f + r_d);
+    bool exact_only = past_the_rim;
+    for (int attempt = 0; attempt < 2; ++attempt) {
+        for (int it = 0; it < 8; ++it) {
+            if (!(err > tol)) break;
+            float4 j = insta360_plane_jacobian(uv, params);
+            float det = j.x * j.w - j.y * j.z;
+            if (!(det > 0.0f)) break;
+            float2 step = (float2)(j.w * e.x - j.y * e.y, j.x * e.y - j.z * e.x) / det;
+            float lambda = 1.0f;
+            bool moved = false;
+            for (int b = 0; b < 4; ++b) {
+                float2 c = uv - lambda * step;
+                if (dot(c, c) <= m_max * m_max) {
+                    float2 ce = insta360_plane(c, params) - p;
+                    float cerr = fmax(fabs(ce.x), fabs(ce.y));
+                    if (cerr < err) { uv = c; e = ce; err = cerr; moved = true; break; }
+                }
+                lambda *= 0.5f;
+            }
+            if (!moved) break;
+        }
+        float4 jf = insta360_plane_jacobian(uv, params);
+        if (jf.x * jf.w - jf.y * jf.z > 0.0f) { break; }
+        // A point past a fold of the map has no ray: the camera images the other branch. Where that fold is the edge of
+        // the image, the point it images can be just short of it: back towards the axis until the map keeps its orientation,
+        // and Newton from there; only a point it then reaches counts (see polish_inverse in distortion_models/mod.rs)
+        err = 1e30f;
+        if (attempt == 1) { break; }
+        float2 uv0 = uv;
+        float s = 1e-3f;
+        bool onto = false;
+        for (int r = 0; r < 8; ++r) {
+            float2 c = uv0 * (1.0f - s);
+            float4 cj = insta360_plane_jacobian(c, params);
+            if (cj.x * cj.w - cj.y * cj.z > 0.0f) { uv = c; onto = true; break; }
+            s *= 2.0f;
+        }
+        if (!onto) { break; }
+        e = insta360_plane(uv, params) - p;
+        err = fmax(fabs(e.x), fabs(e.y));
+        exact_only = true;
+    }
+    // How far the map lands from the point is the test of whether there was a ray here at all
+    float accept_err = 1e-4f * (1.0f + r_d);
+    if (exact_only) { accept_err = 1e-6f * (1.0f + r_d); }
+    if (!(err <= accept_err)) { return (float2)(-99999.0f, -99999.0f); }
 
     // Unified sphere -> ray angle. The sphere point is (u*alpha, v*alpha, alpha - xi), already a unit
     // vector, so the angle falls out of atan2 - where the old x/z went to infinity at 90 degrees
