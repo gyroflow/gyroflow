@@ -215,7 +215,7 @@ impl SmoothingAlgorithm for Optimal {
         let started = std::time::Instant::now();
 
         let trim = self.trim_range_only && !compute_params.trim_ranges.is_empty();
-        let quats = Smoothing::get_trimmed_quats(quats, compute_params.scaled_duration_ms, self.trim_range_only, &compute_params.trim_ranges);
+        let quats = Smoothing::get_trimmed_quats(quats, self.trim_range_only, &compute_params.trim_ranges_motion_us());
         let quats = quats.as_ref();
         let keyframes = &compute_params.keyframes;
 
@@ -240,18 +240,17 @@ impl SmoothingAlgorithm for Optimal {
             m
         };
 
-        // The frames, each at the time the render reads it at; with "Only within trim range" those within the ranges, as
-        // the others get the smoothing of the whole clip (see `GyroSource::recompute_smoothness`)
+        // The frames, each at the time the render reads it at; with "Only within trim range" those the render writes for
+        // the ranges, as the others get the smoothing of the whole clip (see `GyroSource::recompute_smoothness`)
         let fps = compute_params.scaled_fps;
         let frames: Vec<(usize, f64)> = if fps > 0.0 && fps.is_finite() {
             let times = compute_params.smoothing_frame_times.as_deref();
-            let duration = compute_params.scaled_duration_ms;
+            let rendered: Vec<_> = compute_params.trim_ranges.iter().filter_map(|r| compute_params.trim_range_frames(*r)).collect();
             // The frames of the segment being smoothed, of a video cut from recordings (`ComputeParams::smoothing_frames`)
             let frames = compute_params.smoothing_frames.clone().unwrap_or(0..compute_params.frame_count);
             (frames.start..frames.end.min(compute_params.frame_count)).filter_map(|f| {
-                let video_ms = compute_params.timestamp_at_frame(f as i32);
-                if trim && !compute_params.trim_ranges.iter().any(|r| video_ms >= r.0 * duration && video_ms <= r.1 * duration) { return None; }
-                Some((f, times.and_then(|t| t.get(f)).copied().unwrap_or(video_ms)))
+                if trim && !rendered.iter().any(|r| r.contains(&f)) { return None; }
+                Some((f, times.and_then(|t| t.get(f)).copied().unwrap_or_else(|| compute_params.timestamp_at_frame(f as i32))))
             }).collect()
         } else {
             Vec::new()

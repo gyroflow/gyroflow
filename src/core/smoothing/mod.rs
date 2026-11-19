@@ -132,10 +132,12 @@ impl Smoothing {
         self.algs.0.iter().map(|x| x.get_name()).collect()
     }
 
-    pub fn get_trimmed_quats<'a>(quats: &'a TimeQuat, duration_ms: f64, trim_range_only: bool, trim_ranges: &[(f64, f64)]) -> Cow<'a, TimeQuat> {
-        if trim_range_only && !trim_ranges.is_empty() {
+    /// `quats` with the motion outside of `ranges` (the motion data's time in µs, sorted, `ComputeParams::trim_ranges_motion_us`)
+    /// replaced by the orientations at the ranges' ends, so it doesn't affect the smoothing within them ("Only within trim
+    /// range"). `quats` as they are without ranges
+    pub fn get_trimmed_quats<'a>(quats: &'a TimeQuat, trim_range_only: bool, ranges: &[(i64, i64)]) -> Cow<'a, TimeQuat> {
+        if trim_range_only && !ranges.is_empty() {
             let mut quats_copy = quats.clone();
-            let ranges = trim_ranges.iter().map(|x| ((x.0 * duration_ms * 1000.0).round() as i64, (x.1 * duration_ms * 1000.0).round() as i64)).collect::<Vec<_>>();
             let mut prev_q = quats.range(ranges.first().unwrap().0..).next().map(|(&a, &b)| (a, b));
             let mut next_q = prev_q;
             let mut range = ranges.first().unwrap();
@@ -174,7 +176,8 @@ impl Smoothing {
     }
 
     pub fn get_max_angles(quats: &TimeQuat, smoothed_quats: &TimeQuat, params: &ComputeParams) -> (f64, f64, f64) { // -> (pitch, yaw, roll) in deg
-        let ranges = params.trim_ranges.iter().map(|x| ((x.0 * params.scaled_duration_ms * 1000.0) as i64, (x.1 * params.scaled_duration_ms * 1000.0) as i64)).collect::<Vec<_>>();
+        // The smoothed orientations are by the motion data's time, which the frames of the trim ranges read
+        let ranges = params.trim_ranges_motion_us();
         let identity_quat = Quat64::identity();
 
         let mut max_pitch = 0.0;

@@ -1283,13 +1283,14 @@ impl GyroSource {
             // "Only within trim range" replaces the motion outside of the trim ranges before smoothing, so it doesn't affect
             // the smoothing inside of them. The result outside of the ranges has nothing to do with the real motion then,
             // and the preview there looks like the shaky original, drifting. Those frames are not rendered, so use the
-            // smoothing of the whole video for them
+            // smoothing of the whole video for them. The two smoothings are different paths, so the picture jumps where
+            // one takes over from the other: that's past the time any rendered frame reads, the ranges' time in the motion
+            // data (`ComputeParams::trim_ranges_motion_us`), the same the smoothing above trimmed the motion to
             if !compute_params.trim_ranges.is_empty() && alg.get_parameter("trim_range_only") > 0.5 {
+                let ranges = compute_params.trim_ranges_motion_us();
                 let trim_ranges = std::mem::take(&mut compute_params.trim_ranges);
                 let whole_smoothed = alg.smooth_with_original(&locked_quaternions, quats, duration_ms, compute_params);
                 compute_params.trim_ranges = trim_ranges;
-                let duration_us = compute_params.scaled_duration_ms * 1000.0;
-                let ranges = compute_params.trim_ranges.iter().map(|x| ((x.0 * duration_us).round() as i64, (x.1 * duration_us).round() as i64)).collect::<Vec<_>>();
                 for (ts, q) in smoothed_quaternions.iter_mut() {
                     if !ranges.iter().any(|r| *ts >= r.0 && *ts <= r.1) {
                         if let Some(whole) = whole_smoothed.get(ts) { *q = *whole; }

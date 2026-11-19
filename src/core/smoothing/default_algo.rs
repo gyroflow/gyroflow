@@ -223,7 +223,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         let keyframes = &compute_params.keyframes;
 
-        let quats = Smoothing::get_trimmed_quats(quats, compute_params.scaled_duration_ms, self.trim_range_only, &compute_params.trim_ranges);
+        let quats = Smoothing::get_trimmed_quats(quats, self.trim_range_only, &compute_params.trim_ranges_motion_us());
         let quats = quats.as_ref();
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {

@@ -114,6 +114,64 @@ impl ComputeParams {
         }
     }
 
+    /// The frames the render writes for the trim range `range` (fractions of the duration): those presented within it,
+    /// and the first one after it, which the render writes too (it stops after the first frame past the end,
+    /// `receive_and_process_video_frames`). `None` when there's none
+    pub fn trim_range_frames(&self, range: (f64, f64)) -> Option<std::ops::RangeInclusive<usize>> {
+        let (from, to) = (range.0 * self.scaled_duration_ms, range.1 * self.scaled_duration_ms);
+        // The first frame for which `before` is false, the frames' times being in order
+        let partition = |before: &dyn Fn(f64) -> bool| {
+            let (mut lo, mut hi) = (0, self.frame_count);
+            while lo < hi {
+                let mid = (lo + hi) / 2;
+                if before(self.timestamp_at_frame(mid as i32)) { lo = mid + 1; } else { hi = mid; }
+            }
+            lo
+        };
+        let first = partition(&|t| t < from);
+        if first >= self.frame_count { return None; }
+        let after = partition(&|t| t <= to).min(self.frame_count - 1);
+        Some(first..=after.max(first))
+    }
+
+    /// The time in the motion data (µs) the frames of the trim ranges read their orientations at, the ranges "Only within
+    /// trim range" smooths: of each range's frames the render writes (`trim_range_frames`) and of the segment being
+    /// smoothed (`smoothing_frames`), from the earliest one's time (`smoothing_frame_times`) to the latest one's, a
+    /// frame's duration wider on both sides, for the rows read out before and after the frame's time and for the
+    /// orientations a lookup interpolates between. A frame's time in the motion data is its time in the video only without
+    /// a sync offset and without an offset of its own (Sony's, more than a frame): taken by its time in the video, the
+    /// last frames of a range read the motion past the range's end with a sync offset below zero, and got the smoothing
+    /// of the whole clip there, another path than the range's own, so the picture jumped a few frames before the cut.
+    /// Sorted, the ranges that overlap merged. Without the frames' times, the ranges' times in the video
+    pub fn trim_ranges_motion_us(&self) -> Vec<(i64, i64)> {
+        let mut ranges: Vec<(i64, i64)> = match self.smoothing_frame_times.as_deref() {
+            Some(times) => {
+                let frame_us = if self.scaled_fps > 0.0 && self.scaled_fps.is_finite() { 1_000_000.0 / self.scaled_fps } else { 0.0 };
+                let part = self.smoothing_frames.clone().unwrap_or(0..self.frame_count);
+                self.trim_ranges.iter().filter_map(|r| {
+                    let frames = self.trim_range_frames(*r)?;
+                    let (lo, hi) = ((*frames.start()).max(part.start)..(*frames.end() + 1).min(part.end))
+                        .filter_map(|f| times.get(f).copied())
+                        .fold((f64::MAX, f64::MIN), |(lo, hi), t| (lo.min(t), hi.max(t)));
+                    (lo <= hi).then(|| ((lo * 1000.0 - frame_us).floor() as i64, (hi * 1000.0 + frame_us).ceil() as i64))
+                }).collect()
+            }
+            None => {
+                let duration_us = self.scaled_duration_ms * 1000.0;
+                self.trim_ranges.iter().map(|r| ((r.0 * duration_us).round() as i64, (r.1 * duration_us).round() as i64)).collect()
+            }
+        };
+        ranges.sort_unstable();
+        let mut merged: Vec<(i64, i64)> = Vec::with_capacity(ranges.len());
+        for r in ranges {
+            match merged.last_mut() {
+                Some(last) if r.0 <= last.1 => last.1 = last.1.max(r.1),
+                _ => merged.push(r),
+            }
+        }
+        merged
+    }
+
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
         let params = mgr.params.read();
 

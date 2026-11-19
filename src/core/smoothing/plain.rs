@@ -85,7 +85,7 @@ impl SmoothingAlgorithm for Plain {
             alpha = get_alpha(self.time_constant);
         }
 
-        let quats = Smoothing::get_trimmed_quats(quats, compute_params.scaled_duration_ms, self.trim_range_only, &compute_params.trim_ranges);
+        let quats = Smoothing::get_trimmed_quats(quats, self.trim_range_only, &compute_params.trim_ranges_motion_us());
         let quats = quats.as_ref();
 
         let mut alpha_per_timestamp = BTreeMap::<i64, f64>::new();
