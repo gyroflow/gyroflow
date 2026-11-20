@@ -3973,7 +3973,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "1.7.0"
+version = "1.7.1"
 dependencies = [
  "argh",
  "breakpad-sys",
@@ -4039,7 +4039,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.7.0"
+version = "1.7.1"
 dependencies = [
  "ahrs",
  "akaze",
@@ -6193,9 +6193,9 @@ dependencies = [
 
 [[package]]
 name = "pin-project-lite"
-version = "0.2.17"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+checksum = "c938015719552d665fd0553b90d96cd7ff58e83e4c061ca99e6bb78865a72752"
 
 [[package]]
 name = "piper"
@@ -9803,9 +9803,9 @@ dependencies = [
 
 [[package]]
 name = "zcheapstr"
-version = "1.2.0"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "939f186d9ecebe044315a5cb6d6f78568bbc21152adc954d5a0c2f58bdbc9920"
+checksum = "2347b6f50c4f669a282af57bf950debeacb9ce86de21b5b12932178dda691315"
 dependencies = [
  "serde",
 ]

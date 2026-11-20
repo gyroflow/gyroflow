@@ -32,7 +32,7 @@ macro_rules! connect {
     };
 }
 
-/** Gyroflow v1.7.0
+/** Gyroflow v1.7.1
 Video stabilization using gyroscope data
 Exit codes: 0 - success, 1 - render failure, 2 - invalid arguments
 With input files only and no options, it does what "Default CLI behavior" in the app's Advanced settings says: renders them (the default), opens them in the app or adds them to its render queue
