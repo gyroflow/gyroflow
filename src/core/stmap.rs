@@ -96,8 +96,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
         // Output pixel -> ray, the way `undistort_coord` does it: the STMap is written at full lens
         // correction, so it is the output projection's own ray
         let out_c = (transform.kernel_params.output_width as f32 / 2.0, transform.kernel_params.output_height as f32 / 2.0);
-        let stretch = if transform.kernel_params.input_horizontal_stretch > 0.01 { 1.0 / transform.kernel_params.input_horizontal_stretch } else { 1.0 };
-        let out_f = (transform.kernel_params.f[0] * stretch / transform.kernel_params.fov, transform.kernel_params.f[1] * stretch / transform.kernel_params.fov);
+        let out_f = crate::stabilization::projection::output_focal(&transform.kernel_params);
         let proj = transform.kernel_params.output_projection;
         let ray_at = |x: f32, y: f32| -> (f32, f32) {
             crate::stabilization::projection::unproject(((x - out_c.0) / out_f.0, (y - out_c.1) / out_f.1), proj)
