@@ -207,6 +207,7 @@ pub struct RenderQueue {
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
     add_file: qt_method!(fn(&mut self, url: String, gyro_url: String, additional_data: String) -> u32),
+    add_file_with_current_export: qt_method!(fn(&mut self, url: String, additional_data: String) -> u32),
 
     get_job_output_filename: qt_method!(fn(&self, job_id: u32) -> QString),
     get_job_output_folder: qt_method!(fn(&self, job_id: u32) -> QUrl),
@@ -1192,6 +1193,14 @@ impl RenderQueue {
     }
 
     pub fn add_file(&mut self, url: String, gyro_url: String, additional_data: String) -> u32 {
+        self.add_file_internal(url, gyro_url, additional_data, false)
+    }
+
+    fn add_file_with_current_export(&mut self, url: String, additional_data: String) -> u32 {
+        self.add_file_internal(url, String::new(), additional_data, true)
+    }
+
+    fn add_file_internal(&mut self, url: String, gyro_url: String, additional_data: String, use_current_export: bool) -> u32 {
         let job_id = fastrand::u32(1..2147483640);
 
         let is_gf_data = url.starts_with('{');
@@ -1297,7 +1306,7 @@ impl RenderQueue {
                         update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
                     });
                     let apply_preset = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (preset, to_job_id): (String, u32)| {
-                        this.apply_to_all(preset, additional_data3.clone(), to_job_id);
+                        this.apply_to_all_internal(preset, additional_data3.clone(), to_job_id, use_current_export);
                         this.added(job_id);
                     });
 
@@ -1390,7 +1399,9 @@ impl RenderQueue {
                         } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url, Some(sequence_options())) {
                             ::log::debug!("Loaded {:?}", &info);
 
-                            render_options.bitrate = render_options.bitrate.max(info.bitrate);
+                            if !use_current_export || render_options.bitrate <= 0.0 {
+                                render_options.bitrate = render_options.bitrate.max(info.bitrate);
+                            }
                             if !has_output_width {
                                 render_options.output_width = info.width as usize;
                             }
@@ -1721,13 +1732,20 @@ impl RenderQueue {
     }
 
     pub fn apply_to_all(&mut self, data: String, additional_data: String, to_job_id: u32) {
+        self.apply_to_all_internal(data, additional_data, to_job_id, false);
+    }
+
+    fn apply_to_all_internal(&mut self, data: String, additional_data: String, to_job_id: u32, use_current_export: bool) {
         ::log::debug!("Applying preset {}", &data);
         let data_parsed: serde_json::Result<serde_json::Value> = serde_json::from_str(&data);
-        let mut new_output_options = None;
-        if let Ok(obj) = &data_parsed {
-            if let Some(output) = obj.get("output") {
-                new_output_options = Some(output.clone());
-            }
+        let mut new_output_options = data_parsed.as_ref().ok().and_then(|obj| obj.get("output")).cloned();
+        if use_current_export {
+            // Keep the default preset's destination rules but use the current export settings.
+            new_output_options = new_output_options.and_then(|mut output| {
+                let fields = output.as_object_mut()?;
+                fields.retain(|key, _| matches!(key.as_str(), "output_folder" | "output_filename" | "output_path"));
+                (!fields.is_empty()).then_some(output)
+            });
         }
         let processing_done = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, job_id: u32| {
             this.processing_done(job_id, true);
