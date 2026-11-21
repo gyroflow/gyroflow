@@ -201,13 +201,18 @@ deploy *param:
     [System.IO.File]::WriteAllText("$QT_LIBS\..\src\3rdparty\gradle\gradle\wrapper\gradle-wrapper.properties", [System.IO.File]::ReadAllText("$QT_LIBS\..\src\3rdparty\gradle\gradle\wrapper\gradle-wrapper.properties").Replace("gradle-8.3-bin", "gradle-8.6-bin"))
     [System.IO.File]::WriteAllText("$QT_LIBS\..\src\android\templates\build.gradle", [System.IO.File]::ReadAllText("$QT_LIBS\..\src\android\templates\build.gradle").Replace("7.4.1", "8.4.2"))
 
+    # cargo-apk stages the libraries here and then fails, for any profile but dev, signing its own APK (not used, it has no
+    # keystore): its exit code doesn't tell whether the build worked, libgyroflow.so staged by this run does
+    $StagedLibs = "$ProjectDir\target\$Env:BUILD_PROFILE\apk\lib"
+    if (Test-Path $StagedLibs) { Remove-Item -Path $StagedLibs -Recurse -Force }
+
     # Without the AI optical flow (ai-optical-flow, GMFlow): it's for desktop GPUs, and its model is downloaded on first use
     cargo apk build --profile $Env:BUILD_PROFILE --no-default-features --features opencv
     $CargoExitCode = $LASTEXITCODE
 
     # Restore [[bin]]
     [System.IO.File]::WriteAllText("$ProjectDir\Cargo.toml", [System.IO.File]::ReadAllText("$ProjectDir\Cargo.toml").Replace("[lib]`ncrate-type = [""cdylib""]", "[[bin]]"))
-    if ($CargoExitCode -ne 0) { throw "cargo apk build failed with exit code $CargoExitCode" }
+    if (-not (Test-Path "$StagedLibs\arm64-v8a\libgyroflow.so")) { throw "cargo apk build failed with exit code $CargoExitCode" }
 
     mkdir "$ProjectDir\target\android-build" -ErrorAction SilentlyContinue
     mkdir "$ProjectDir\target\android-build\libs" -ErrorAction SilentlyContinue
