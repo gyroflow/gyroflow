@@ -1,0 +1,280 @@
+{
+  "version": 1,
+  "mounts": {
+    "Sony E": { "flange_distance_mm": 18.0, "full_frame": true },
+    "Canon RF": { "flange_distance_mm": 20.0, "full_frame": true },
+    "Canon EF": { "flange_distance_mm": 44.0, "full_frame": true },
+    "Nikon Z": { "flange_distance_mm": 16.0, "full_frame": true },
+    "Nikon F": { "flange_distance_mm": 46.5, "full_frame": true },
+    "Micro Four Thirds": { "flange_distance_mm": 19.25, "full_frame": false },
+    "Fujifilm X": { "flange_distance_mm": 17.7, "full_frame": false },
+    "Fujifilm G": { "flange_distance_mm": 26.7, "full_frame": false },
+    "Leica L": { "flange_distance_mm": 20.0, "full_frame": true },
+    "DJI Action": { "flange_distance_mm": 0.0, "fixed": true },
+    "GoPro Fixed": { "flange_distance_mm": 0.0, "fixed": true },
+    "Insta360 Fixed": { "flange_distance_mm": 0.0, "fixed": true }
+  },
+  "cameras": [
+    {
+      "brand": "Sony",
+      "model": "FX3",
+      "mount": "Sony E",
+      "sensor_type": "Full Frame",
+      "crop_factor": 1.0,
+      "aliases": ["ILME-FX3", "Sony ILME-FX3"]
+    },
+    {
+      "brand": "Sony",
+      "model": "A7S III",
+      "mount": "Sony E",
+      "sensor_type": "Full Frame",
+      "crop_factor": 1.0,
+      "aliases": ["ILCE-7SM3", "Sony A7S3", "Sony Alpha 7S III"]
+    },
+    {
+      "brand": "Sony",
+      "model": "A7 IV",
+      "mount": "Sony E",
+      "sensor_type": "Full Frame",
+      "crop_factor": 1.0,
+      "aliases": ["ILCE-7M4", "Sony A7M4"]
+    },
+    {
+      "brand": "Sony",
+      "model": "FX30",
+      "mount": "Sony E",
+      "sensor_type": "APS-C",
+      "crop_factor": 1.53,
+      "aliases": ["ILME-FX30"]
+    },
+    {
+      "brand": "Sony",
+      "model": "ZV-E1",
+      "mount": "Sony E",
+      "sensor_type": "Full Frame",
+      "crop_factor": 1.0,
+      "aliases": ["ZV-E1"]
+    },
+    {
+      "brand": "Sony",
+      "model": "ZV-E10",
+      "mount": "Sony E",
+      "sensor_type": "APS-C",
+      "crop_factor": 1.53,
+      "aliases": ["ZV-E10"]
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R5",
+      "mount": "Canon RF",
+      "sensor_type": "Full Frame",
+      "crop_factor": 1.0,
+      "aliases": ["Canon R5"]
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R6",
+      "mount": "Canon RF",
+      "sensor_type": "Full Frame",
+      "crop_factor": 1.0,
+      "aliases": ["Canon R6"]
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R7",
+      "mount": "Canon RF",
+      "sensor_type": "APS-C",
+      "crop_factor": 1.6,
+      "aliases": ["Canon R7"]
+    },
+    {
+      "brand": "Panasonic",
+      "model": "GH5",
+      "mount": "Micro Four Thirds",
+      "sensor_type": "M43",
+      "crop_factor": 2.0,
+      "aliases": ["DC-GH5"]
+    },
+    {
+      "brand": "Panasonic",
+      "model": "GH6",
+      "mount": "Micro Four Thirds",
+      "sensor_type": "M43",
+      "crop_factor": 2.0,
+      "aliases": ["DC-GH6"]
+    },
+    {
+      "brand": "Panasonic",
+      "model": "S5 II",
+      "mount": "Leica L",
+      "sensor_type": "Full Frame",
+      "crop_factor": 1.0,
+      "aliases": ["DC-S5M2", "Lumix S5II"]
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-T4",
+      "mount": "Fujifilm X",
+      "sensor_type": "APS-C",
+      "crop_factor": 1.53,
+      "aliases": ["XT4", "FUJIFILM X-T4"]
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-H2S",
+      "mount": "Fujifilm X",
+      "sensor_type": "APS-C",
+      "crop_factor": 1.53,
+      "aliases": ["XH2S", "FUJIFILM X-H2S"]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO12 Black",
+      "mount": "GoPro Fixed",
+      "sensor_type": "1/1.9 inch",
+      "crop_factor": 5.4,
+      "aliases": ["HERO12", "GoPro 12"]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO11 Black",
+      "mount": "GoPro Fixed",
+      "sensor_type": "1/1.9 inch",
+      "crop_factor": 5.4,
+      "aliases": ["HERO11", "GoPro 11"]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO10 Black",
+      "mount": "GoPro Fixed",
+      "sensor_type": "1/2.3 inch",
+      "crop_factor": 5.62,
+      "aliases": ["HERO10", "GoPro 10"]
+    },
+    {
+      "brand": "DJI",
+      "model": "Action 4",
+      "mount": "DJI Fixed",
+      "sensor_type": "1/1.3 inch",
+      "crop_factor": 3.8,
+      "aliases": ["Osmo Action 4"]
+    },
+    {
+      "brand": "DJI",
+      "model": "Action 3",
+      "mount": "DJI Fixed",
+      "sensor_type": "1/1.7 inch",
+      "crop_factor": 4.55,
+      "aliases": ["Osmo Action 3"]
+    },
+    {
+      "brand": "Insta360",
+      "model": "Ace Pro",
+      "mount": "Insta360 Fixed",
+      "sensor_type": "1/1.3 inch",
+      "crop_factor": 3.8,
+      "aliases": ["AcePro"]
+    }
+  ],
+  "lenses": [
+    {
+      "brand": "Sony",
+      "model": "FE 24mm F1.4 GM",
+      "mount": "Sony E",
+      "sensor_format": "Full Frame",
+      "focal_min": 24.0,
+      "focal_max": 24.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 35mm F1.4 GM",
+      "mount": "Sony E",
+      "sensor_format": "Full Frame",
+      "focal_min": 35.0,
+      "focal_max": 35.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 24-70mm F2.8 GM II",
+      "mount": "Sony E",
+      "sensor_format": "Full Frame",
+      "focal_min": 24.0,
+      "focal_max": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 16-35mm F2.8 GM II",
+      "mount": "Sony E",
+      "sensor_format": "Full Frame",
+      "focal_min": 16.0,
+      "focal_max": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "E 15mm F1.4 G",
+      "mount": "Sony E",
+      "sensor_format": "APS-C",
+      "focal_min": 15.0,
+      "focal_max": 15.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Canon",
+      "model": "RF 15-35mm F2.8 L IS USM",
+      "mount": "Canon RF",
+      "sensor_format": "Full Frame",
+      "focal_min": 15.0,
+      "focal_max": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Canon",
+      "model": "RF 24-70mm F2.8 L IS USM",
+      "mount": "Canon RF",
+      "sensor_format": "Full Frame",
+      "focal_min": 24.0,
+      "focal_max": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sigma",
+      "model": "16mm F1.4 DC DN Contemporary",
+      "mount": "Sony E",
+      "sensor_format": "APS-C",
+      "focal_min": 16.0,
+      "focal_max": 16.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sigma",
+      "model": "24-70mm F2.8 DG DN Art",
+      "mount": "Sony E",
+      "sensor_format": "Full Frame",
+      "focal_min": 24.0,
+      "focal_max": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO11/12 Integrated Wide Lens",
+      "mount": "GoPro Fixed",
+      "sensor_format": "1/1.9 inch",
+      "focal_min": 2.47,
+      "focal_max": 2.47,
+      "is_zoom": false
+    },
+    {
+      "brand": "DJI",
+      "model": "Action 4 Integrated Wide Lens",
+      "mount": "DJI Fixed",
+      "sensor_format": "1/1.3 inch",
+      "focal_min": 2.6,
+      "focal_max": 2.6,
+      "is_zoom": false
+    }
+  ]
+}
