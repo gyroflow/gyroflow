@@ -157,14 +157,19 @@ impl PoseEstimator {
                             drop(l);
 
                             if let Some(rot) = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
-                                let mut l = results.write();
-                                if let Some(x) = l.get_mut(ts) {
-                                    x.rotation = Some(rot);
-                                    x.quat = Some(Quat64::from(rot));
-                                    let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame);
-                                    x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
-                                } else {
-                                    log::warn!("Failed to get ts {}", ts);
+                                let rate = scaled_fps / every_nth_frame;
+                                if rate.is_finite() && rate > 0.0 && rot.matrix().iter().all(|v| v.is_finite()) {
+                                    let rotvec = rot.scaled_axis() * rate;
+                                    if rotvec.iter().all(|v| v.is_finite()) {
+                                        let mut l = results.write();
+                                        if let Some(x) = l.get_mut(ts) {
+                                            x.rotation = Some(rot);
+                                            x.quat = Some(Quat64::from(rot));
+                                            x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
+                                        } else {
+                                            log::warn!("Failed to get ts {}", ts);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -275,9 +280,18 @@ impl PoseEstimator {
         }
         img
     }
-    pub fn yuv_to_gray(_width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
-        // TODO: maybe a better way than using stride as width?
-        image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
+    pub fn yuv_to_gray(width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
+        let (w, h, s) = (width as usize, height as usize, stride as usize);
+        if slice.len() < s * h { return None; }
+        if s == w {
+            image::GrayImage::from_raw(width, height, slice[..w * h].to_vec())
+        } else {
+            let mut buf = Vec::with_capacity(w * h);
+            for y in 0..h {
+                buf.extend_from_slice(&slice[y * s..y * s + w]);
+            }
+            image::GrayImage::from_raw(width, height, buf)
+        }
     }
     pub fn lowpass_filter(&self, freq: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
@@ -405,6 +419,62 @@ impl PoseEstimator {
             // (no motion data to sync, no tracker for it) it's rs-sync
             2 | 3 => find_offset::rs_sync::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
             v => { log::error!("Unknown offset method: {v}"); Vec::new() }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_yuv_to_gray_stride_padding() {
+        let width = 4;
+        let height = 3;
+        let stride = 6;
+        let mut slice = vec![0u8; (stride * height) as usize];
+        for y in 0..height {
+            for x in 0..width {
+                slice[(y * stride + x) as usize] = (y * 10 + x) as u8;
+            }
+            slice[(y * stride + 4) as usize] = 0xFF;
+            slice[(y * stride + 5) as usize] = 0xFF;
+        }
+        let gray = PoseEstimator::yuv_to_gray(width, height, stride, &slice).unwrap();
+        assert_eq!(gray.width(), width);
+        assert_eq!(gray.height(), height);
+        for y in 0..height {
+            for x in 0..width {
+                assert_eq!(gray.get_pixel(x, y)[0], (y * 10 + x) as u8);
+            }
+        }
+    }
+
+    #[test]
+    fn test_yuv_to_gray_exact_width() {
+        let width = 4;
+        let height = 3;
+        let stride = 4;
+        let slice: Vec<u8> = (0..(width * height) as u8).collect();
+        let gray = PoseEstimator::yuv_to_gray(width, height, stride, &slice).unwrap();
+        assert_eq!(gray.width(), width);
+        assert_eq!(gray.height(), height);
+        assert_eq!(gray.into_raw(), slice);
+    }
+
+    #[test]
+    fn test_finite_angular_velocity_guard() {
+        let rot: Rotation3<f64> = Rotation3::identity();
+        let rate: f64 = 30.0;
+        assert!(rate.is_finite() && rate > 0.0 && rot.matrix().iter().all(|v| v.is_finite()));
+        let rotvec = rot.scaled_axis() * rate;
+        assert!(rotvec.iter().all(|v| v.is_finite()));
+
+        for invalid in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            let mut matrix = nalgebra::Matrix3::identity();
+            matrix[(0, 0)] = invalid;
+            let bad_rot = Rotation3::from_matrix_unchecked(matrix);
+            assert!(!bad_rot.matrix().iter().all(|v| v.is_finite()));
         }
     }
 }
