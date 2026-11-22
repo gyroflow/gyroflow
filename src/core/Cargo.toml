@@ -51,6 +51,7 @@ ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
 whoami = "2.1"
+lensfun = "0.7"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a" }
@@ -109,6 +110,9 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
              "Win32_Storage_Packaging_Appx", "Win32_Storage_FileSystem", "Win32_System_IO" ]
+
+[dev-dependencies]
+lensfun = "0.7"
 
 [features]
 default = []
