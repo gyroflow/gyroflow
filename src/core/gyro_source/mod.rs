@@ -637,8 +637,10 @@ impl GyroSource {
                         let scale = *(map.get_t(TagId::Scale) as Option<&i16>).unwrap_or(&32767) as f64;
                         if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<telemetry_parser::tags_impl::Quaternion<i16>>> {
                             for v in arr.iter() {
+                                // In the axes of the quaternions telemetry-parser makes of CORI · IORI, which negate x
+                                // of both (gopro/mod.rs): the image orientation has to be the one in that product
                                 iori.push(Quat64::from_quaternion(nalgebra::Quaternion::<f64>::from_vector(Vector4::new(
-                                    v.x as f64 / scale,
+                                    -v.x as f64 / scale,
                                     v.y as f64 / scale,
                                     v.z as f64 / scale,
                                     v.w as f64 / scale)
