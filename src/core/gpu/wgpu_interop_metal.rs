@@ -72,7 +72,8 @@ pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, 
     };
 
     unsafe {
-        device.create_texture_from_hal::<Metal>(
+        super::wgpu_interop::texture_from_hal::<Metal>(
+            device,
             texture,
             &wgpu::TextureDescriptor {
                 label: None,
@@ -91,7 +92,10 @@ pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, 
 
 pub fn create_buffer_from_metal(device: &Device, buffer: *mut std::ffi::c_void, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
     let buffer = retain_buffer(buffer);
+    #[cfg(not(feature = "wgpu-fork"))]
     let buffer = unsafe { <Metal as wgpu::hal::Api>::Device::buffer_from_raw(buffer, size) };
+    #[cfg(feature = "wgpu-fork")]
+    let buffer = unsafe { <Metal as wgpu::hal::Api>::Device::buffer_from_raw(buffer) };
     unsafe {
         device.create_buffer_from_hal::<Metal>(
             buffer,

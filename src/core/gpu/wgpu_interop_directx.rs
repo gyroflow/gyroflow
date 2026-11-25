@@ -188,9 +188,12 @@ pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_devi
 
 pub fn create_texture_from_dx12_resource(device: &wgpu::Device, resource: Direct3D12::ID3D12Resource, desc: &wgpu::TextureDescriptor) -> wgpu::Texture {
     unsafe {
+        #[cfg(not(feature = "wgpu-fork"))]
         let texture = <Dx12 as wgpu::hal::Api>::Device::texture_from_raw(resource, desc.format, desc.dimension, desc.size, 1, 1);
+        #[cfg(feature = "wgpu-fork")]
+        let texture = <Dx12 as wgpu::hal::Api>::Device::texture_from_raw(resource, desc.format, desc.dimension, desc.size, 1, 1, None);
 
-        device.create_texture_from_hal::<Dx12>(texture, &desc, wgpu::TextureUses::UNINITIALIZED)
+        super::wgpu_interop::texture_from_hal::<Dx12>(device, texture, &desc, wgpu::TextureUses::UNINITIALIZED)
     }
 }
 

@@ -38,7 +38,8 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
     };
 
     unsafe {
-        device.create_texture_from_hal::<Vulkan>(
+        super::wgpu_interop::texture_from_hal::<Vulkan>(
+            device,
             texture,
             &wgpu::TextureDescriptor {
                 label: None,

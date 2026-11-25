@@ -156,7 +156,10 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                     }
 
                     unsafe {
+                        #[cfg(not(feature = "wgpu-fork"))]
                         let buffer = <wgpu::hal::api::Dx12 as wgpu::hal::Api>::Device::buffer_from_raw(dx12_texture, actual_size as u64);
+                        #[cfg(feature = "wgpu-fork")]
+                        let buffer = <wgpu::hal::api::Dx12 as wgpu::hal::Api>::Device::buffer_from_raw(dx12_texture, actual_size as u64, None);
 
                         let wgpu_buffer = device.create_buffer_from_hal::<wgpu::hal::api::Dx12>(buffer, &wgpu::BufferDescriptor {
                             label: None,
@@ -451,7 +454,16 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
     temp_texture
 }
 
-pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription, out_texture: &TextureHolder, format: wgpu::TextureFormat, _sub_index: wgpu::SubmissionIndex) {
+/// Wraps a texture made with the GPU's own API as a wgpu texture. The producer's content is in it, so wgpu must take it as
+/// initialized: wgpu 30 always does, the wgpu fork (`wgpu-fork`) is told so
+pub(crate) unsafe fn texture_from_hal<A: wgpu::hal::Api>(device: &wgpu::Device, texture: A::Texture, desc: &wgpu::TextureDescriptor, state: wgpu::TextureUses) -> wgpu::Texture {
+    #[cfg(not(feature = "wgpu-fork"))]
+    unsafe { device.create_texture_from_hal::<A>(texture, desc, state) }
+    #[cfg(feature = "wgpu-fork")]
+    unsafe { device.create_texture_from_hal::<A>(texture, desc, state, true) }
+}
+
+pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription, out_texture: &TextureHolder, format: wgpu::TextureFormat, _sub_index: Option<wgpu::SubmissionIndex>) {
     match &buf.data {
         #[cfg(target_os = "windows")]
         BufferSource::DirectX11 { texture, device_context, .. } => {

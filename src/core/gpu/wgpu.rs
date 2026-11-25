@@ -301,6 +301,7 @@ impl WgpuWrapper {
                             memory_hints: wgpu::MemoryHints::Performance,
                             trace: wgpu::Trace::Off,
                             experimental_features: wgpu::ExperimentalFeatures::disabled(),
+                            ..Default::default()
                         }).map_err(|e| WgpuError::RequestDevice(e))?
                     }
                 },
@@ -329,6 +330,7 @@ impl WgpuWrapper {
                             memory_hints: memory_hints.clone(),
                             trace: wgpu::Trace::Off,
                             experimental_features: wgpu::ExperimentalFeatures::disabled(),
+                            ..Default::default()
                         }));
                         if let Err(e) = &device {
                             let e_str = format!("{e:?}");
@@ -614,7 +616,7 @@ impl WgpuWrapper {
 
         let _temp_texture2 = handle_output_texture(&self.device, &buffers.output, &self.queue, &mut encoder, &self.out_texture, self.pixel_format, self.staging_buffer.as_ref().unwrap(), self.padded_out_stride);
 
-        let sub_index = self.queue.submit(Some(encoder.finish()));
+        let sub_index: Option<wgpu::SubmissionIndex> = self.queue.submit(Some(encoder.finish())).into();
 
         match &mut buffers.output.data {
             BufferSource::Cpu { buffer, .. } => {

@@ -117,6 +117,9 @@ use-opencv = ["opencv"]
 use-burn = ["dep:burn", "dep:burn-store", "dep:burn-cubecl", "dep:cubecl", "dep:sha2", "dep:ureq"]
 bundle-lens-profiles = []
 cache-gyro-metadata = []
+# Builds against the AdrianEddy/wgpu fork (upstream trunk and its fixes) instead of crates.io wgpu 30: the fork's HAL
+# interop calls take arguments wgpu 30's don't. The application's root manifest points wgpu at the fork with [patch.crates-io]
+wgpu-fork = []
 
 [profile.deploy]
 inherits = "release"

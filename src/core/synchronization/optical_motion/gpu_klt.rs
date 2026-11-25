@@ -128,6 +128,7 @@ impl Shared {
             memory_hints: wgpu::MemoryHints::Performance,
             trace: wgpu::Trace::Off,
             experimental_features: wgpu::ExperimentalFeatures::disabled(),
+            ..Default::default()
         })).map_err(|e| e.to_string())?;
         let failed = Arc::new(AtomicBool::new(false));
         let f = failed.clone();
@@ -203,7 +204,7 @@ fn layout(device: &wgpu::Device, label: &str, bindings: &[(u32, wgpu::BindingTyp
 
 /// Submitted and not read back yet
 struct Pending {
-    submission: wgpu::SubmissionIndex,
+    submission: Option<wgpu::SubmissionIndex>,
     mapped: mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>,
     tracked: usize,
 }
@@ -438,7 +439,7 @@ impl GpuKlt {
             enc.copy_buffer_to_buffer(&self.out_bwd, 0, &self.staging, self.bwd_off, n as u64 * 16);
         }
         enc.copy_buffer_to_buffer(&self.cands, 0, &self.staging, self.cands_off, 8 + self.capacity as u64 * 8);
-        let submission = queue.submit(Some(enc.finish()));
+        let submission = queue.submit(Some(enc.finish())).into();
         let (tx, mapped) = mpsc::channel();
         self.staging.slice(..).map_async(wgpu::MapMode::Read, move |r| { let _ = tx.send(r); });
         self.pending = Some(Pending { submission, mapped, tracked: n });
@@ -483,7 +484,7 @@ impl GpuKlt {
         let staging = device.create_buffer(&wgpu::BufferDescriptor { label: None, size: bytes, usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST, mapped_at_creation: false });
         let mut enc = device.create_command_encoder(&Default::default());
         enc.copy_buffer_to_buffer(&self.work, 0, &staging, 0, bytes);
-        let submission = queue.submit(Some(enc.finish()));
+        let submission = queue.submit(Some(enc.finish())).into();
         let (tx, rx) = mpsc::channel();
         staging.slice(..).map_async(wgpu::MapMode::Read, move |r| { let _ = tx.send(r); });
         self.wait(submission, &rx)?;
@@ -492,13 +493,14 @@ impl GpuKlt {
         Ok(())
     }
 
-    /// Waits for `submission` and for the buffer it maps. A device lost meanwhile panics in wgpu's poll (it returns only
+    /// Waits for `submission` (`None` from a wgpu that reports a submission it couldn't make: then for every one, and the
+    /// device's error has `failed` set already) and for the buffer it maps. A device lost meanwhile panics in wgpu's poll (it returns only
     /// timeouts), and on the analysis' thread pool a panic takes the app down: an error here. Any failure, a timeout too,
     /// has the device made again for the next analysis
-    fn wait(&self, submission: wgpu::SubmissionIndex, mapped: &mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>) -> Result<(), String> {
+    fn wait(&self, submission: Option<wgpu::SubmissionIndex>, mapped: &mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>) -> Result<(), String> {
         if self.shared.failed.load(Relaxed) { return Err("the device failed".into()); }
         let device = &self.shared.device;
-        let waited = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| device.poll(wgpu::PollType::Wait { submission_index: Some(submission), timeout: Some(TIMEOUT) })))
+        let waited = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| device.poll(wgpu::PollType::Wait { submission_index: submission, timeout: Some(TIMEOUT) })))
             .map_err(|_| "the device was lost".to_string())
             .and_then(|polled| polled.map_err(|e| e.to_string()))
             .and_then(|_| mapped.recv_timeout(TIMEOUT).map_err(|e| e.to_string())?.map_err(|e| e.to_string()));

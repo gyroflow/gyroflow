@@ -1013,6 +1013,7 @@ mod tests {
                 trace: wgpu::Trace::Off,
                 // As cubecl does: the features it asks for include the experimental ones the adapter has
                 experimental_features: unsafe { wgpu::ExperimentalFeatures::enabled() },
+                ..Default::default()
             })).expect("device");
             let (limits, name) = (device.limits(), adapter.get_info().name);
             let device = burn::tensor::Device::wgpu_options().setup(WgpuSetup { instance, adapter, device, queue, backend }).init().expect("burn on that device");
