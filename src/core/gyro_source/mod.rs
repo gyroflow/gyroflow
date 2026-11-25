@@ -596,6 +596,13 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::Metadata) as Option<&serde_json::Value> {
                             crate::util::merge_json(&mut additional_data, v);
                         }
+                        // GoPro Labs DIVE: the camera's own stabilization already accounts for the water
+                        // (`FrameTransform::kernel_image_orientation`)
+                        if let Some(v) = map.get_t(TagId::Unknown(0x44495645/*DIVE*/)) as Option<&u32> {
+                            if *v != 0 {
+                                if let Some(o) = additional_data.as_object_mut() { o.insert("in_camera_underwater".to_owned(), true.into()); }
+                            }
+                        }
                     }
                     if let Some(map) = tag_map.get(&GroupId::Custom("FovAdaptationScore".into())) {
                         if let Some(v) = map.get_t(TagId::Data) as Option<&Vec<f32>> {
@@ -1596,7 +1603,7 @@ impl GyroSource {
     /// The orientation at the video's time `timestamp_ms`, from `quats`, of the motion data `lookup` may read: its time
     /// in the motion data is the video's less the sync offset there, and it's clamped to that data (no orientation is
     /// interpolated across a segment boundary of a video cut from recordings). The identity where it has none
-    fn quat_at_timestamp(&self, quats: &TimeQuat, timestamp_ms: f64, lookup: &MotionLookup) -> Quat64 {
+    pub(crate) fn quat_at_timestamp(&self, quats: &TimeQuat, timestamp_ms: f64, lookup: &MotionLookup) -> Quat64 {
         if quats.len() < 2 || self.duration_ms <= 0.0 { return Quat64::identity(); }
         let motion_ms = timestamp_ms - self.offset_at_video_timestamp_in(timestamp_ms, lookup.segment);
         self.quat_in(quats, motion_ms, &lookup.motion, None)

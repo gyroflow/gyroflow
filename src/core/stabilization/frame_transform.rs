@@ -300,6 +300,40 @@ impl FrameTransform {
         nalgebra::convert(r.transpose())
     }
 
+    /// The in-camera stabilizer's rotation at `timestamp_ms` (the file's image orientations, GoPro's IORI), as the kernel
+    /// takes it (`KernelParams::image_orientation`), or zero when it isn't needed.
+    ///
+    /// The orientation the render follows is the recorded picture's: the camera's (CORI) turned by the stabilizer's (IORI).
+    /// In air only that product matters. Under water a flat port sits in front of the lens, fixed to the physical camera,
+    /// and the stabilizer turned the picture inside the housing, through its own model of the lens in air: the ray of a
+    /// source pixel is refracted about the physical camera's axis, not the picture's. So the kernel takes the ray from
+    /// the picture's camera to the physical one (IORI), refracts it there, and takes it back before the lens images it.
+    /// Leaving this out bends the picture by `(κ(θ) - 1/n)` of the stabilizer's tilt, `κ(θ) = cos θ / √(n² - sin² θ)`:
+    /// little in the middle, most at the edges, and changing from frame to frame.
+    ///
+    /// Not with GoPro Labs DIVE (`in_camera_underwater`): that camera stabilizes for the water itself, and its turn is the
+    /// picture's on the water's side already
+    pub fn kernel_image_orientation(gyro: &crate::gyro_source::GyroSource, file_metadata: &crate::gyro_source::FileMetadata, timestamp_ms: f64, lookup: &crate::gyro_source::MotionLookup, light_refraction_coefficient: f64, framebuffer_inverted: bool) -> [f32; 4] {
+        if light_refraction_coefficient == 1.0 || light_refraction_coefficient <= 0.0 { return [0.0; 4]; }
+        if file_metadata.additional_data.get("in_camera_underwater").and_then(|v| v.as_bool()) == Some(true) { return [0.0; 4]; }
+        let Some(io) = file_metadata.image_orientations.as_ref().filter(|io| io.len() > 1) else { return [0.0; 4]; };
+        let r = Self::kernel_axes(*gyro.quat_at_timestamp(io, timestamp_ms, lookup).to_rotation_matrix().matrix(), framebuffer_inverted);
+        let q = nalgebra::UnitQuaternion::from_matrix(&r);
+        [q.i as f32, q.j as f32, q.k as f32, q.w as f32]
+    }
+    /// A rotation in the motion data's axes, flipped into the kernel's image axes (y down, or for an upside-down
+    /// framebuffer mirrored the other way), as `kernel_rotation` flips the rows' matrices
+    fn kernel_axes(mut r: Matrix3<f64>, framebuffer_inverted: bool) -> Matrix3<f64> {
+        if framebuffer_inverted {
+            r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+            r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
+        } else {
+            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+        }
+        r
+    }
+
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
@@ -447,6 +481,7 @@ impl FrameTransform {
                 bz, 0.0
             ]
         }).collect::<Vec<[f32; 16]>>();
+        let image_orientation = Self::kernel_image_orientation(&gyro, &file_metadata, timestamp_ms, &lookup, light_refraction_coefficient, params.framebuffer_inverted);
         drop(file_metadata);
         drop(gyro);
 
@@ -478,6 +513,7 @@ impl FrameTransform {
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
+            image_orientation,
             ..Default::default()
         };
 

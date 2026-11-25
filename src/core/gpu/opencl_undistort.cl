@@ -51,6 +51,7 @@ typedef struct {
     float reserved2;                 // 16
     float4 ewa_coeffs_p;             // 16
     float4 ewa_coeffs_q;             // 16
+    float4 image_orientation;        // 16 - the in-camera stabilizer's turn, quaternion (x, y, z, w); zero = none
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -490,6 +491,11 @@ float3 ray_to_dir(float2 ray) {
     return (float3)(ray * (sin(theta) / theta), cos(theta));
 }
 
+// `v` turned by the unit quaternion `q` (x, y, z, w)
+float3 quat_rotate(float4 q, float3 v) {
+    float3 t = 2.0f * cross(q.xyz, v);
+    return v + q.w * t + cross(q.xyz, t);
+}
 float2 rotate_and_distort(float2 ray, uint idx, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
     __global const float *matrix = &matrices[idx];
     float3 d = ray_to_dir(ray);
@@ -507,11 +513,17 @@ float2 rotate_and_distort(float2 ray, uint idx, __global KernelParams *params, _
 
         // Refraction (underwater): Snell's law on the angle itself, exact for any field. Past the critical angle - or behind the flat port - no ray enters the housing at all: Snell's window ends there
         if ((params->flags & 2048) && params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f && rxy > 1e-12f) {
-            float sin_d = sin(theta) * params->light_refraction_coefficient;
-            if (sin_d >= 1.0f || _w <= 0.0f) { return (float2)(-99999.0f, -99999.0f); }
-            float theta_d = asin(sin_d);
-            float s = sin(theta_d) / rxy;
-            _x *= s; _y *= s; _w = cos(theta_d);
+            // The port is fixed to the physical camera, which the in-camera stabilizer's turn (if any) tells apart from the recorded picture's: refract in its axes, then turn back for the lens (KernelParams::image_orientation)
+            float4 io = params->image_orientation;
+            bool turned = io.x != 0.0f || io.y != 0.0f || io.z != 0.0f;
+            float3 v = (float3)(_x, _y, _w);
+            if (turned) { v = quat_rotate(io, v); }
+            float r = length(v.xy);
+            float sin_d = sin(atan2(r, v.z)) * params->light_refraction_coefficient;
+            if (sin_d >= 1.0f || v.z <= 0.0f) { return (float2)(-99999.0f, -99999.0f); }
+            if (r > 1e-12f) { float theta_d = asin(sin_d); v = (float3)(v.xy * (sin(theta_d) / r), cos(theta_d)); }
+            if (turned) { v = quat_rotate((float4)(-io.xyz, io.w), v); }
+            _x = v.x; _y = v.y; _w = v.z;
         }
 
         float2 uv = distort_point(_x, _y, _w, params);

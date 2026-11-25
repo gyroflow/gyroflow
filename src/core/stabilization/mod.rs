@@ -185,6 +185,12 @@ pub struct KernelParams {
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             [f32; 4], // 16
     pub ewa_coeffs_q:             [f32; 4], // 16
+    /// The in-camera stabilizer's rotation of this frame (GoPro's IORI), as a quaternion `[x, y, z, w]` in the kernel's
+    /// source axes: from the recorded picture's camera to the physical one. Zero when there is none, or no refraction:
+    /// the per-row matrices carry it, and only a flat port tells the two cameras apart - the port is fixed to the
+    /// physical camera, so the refraction is applied in its axes and the stabilizer's turn on the lens's side of it
+    /// (`FrameTransform::kernel_image_orientation`)
+    pub image_orientation:        [f32; 4], // 16
 }
 unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}

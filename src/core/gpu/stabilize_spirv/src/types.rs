@@ -82,6 +82,7 @@ pub struct KernelParams {
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             Vec4, // 16
     pub ewa_coeffs_q:             Vec4, // 16
+    pub image_orientation:        Vec4, // 16 - the in-camera stabilizer's turn, quaternion (x, y, z, w); zero = none
 }
 
 // #[inline] pub fn fast_floor(x: f32) -> i32 { x as i32 }
