@@ -404,12 +404,20 @@ impl MeshCorrections {
         }
     }
 
+    /// The frame's correction, `None` when it has none; with `with_mesh` false the focal plane table alone
+    /// (`DistortionModel::uses_camera_mesh`), and `None` when that's all the frame has
+    fn correction(&self, frame: usize, with_mesh: bool) -> Option<(&MeshFrame, Option<&MeshTable>)> {
+        let f = self.frame(frame)?;
+        let table = if with_mesh { self.table_of(f) } else { None };
+        (table.is_some() || f.has_focal_plane()).then_some((f, table))
+    }
+
     /// The kernels' buffer of a frame: `[inverse mesh][focal plane table][forward mesh]`, the forward mesh reduced to a
     /// single zero when the table doesn't need refining. The kernels probe that slot, and the GPU buffers keep stale
-    /// data past what was uploaded, so it's always there. Empty when the frame has no correction
-    pub fn kernel_buffer(&self, frame: usize) -> Vec<f32> {
-        let Some(f) = self.frame(frame) else { return Vec::new() };
-        let table = self.table_of(f);
+    /// data past what was uploaded, so it's always there. Empty when the frame has no correction. With `with_mesh`
+    /// false the mesh blocks are bare headers, the focal plane table alone applies (`DistortionModel::uses_camera_mesh`)
+    pub fn kernel_buffer(&self, frame: usize, with_mesh: bool) -> Vec<f32> {
+        let Some((f, table)) = self.correction(frame, with_mesh) else { return Vec::new() };
         let inverse: &[f32] = table.map_or(&[], |t| t.inverse.as_slice());
         let refinement: &[f32] = table.map_or(&[], |t| t.refinement.as_slice());
         let mut buf = Vec::with_capacity(inverse.len().max(MESH_HEADER) + f.focal_plane.len().max(4) + refinement.len().max(1));
@@ -423,10 +431,11 @@ impl MeshCorrections {
         buf
     }
     /// The camera's mesh of a frame with the frame's geometry in its header, followed by the focal plane table: what
-    /// `undistort_points` applies. `None` when the frame has no correction
-    pub fn forward_mesh(&self, frame: usize) -> Option<Vec<f64>> {
-        let f = self.frame(frame)?;
-        let forward: &[f64] = self.table_of(f).map_or(&[], |t| t.forward.as_slice());
+    /// `undistort_points` applies. `None` when the frame has no correction. With `with_mesh` false the mesh block is a
+    /// bare header, as in `kernel_buffer`
+    pub fn forward_mesh(&self, frame: usize, with_mesh: bool) -> Option<Vec<f64>> {
+        let (f, table) = self.correction(frame, with_mesh)?;
+        let forward: &[f64] = table.map_or(&[], |t| t.forward.as_slice());
         let mut buf = Vec::with_capacity(forward.len().max(MESH_HEADER) + f.focal_plane.len().max(4));
         Self::push_block(&mut buf, forward, f, |v| v);
         Self::push_focal_plane(&mut buf, f, |v| v);

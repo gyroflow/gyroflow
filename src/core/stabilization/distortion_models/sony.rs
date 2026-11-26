@@ -207,6 +207,79 @@ impl Sony {
         k
     }
 
+    /// The spline block of a lens curve the camera states for another focal length than the lens has: `angles[i]` is
+    /// the curve's ray angle (radians) at image radius (i + 1)·`radius_step`, the radii normalized by the lens's own
+    /// focal length, and `ratio` is the stated focal length over the lens's. Some bodies record such a curve, an
+    /// "8 mm" one with a 24 mm or a 105 mm lens: its distortion is the lens's (the undistorted radius, stated focal
+    /// length × tan θ, is the knot's radius near the axis and follows the camera's mesh correction across the frame),
+    /// only the angles are those of the stated focal length. Sony's stabilizer uses it as it is, the mesh included; the
+    /// picture that gives is the right one, but each ray's angle is off by the focal lengths' ratio.
+    ///
+    /// The lens's own curve is θ'(r) = atan(`ratio`·tan θ(r)), with θ(r) evaluated as Sony does (the natural spline
+    /// through the knots, the 3° line near the axis, linear past the knots): the same undistorted radii up to a scale,
+    /// so the same picture, with the lens's angles. A spline can't follow that curve exactly between its knots, so its
+    /// knot angles are fitted to it by least squares in the undistorted radius, the knots and `radius_max` (normalized
+    /// as `radius_step`) both covered. The fit has no linear region: the camera's is part of what it follows, and a line
+    /// from 3° of the rescaled curve would replace a far wider region than the camera's (half the frame of a 105 mm lens)
+    pub fn coefficients_from_rescaled_lens_curve(angles: &[f64], radius_step: f64, ratio: f64, radius_max: f64) -> Vec<f64> {
+        let n = angles.len().min(MAX_SEGMENTS);
+        if n == 0 || !(radius_step > 0.0) || !(ratio > 0.0) || !ratio.is_finite() { return vec![0.0; COEFF_COUNT]; }
+        let h = radius_step;
+        let radii: Vec<f64> = (0..=n).map(|i| i as f64 * h).collect();
+        let mut y = vec![0.0; n + 1];
+        y[1..].copy_from_slice(&angles[..n]);
+        let knots: Vec<f64> = y[1..].iter().map(|t| (ratio * t.tan()).atan()).collect();
+        let fallback = |k: &[f64]| { let mut k = Self::coefficients_from_lens_curve(k, h); k[RLIN] = 0.0; k };
+
+        // The curve as the camera evaluates it
+        let Some(camera) = NaturalSpline::new(&radii, &y) else { return fallback(&knots) };
+        let r_lin = NaturalSpline::new(&y, &radii).map(|inverse| inverse.at(THETA0)).filter(|r| *r > 0.0);
+        let camera_angle = |r: f64| match r_lin { Some(r_lin) if r < r_lin => THETA0 * r / r_lin, _ => camera.at(r) };
+
+        // Its undistorted radius at the lens's focal length, sampled over the knots and the frame
+        const SAMPLES: usize = 256;
+        let r_end = (n as f64 * h).max(radius_max);
+        let max_angle = 89.0f64.to_radians();
+        let samples: Vec<(f64, f64)> = (1..=SAMPLES).filter_map(|i| {
+            let r = r_end * i as f64 / SAMPLES as f64;
+            let theta = camera_angle(r);
+            (theta > 0.0 && theta < max_angle).then(|| (r, ratio * theta.tan()))
+        }).collect();
+        // The natural spline is linear in its knot values: the curve at each sample is `basis · knots`
+        let basis: Option<Vec<NaturalSpline>> = (1..=n).map(|j| {
+            let mut unit = vec![0.0; n + 1];
+            unit[j] = 1.0;
+            NaturalSpline::new(&radii, &unit)
+        }).collect();
+        let Some(basis) = basis else { return fallback(&knots) };
+        let rows: Vec<Vec<f64>> = samples.iter().map(|(r, _)| basis.iter().map(|s| s.at(*r)).collect()).collect();
+        if rows.len() < n { return fallback(&knots) }
+
+        // Gauss-Newton on tan θ', from the rescaled knots
+        let mut fit = knots.clone();
+        for _ in 0..8 {
+            let mut jtj = nalgebra::DMatrix::<f64>::zeros(n, n);
+            let mut jtr = nalgebra::DVector::<f64>::zeros(n);
+            for (row, (_, target)) in rows.iter().zip(&samples) {
+                let theta: f64 = row.iter().zip(&fit).map(|(b, y)| b * y).sum();
+                if !(theta.abs() < max_angle) { continue; }
+                let sec2 = 1.0 / theta.cos().powi(2);
+                let residual = theta.tan() - target;
+                for a in 0..n {
+                    let ja = sec2 * row[a];
+                    jtr[a] += ja * residual;
+                    for b in 0..n { jtj[(a, b)] += ja * sec2 * row[b]; }
+                }
+            }
+            let Some(step) = jtj.cholesky().map(|c| c.solve(&jtr)) else { break };
+            for (y, s) in fit.iter_mut().zip(step.iter()) { *y -= s; }
+            if step.amax() < 1e-12 { break; }
+        }
+        // A curve that doesn't rise isn't a lens: the knots then are as close as it gets
+        let rises = fit.iter().all(|t| t.is_finite()) && fit[0] > 0.0 && fit.windows(2).all(|w| w[1] > w[0]);
+        fallback(if rises { &fit } else { &knots })
+    }
+
     /// Converts the 6-term polynomial `r(θ) = Σ p_i·θ^(i+1)` that older Gyroflow versions fitted to the lens curve
     /// (still present per frame in project files with embedded metadata) into the spline block.
     /// `radius_max` is the normalized radius the spline has to cover (image half-diagonal / focal length).

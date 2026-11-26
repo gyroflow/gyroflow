@@ -352,7 +352,7 @@ impl FrameTransform {
         let file_metadata = gyro.file_metadata.read();
 
         // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded)
-        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame, params.distortion_model.uses_camera_mesh());
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
@@ -514,7 +514,8 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        let mesh_correction = file_metadata.mesh_correction.forward_mesh(frame); // distorting mesh, none when the frame has none
+        // Distorting mesh, none when the frame has none or the lens profile describes the corrected picture
+        let mesh_correction = file_metadata.mesh_correction.forward_mesh(frame, params.distortion_model.uses_camera_mesh());
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms, &file_metadata);

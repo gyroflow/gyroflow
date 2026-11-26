@@ -61,14 +61,29 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                 let ratio = approx_focal_length_mm / focal_length_mm.max(0.000001);
 
                 let is_bad_focal_length = (ratio - 1.0).abs() > 0.5;
-                if is_bad_focal_length {
-                    log::error!("Bad focal length: {approx_focal_length_mm} -> {focal_length_mm}");
-                }
 
                 let sensor_height = v.get("effective_sensor_height_nm")?.as_f64()? / 1e9;
                 let coeff_scale = v.get("coeff_scale")?.as_f64()?;
                 let lens_in_ray_angle: Vec<f64> = v.get("coeffs")?.as_array()?.into_iter().filter_map(|x| Some(x.as_f64()? / coeff_scale.max(1.0) / 180.0 * std::f64::consts::PI)).collect();
-                if lens_in_ray_angle.is_empty() || sensor_height == 0.0 || is_bad_focal_length {
+
+                // A curve stated for a nominal focal length (8 mm on a 24 mm or a 105 mm lens): its knots agree with the
+                // focal length it states, the undistorted radius of the first one (stated focal length × tan θ) being
+                // that knot's radius, and its distortion is the lens's, which the camera's mesh correction undoes. Sony's
+                // stabilizer uses it as it is, mesh included (`Sony::coefficients_from_rescaled_lens_curve`): it's kept,
+                // rescaled to the lens's focal length, so the mesh has the lens curve it was made for
+                let nominal_curve = is_bad_focal_length && !lens_in_ray_angle.is_empty() && sensor_height > 0.0 && approx_focal_length_mm > 0.0 && {
+                    let first_radius = sensor_height / lens_in_ray_angle.len().min(MAX_SEGMENTS) as f64;
+                    let undistorted = focal_length_mm / 1000.0 * lens_in_ray_angle[0].tan();
+                    (undistorted / first_radius - 1.0).abs() < 0.05
+                };
+                if is_bad_focal_length && md.lens_profile.is_none() {
+                    if nominal_curve {
+                        log::info!("Lens curve stated for {focal_length_mm} mm on a {approx_focal_length_mm} mm lens, rescaled to the lens");
+                    } else {
+                        log::error!("Bad focal length: {approx_focal_length_mm} -> {focal_length_mm}");
+                    }
+                }
+                if lens_in_ray_angle.is_empty() || sensor_height == 0.0 || (is_bad_focal_length && !nominal_curve) {
                     let sensor_size_px = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)>).cloned()?;
 
                     let focal_length_mm = if is_bad_focal_length { approx_focal_length_mm } else { v.get("focal_length_nm")?.as_f64()? / 1000000.0 };
@@ -127,6 +142,10 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                 // Effective meters-per-output-pixel after the sensor → output resize.
                 let pixel_pitch_scaled = pixel_pitch_m.component_mul(&sensor_crop_px).component_div(&video_res_px);
 
+                // The lens's own focal length for a curve stated for a nominal one
+                let stated_focal_length_mm = focal_length_mm;
+                let focal_length_mm = if nominal_curve { approx_focal_length_mm } else { focal_length_mm };
+
                 // Single physical focal length (meters) used to normalize the lens curve.
                 let f_meters = focal_length_mm / 1000.0;
 
@@ -136,11 +155,21 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
 
                 // Sony's stabilizer evaluates the lens curve as a natural cubic spline through the ray angles at radii
                 // i/N × effective sensor height; build the same spline in normalized units (radius / focal length)
-                if lens_in_ray_angle.len() != MAX_SEGMENTS {
+                if lens_in_ray_angle.len() != MAX_SEGMENTS && md.lens_profile.is_none() {
                     log::warn!("Sony lens curve has {} knots, expected {MAX_SEGMENTS}", lens_in_ray_angle.len());
                 }
                 let n = lens_in_ray_angle.len().min(MAX_SEGMENTS);
-                let normalized = Sony::coefficients_from_lens_curve(&lens_in_ray_angle, sensor_height / n as f64 / f_meters);
+                let radius_step = sensor_height / n as f64 / f_meters;
+                let normalized = if nominal_curve {
+                    // Fitted over the knots and the whole sensor, which the mesh and the principal point can reach
+                    let half_diagonal_m = match sensor_size_px {
+                        Some(s) => (s.0 as f64 * pixel_pitch_m.x).hypot(s.1 as f64 * pixel_pitch_m.y) / 2.0,
+                        None => (sensor_crop_px.x * pixel_pitch_m.x).hypot(sensor_crop_px.y * pixel_pitch_m.y) / 2.0 * 1.1,
+                    };
+                    rescaled_lens_curve(&lens_in_ray_angle, radius_step, stated_focal_length_mm / focal_length_mm, half_diagonal_m / f_meters)
+                } else {
+                    Sony::coefficients_from_lens_curve(&lens_in_ray_angle, radius_step)
+                };
 
                 let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                 if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
@@ -193,6 +222,23 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
     }
 }
 
+
+/// `Sony::coefficients_from_rescaled_lens_curve`, of the last curve it was asked for on this thread again when it's the
+/// same: every frame records its curve, and they're the same frame after frame
+fn rescaled_lens_curve(angles: &[f64], radius_step: f64, ratio: f64, radius_max: f64) -> Vec<f64> {
+    thread_local! {
+        static LAST: std::cell::RefCell<Option<(Vec<u64>, Vec<f64>)>> = const { std::cell::RefCell::new(None) };
+    }
+    let key: Vec<u64> = angles.iter().chain([radius_step, ratio, radius_max].iter()).map(|v| v.to_bits()).collect();
+    LAST.with_borrow_mut(|last| {
+        if let Some((k, coeffs)) = last.as_ref() && *k == key {
+            return coeffs.clone();
+        }
+        let coeffs = Sony::coefficients_from_rescaled_lens_curve(angles, radius_step, ratio, radius_max);
+        *last = Some((key, coeffs.clone()));
+        coeffs
+    })
+}
 
 /// Fixes up per-frame data from project files written by older Gyroflow versions
 pub fn upgrade_legacy_metadata(md: &mut FileMetadata) {

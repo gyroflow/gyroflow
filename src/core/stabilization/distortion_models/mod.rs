@@ -200,6 +200,15 @@ impl_models! {
 }
 
 impl DistortionModel {
+    /// The model describes the raw lens, the picture before the camera's mesh correction (`MeshCorrections`), so the
+    /// camera's mesh goes with it: the Sony curve of the metadata, and the gyroflow protobuf's polynomial. Any other
+    /// profile describes the recorded picture, the camera's correction already in it, and taking the mesh out of that
+    /// picture would bring the lens distortion it removed back. The preview's shaders have the mesh for these two only.
+    /// The focal plane table isn't part of this: it's on the recorded side of the mesh, and applies with any profile
+    pub fn uses_camera_mesh(&self) -> bool {
+        matches!(&self.inner, DistortionModels::Sony(_) | DistortionModels::GenericPolynomial(_))
+    }
+
     /// The model has terms that aren't radial (decentering, thin prism), which move a ray off its own azimuth. Only then
     /// does the partial correction's solve along the ray's radius leave the 2D map to finish (`polish_blend` in the
     /// render; the `{non_radial}` sections of the kernels, which the others are built without)
