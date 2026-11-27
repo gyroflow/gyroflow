@@ -98,7 +98,7 @@ fn a_project_from_before_the_setting_is_rectilinear_and_a_preset_without_it_leav
 
 #[test]
 fn the_project_file_names_round_trip() {
-    for v in [projection::AUTOMATIC, 0, 1, 2, 3, 4] {
+    for v in [projection::AUTOMATIC, 0, 1, 2, 3, 4, 5] {
         let name = projection::setting_name(v);
         assert_eq!(projection::setting_from_name(name), Some(v), "{name}");
     }

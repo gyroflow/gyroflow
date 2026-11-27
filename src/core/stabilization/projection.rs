@@ -52,6 +52,24 @@
 //! rectilinear cannot hold - and it is not the default because a fisheye picture reads as a lens profile
 //! that didn't apply, and because the field it judges by often ends where a calibration's polynomial
 //! folds, which two profiles of one lens put at different angles.
+//!
+//! ## Equirectangular
+//!
+//! [`OutputProjection::Equirect`] is no radial projection: the output plane is longitude and latitude, the
+//! whole of it the whole sphere, 360° across and 180° down, whatever the lens and the output size (a frame that
+//! isn't 2:1 has pixels that aren't square in angle). `fov_scale` (and the adaptive zoom, which a sphere has no
+//! use for) still divides it: at 0.5 the output is the middle 180°×90°. The plane's scale is therefore not the
+//! lens's focal length but [`equirect_focal`] - see `FrameTransform::equirect_zoom` - and the lens-correction
+//! blend doesn't apply: an equirectangular output is always fully corrected.
+//!
+//! The axes are those of `video-types` and of the rest of the pipeline: +x right, +y down, +z forward.
+//! Longitude 0 is +z and +π/2 is +x; the plane's `y` is down, so latitude +π/2 (up, -y) is the top row. A
+//! direction straight behind the camera is at ±180°, the left and right edges, and its angle vector has a
+//! length of π - representable, since nothing in the ray encoding diverges before 180°.
+//!
+//! Its scalar helpers ([`radius_of_theta`] and friends) are the equidistant projection's, which is exact along
+//! the two axes through the middle of the frame (a ray θ off the axis horizontally is at longitude θ, vertically
+//! at latitude θ) and is what the zoom and the field sweeps read the projection by.
 
 #[repr(i32)]
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
@@ -67,6 +85,8 @@ pub enum OutputProjection {
     EquisolidAngle = 3,
     /// `ρ = sin θ`: the sphere seen from infinitely far away
     Orthographic = 4,
+    /// Longitude across, latitude down: the whole sphere, 360°×180°. Not radial, see the module's docs
+    Equirect = 5,
 }
 
 impl OutputProjection {
@@ -144,6 +164,7 @@ impl OutputProjection {
             2 => Self::Equidistant,
             3 => Self::EquisolidAngle,
             4 => Self::Orthographic,
+            5 => Self::Equirect,
             _ => Self::Rectilinear,
         }
     }
@@ -155,17 +176,18 @@ impl OutputProjection {
             Self::Equidistant    => "equidistant",
             Self::EquisolidAngle => "equisolid",
             Self::Orthographic   => "orthographic",
+            Self::Equirect       => "equirect",
         }
     }
     pub fn from_name(name: &str) -> Option<Self> {
-        [Self::Rectilinear, Self::Stereographic, Self::Equidistant, Self::EquisolidAngle, Self::Orthographic].into_iter().find(|p| p.name() == name)
+        [Self::Rectilinear, Self::Stereographic, Self::Equidistant, Self::EquisolidAngle, Self::Orthographic, Self::Equirect].into_iter().find(|p| p.name() == name)
     }
     /// Ray angle of a normalized output radius
     pub fn theta_of_radius(&self, r: f64) -> f64 {
         match self {
             Self::Rectilinear    => r.atan(),
             Self::Stereographic  => 2.0 * (r / 2.0).atan(),
-            Self::Equidistant    => r,
+            Self::Equidistant | Self::Equirect => r,
             Self::EquisolidAngle => 2.0 * (r / 2.0).clamp(-1.0, 1.0).asin(),
             Self::Orthographic   => r.clamp(-1.0, 1.0).asin(),
         }
@@ -178,7 +200,7 @@ impl OutputProjection {
             // back into it
             Self::Rectilinear    => if t < 1.5707 { t.tan() } else { 1e9 },
             Self::Stereographic  => 2.0 * (t / 2.0).tan(),
-            Self::Equidistant    => t,
+            Self::Equidistant | Self::Equirect => t,
             Self::EquisolidAngle => 2.0 * (t / 2.0).sin(),
             Self::Orthographic   => t.sin(),
         }
@@ -200,7 +222,7 @@ impl OutputProjection {
             Self::Rectilinear    => if t < 1.5707 { 1.0 / (t.cos() * t.cos()) } else { 1e9 },
             // `ρ = 2·tan(θ/2)` differentiates to `sec²(θ/2)`, ie. `2/(1 + cos θ)` - not `1/(1 + cos θ)`
             Self::Stereographic  => 1.0 / (t / 2.0).cos().powi(2).max(1e-9),
-            Self::Equidistant    => 1.0,
+            Self::Equidistant | Self::Equirect => 1.0,
             Self::EquisolidAngle => (t / 2.0).cos(),
             Self::Orthographic   => t.cos(),
         }
@@ -219,9 +241,48 @@ pub fn setting_from_name(name: &str) -> Option<i32> {
     if name == "automatic" { Some(AUTOMATIC) } else { OutputProjection::from_name(name).map(|p| p as i32) }
 }
 
+/// `OutputProjection::Equirect` as `i32`, for the kernels' branches
+pub const EQUIRECT: i32 = OutputProjection::Equirect as i32;
+
+/// The output plane's scale for [`OutputProjection::Equirect`], in output pixels per radian of longitude and of
+/// latitude: the whole width is 360° and the whole height 180° at `zoom` 1, the part of the sphere `zoom` says
+/// otherwise. It stands where `f / fov` stands for the other projections, `(pixel - c) / out_f` being the plane
+#[inline]
+pub fn equirect_focal(output_size: (f32, f32), zoom: f32) -> (f32, f32) {
+    let zoom = zoom.max(1e-6);
+    (output_size.0 / (2.0 * std::f32::consts::PI * zoom), output_size.1 / (std::f32::consts::PI * zoom))
+}
+
+/// The output plane the kernel reads, `(pixel - c) / out_f`: the lens's focal length over the zoom, or for the
+/// equirect, the sphere's own scale. One place for the CPU paths; the GPU kernels spell the same out
+#[inline]
+pub fn output_focal(params: &super::KernelParams) -> (f32, f32) {
+    if params.output_projection == EQUIRECT {
+        return equirect_focal((params.output_width as f32, params.output_height as f32), params.fov);
+    }
+    let stretch = if params.input_horizontal_stretch > 0.01 { 1.0 / params.input_horizontal_stretch } else { 1.0 };
+    (params.f[0] * stretch / params.fov, params.f[1] * stretch / params.fov)
+}
+
+/// Equirect plane point (longitude, latitude down, in radians) → 3D unit direction. Past ±90° of latitude the
+/// meridian goes on over the pole, and past ±180° of longitude it wraps: every point of the plane is a direction
+#[inline]
+pub fn equirect_to_dir(n: (f32, f32)) -> (f32, f32, f32) {
+    let (cl, sl) = (n.1.cos(), n.1.sin());
+    (cl * n.0.sin(), sl, cl * n.0.cos())
+}
+
+/// 3D direction → equirect plane point (longitude in -π..π, latitude down in -π/2..π/2). The direction needs no
+/// normalization
+#[inline]
+pub fn dir_to_equirect(d: (f32, f32, f32)) -> (f32, f32) {
+    (d.0.atan2(d.2), d.1.atan2((d.0 * d.0 + d.2 * d.2).sqrt()))
+}
+
 /// Output plane point → ray (angle vector)
 #[inline]
 pub fn unproject(n: (f32, f32), proj: i32) -> (f32, f32) {
+    if proj == EQUIRECT { return dir_to_ray(equirect_to_dir(n)); }
     let r = (n.0 * n.0 + n.1 * n.1).sqrt();
     if r < 1e-12 { return (0.0, 0.0); }
     let theta = match proj {
@@ -238,6 +299,7 @@ pub fn unproject(n: (f32, f32), proj: i32) -> (f32, f32) {
 /// Ray (angle vector) → output plane point
 #[inline]
 pub fn project(ray: (f32, f32), proj: i32) -> (f32, f32) {
+    if proj == EQUIRECT { return dir_to_equirect(ray_to_dir(ray)); }
     let theta = (ray.0 * ray.0 + ray.1 * ray.1).sqrt();
     if theta < 1e-12 { return (0.0, 0.0); }
     let r = match proj {
@@ -251,12 +313,12 @@ pub fn project(ray: (f32, f32), proj: i32) -> (f32, f32) {
     (ray.0 * s, ray.1 * s)
 }
 
-/// The output radius a ray angle lands at, scalar form of [`project`]
+/// The output radius a ray angle lands at, scalar form of [`project`] (for the equirect, along its axes)
 #[inline]
 pub fn radius_of_theta(theta: f32, proj: i32) -> f32 {
     match proj {
         1 => 2.0 * (theta * 0.5).tan(),
-        2 => theta,
+        2 | 5 => theta,
         3 => 2.0 * (theta * 0.5).sin(),
         4 => theta.sin(),
         // Just under 90°, where `tan` flips sign: a large finite radius keeps a ray this projection has no
@@ -270,7 +332,7 @@ pub fn radius_of_theta(theta: f32, proj: i32) -> f32 {
 pub fn theta_of_radius(r: f32, proj: i32) -> f32 {
     match proj {
         1 => 2.0 * (r * 0.5).atan(),
-        2 => r,
+        2 | 5 => r,
         3 => 2.0 * (r * 0.5).min(1.0).asin(),
         4 => r.min(1.0).asin(),
         _ => r.atan(),

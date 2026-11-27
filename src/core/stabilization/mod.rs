@@ -18,7 +18,7 @@ mod pixel_formats;
 pub mod distortion_models;
 pub mod projection;
 pub use pixel_formats::*;
-pub use compute_params::ComputeParams;
+pub use compute_params::{ ComputeParams, RigLens, ray_from_lens_offset };
 pub use frame_transform::{ FrameTransform, FocalSource };
 pub use cpu_undistort::*;
 
