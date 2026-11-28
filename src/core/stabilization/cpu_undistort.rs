@@ -162,6 +162,7 @@ fn spirv_kernel_params(params: &KernelParams) -> stabilize_spirv::KernelParams {
         reserved2:                 p.reserved2,
         ewa_coeffs_p:              Vec4::from_array(p.ewa_coeffs_p),
         ewa_coeffs_q:              Vec4::from_array(p.ewa_coeffs_q),
+        image_orientation:         Vec4::from_array(p.image_orientation),
     }
 }
 
@@ -488,11 +489,17 @@ impl Stabilization {
 
             // Refraction (underwater): Snell's law on the angle itself, exact for any field. Past the critical angle - or behind the flat port - no ray enters the housing at all: Snell's window ends there
             if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 && rxy > 1e-12 {
-                let sin_d = theta.sin() * params.light_refraction_coefficient;
-                if sin_d >= 1.0 || _w <= 0.0 { return None; }
-                let theta_d = sin_d.asin();
-                let (s, c) = (theta_d.sin() / rxy, theta_d.cos());
-                _x *= s; _y *= s; _w = c;
+                // The port is fixed to the physical camera, which the in-camera stabilizer's turn (if any) tells apart from the recorded picture's: refract in its axes, then turn back for the lens (KernelParams::image_orientation)
+                let io = params.image_orientation;
+                let turned = io[0] != 0.0 || io[1] != 0.0 || io[2] != 0.0;
+                let mut v = (_x, _y, _w);
+                if turned { v = quat_rotate(io, v); }
+                let r = (v.0 * v.0 + v.1 * v.1).sqrt();
+                let sin_d = r.atan2(v.2).sin() * params.light_refraction_coefficient;
+                if sin_d >= 1.0 || v.2 <= 0.0 { return None; }
+                if r > 1e-12 { let theta_d = sin_d.asin(); let s = theta_d.sin() / r; v = (v.0 * s, v.1 * s, theta_d.cos()); }
+                if turned { v = quat_rotate([-io[0], -io[1], -io[2], io[3]], v); }
+                (_x, _y, _w) = v;
             }
 
             let mut uv = distortion_model.distort_point(_x, _y, _w, &params);
@@ -937,7 +944,7 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
 
     // The features were tracked on a frame of their own size, so the lens is read at that scale - and so is
     // the digital lens, which works in whole pixels of the frame it is handed
-    let mut kernel_params = point_kernel_params(params, camera_matrix * img_dim_ratio, distortion_coeffs, 0.0, timestamp_ms);
+    let mut kernel_params = point_kernel_params(params, camera_matrix * img_dim_ratio, distortion_coeffs, 0.0, timestamp_ms, None);
     kernel_params.width  = points_dims.0 as i32; kernel_params.output_width  = points_dims.0 as i32;
     kernel_params.height = points_dims.1 as i32; kernel_params.output_height = points_dims.1 as i32;
 
@@ -964,7 +971,7 @@ pub fn undistort_points_for_optical_motion(distorted: &[(f32, f32)], timestamp_m
     // Without rolling shutter correction the shift is looked up once, for the whole frame
     let shifts = shifts.map(|s| if s.len() == 1 { vec![s[0]; full.len()] } else { s });
 
-    let kernel_params = point_kernel_params(params, camera_matrix, distortion_coeffs, 0.0, timestamp_ms);
+    let kernel_params = point_kernel_params(params, camera_matrix, distortion_coeffs, 0.0, timestamp_ms, Some(frame));
     undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, params, shifts.as_deref(), mesh.as_deref(), breathing.as_deref(), false)
         .into_iter()
         .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
@@ -973,7 +980,15 @@ pub fn undistort_points_for_optical_motion(distorted: &[(f32, f32)], timestamp_m
 
 /// The block the point path evaluates the lens with: the same one the render fills per frame, minus
 /// everything that is about pixels rather than about the lens
-fn point_kernel_params(params: &ComputeParams, camera_matrix: Matrix3<f64>, distortion_coeffs: [f64; 24], field_limit: f64, timestamp_ms: f64) -> KernelParams {
+/// `v` turned by the unit quaternion `q` (x, y, z, w)
+fn quat_rotate(q: [f32; 4], v: (f32, f32, f32)) -> (f32, f32, f32) {
+    let t = (2.0 * (q[1] * v.2 - q[2] * v.1), 2.0 * (q[2] * v.0 - q[0] * v.2), 2.0 * (q[0] * v.1 - q[1] * v.0));
+    (v.0 + q[3] * t.0 + (q[1] * t.2 - q[2] * t.1),
+     v.1 + q[3] * t.1 + (q[2] * t.0 - q[0] * t.2),
+     v.2 + q[3] * t.2 + (q[0] * t.1 - q[1] * t.0))
+}
+
+fn point_kernel_params(params: &ComputeParams, camera_matrix: Matrix3<f64>, distortion_coeffs: [f64; 24], field_limit: f64, timestamp_ms: f64, frame: Option<usize>) -> KernelParams {
     let mut digital_lens_params = [0f32; 16];
     if let Some(p) = &params.digital_lens_params {
         for (i, v) in p.iter().take(16).enumerate() {
@@ -981,6 +996,7 @@ fn point_kernel_params(params: &ComputeParams, camera_matrix: Matrix3<f64>, dist
         }
     }
 
+    let light_refraction_coefficient = params.keyframes.value_at_video_timestamp(&crate::KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient);
     // TODO more params
     KernelParams {
         width : params.width as i32,
@@ -991,7 +1007,14 @@ fn point_kernel_params(params: &ComputeParams, camera_matrix: Matrix3<f64>, dist
         c: [camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32],
         k: distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<_>>().try_into().unwrap(),
         digital_lens_params,
-        light_refraction_coefficient: params.keyframes.value_at_video_timestamp(&crate::KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient) as f32,
+        light_refraction_coefficient: light_refraction_coefficient as f32,
+        // The points are in the picture's own axes (y down), as `at_timestamp_for_points` turns its rotations
+        image_orientation: {
+            let gyro = params.gyro.read();
+            let file_metadata = gyro.file_metadata.read();
+            let lookup = frame.map(|f| gyro.lookup_for_frame(f)).unwrap_or(crate::gyro_source::MotionLookup::ALL);
+            FrameTransform::kernel_image_orientation(&gyro, &file_metadata, timestamp_ms, &lookup, light_refraction_coefficient, false)
+        },
         // The model has to reach exactly as far here as it does in the render, or the lens-correction
         // solve measures a field the picture doesn't have
         field_limit: field_limit as f32,
@@ -1013,10 +1036,22 @@ fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelPara
     // features (the sync) has to hear "no image here" instead of a ray nothing arrived on
     let field_limit = if clamp_to_field { kernel_params.field_limit } else { 0.0 };
 
-    // Snell's law backwards - the inverse of what `rotate_and_distort` applies going the other way
+    // Snell's law backwards - the inverse of what `rotate_and_distort` applies going the other way, in the physical
+    // camera's axes when the in-camera stabilizer turned the picture (`KernelParams::image_orientation`)
+    let io = kernel_params.image_orientation;
+    let turned = io[0] != 0.0 || io[1] != 0.0 || io[2] != 0.0;
     let refract = |ray: (f32, f32)| -> (f32, f32) {
         let n = kernel_params.light_refraction_coefficient;
         if n == 1.0 || n <= 0.0 { return ray; }
+        if turned {
+            let v = quat_rotate(io, projection::ray_to_dir(ray));
+            let r = (v.0 * v.0 + v.1 * v.1).sqrt();
+            let v = if r > 1e-12 {
+                let theta_w = (r.atan2(v.2).min(std::f32::consts::FRAC_PI_2).sin() / n).clamp(-1.0, 1.0).asin();
+                (v.0 * (theta_w.sin() / r), v.1 * (theta_w.sin() / r), theta_w.cos())
+            } else { v };
+            return projection::dir_to_ray(quat_rotate([-io[0], -io[1], -io[2], io[3]], v));
+        }
         let theta = (ray.0 * ray.0 + ray.1 * ray.1).sqrt();
         if theta < 1e-12 { return ray; }
         // A ray from behind the flat port never entered the housing: hold it at the edge of Snell's window
@@ -1129,7 +1164,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         None    => ((1.0, 1.0), (0.0, 0.0))
     };
 
-    let kernel_params = point_kernel_params(params, camera_matrix, *distortion_coeffs, field_limit, timestamp_ms);
+    let kernel_params = point_kernel_params(params, camera_matrix, *distortion_coeffs, field_limit, timestamp_ms, None);
     let field_limit = kernel_params.field_limit;
     let amount = lens_correction_amount as f32;
     let proj = params.output_projection;

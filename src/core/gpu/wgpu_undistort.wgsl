@@ -49,6 +49,7 @@ struct KernelParams {
     reserved2:                f32, // 16
     ewa_coeffs_p:             vec4<f32>, // 16
     ewa_coeffs_q:             vec4<f32>, // 16
+    image_orientation:        vec4<f32>, // 16 - the in-camera stabilizer's turn, quaternion (x, y, z, w); zero = none
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
@@ -474,6 +475,11 @@ fn ray_to_dir(ray: vec2<f32>) -> vec3<f32> {
     return vec3<f32>(ray * (sin(theta) / theta), cos(theta));
 }
 
+// `v` turned by the unit quaternion `q` (x, y, z, w)
+fn quat_rotate(q: vec4<f32>, v: vec3<f32>) -> vec3<f32> {
+    let t = 2.0 * cross(q.xyz, v);
+    return v + q.w * t + cross(q.xyz, t);
+}
 fn rotate_and_distort(ray: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
     let d = ray_to_dir(ray);
     var _x = (d.x * matrices[idx + 0u]) + (d.y * matrices[idx + 1u]) + (d.z * matrices[idx + 2u]) + params.translation3d.x;
@@ -491,11 +497,17 @@ fn rotate_and_distort(ray: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 
         // Refraction (underwater): Snell's law on the angle itself, exact for any field. Past the critical angle - or behind the flat port - no ray enters the housing at all: Snell's window ends there
         if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 && rxy > 1e-12) {
-            let sin_d = sin(theta) * params.light_refraction_coefficient;
-            if (sin_d >= 1.0 || _w <= 0.0) { return vec2<f32>(-99999.0, -99999.0); }
-            let theta_d = asin(sin_d);
-            let s = sin(theta_d) / rxy;
-            _x *= s; _y *= s; _w = cos(theta_d);
+            // The port is fixed to the physical camera, which the in-camera stabilizer's turn (if any) tells apart from the recorded picture's: refract in its axes, then turn back for the lens (KernelParams::image_orientation)
+            let io = params.image_orientation;
+            let turned = any(io.xyz != vec3<f32>(0.0));
+            var v = vec3<f32>(_x, _y, _w);
+            if (turned) { v = quat_rotate(io, v); }
+            let r = length(v.xy);
+            let sin_d = sin(atan2(r, v.z)) * params.light_refraction_coefficient;
+            if (sin_d >= 1.0 || v.z <= 0.0) { return vec2<f32>(-99999.0, -99999.0); }
+            if (r > 1e-12) { let theta_d = asin(sin_d); v = vec3<f32>(v.xy * (sin(theta_d) / r), cos(theta_d)); }
+            if (turned) { v = quat_rotate(vec4<f32>(-io.xyz, io.w), v); }
+            _x = v.x; _y = v.y; _w = v.z;
         }
 
         var uv = distort_point(_x, _y, _w);

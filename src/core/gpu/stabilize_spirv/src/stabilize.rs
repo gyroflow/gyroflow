@@ -116,6 +116,13 @@ pub fn ray_to_dir(ray: Vec2) -> Vec3 {
     vec3(ray.x * s, ray.y * s, theta.cos())
 }
 
+/// `v` turned by the unit quaternion `q` (x, y, z, w)
+#[inline]
+fn quat_rotate(q: Vec4, v: Vec3) -> Vec3 {
+    let u = vec3(q.x, q.y, q.z);
+    let t = 2.0 * u.cross(v);
+    v + q.w * t + u.cross(t)
+}
 pub fn rotate_and_distort(ray: Vec2, idx: i32, params: &KernelParams, matrices: &MatricesType, sampler: SamplerType, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec2 {
     let size_for_rs = if (flags & 16) == 16 { params.width as f32 } else { params.height as f32 };
     let d = ray_to_dir(ray);
@@ -135,11 +142,17 @@ pub fn rotate_and_distort(ray: Vec2, idx: i32, params: &KernelParams, matrices: 
 
         // Refraction (underwater): Snell's law on the angle itself, exact for any field. Past the critical angle - or behind the flat port - no ray enters the housing at all: Snell's window ends there
         if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 && rxy > 1e-12 {
-            let sin_d = theta.sin() * params.light_refraction_coefficient;
-            if sin_d >= 1.0 || point_3d.z <= 0.0 { return vec2(-99999.0, -99999.0); }
-            let theta_d = sin_d.asin();
-            let s = theta_d.sin() / rxy;
-            point_3d = vec3(point_3d.x * s, point_3d.y * s, theta_d.cos());
+            // The port is fixed to the physical camera, which the in-camera stabilizer's turn (if any) tells apart from the recorded picture's: refract in its axes, then turn back for the lens (KernelParams::image_orientation)
+            let io = params.image_orientation;
+            let turned = io.x != 0.0 || io.y != 0.0 || io.z != 0.0;
+            let mut v = point_3d;
+            if turned { v = quat_rotate(io, v); }
+            let r = vec2(v.x, v.y).length();
+            let sin_d = r.atan2(v.z).sin() * params.light_refraction_coefficient;
+            if sin_d >= 1.0 || v.z <= 0.0 { return vec2(-99999.0, -99999.0); }
+            if r > 1e-12 { let theta_d = sin_d.asin(); let s = theta_d.sin() / r; v = vec3(v.x * s, v.y * s, theta_d.cos()); }
+            if turned { v = quat_rotate(Vec4::new(-io.x, -io.y, -io.z, io.w), v); }
+            point_3d = v;
         }
 
         let bz = get_mtrx_param(size_for_rs, matrices, sampler, idx, 14);
