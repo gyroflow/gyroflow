@@ -83,6 +83,8 @@ pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, 
                 dimension: wgpu::TextureDimension::D2,
                 format,
                 usage,
+                #[cfg(feature = "wgpu-fork")]
+                texture_binding_view_dimension: None,
                 view_formats: &[],
             },
             wgpu::TextureUses::UNINITIALIZED

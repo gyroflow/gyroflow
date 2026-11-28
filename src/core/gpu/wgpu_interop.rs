@@ -55,6 +55,8 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
         dimension: wgpu::TextureDimension::D2,
         format,
         usage,
+        #[cfg(feature = "wgpu-fork")]
+        texture_binding_view_dimension: None,
         view_formats: &[]
     };
 

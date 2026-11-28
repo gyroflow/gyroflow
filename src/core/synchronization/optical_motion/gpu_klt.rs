@@ -305,7 +305,8 @@ impl GpuKlt {
         let size = wgpu::Extent3d { width: width.next_multiple_of(unit), height: height.next_multiple_of(unit), depth_or_array_layers: 1 };
         let texture = |format| device.create_texture(&wgpu::TextureDescriptor {
             label: None, size, mip_level_count: n, sample_count: 1, dimension: wgpu::TextureDimension::D2, format,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::STORAGE_BINDING, view_formats: &[]
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::STORAGE_BINDING, view_formats: &[],
+            #[cfg(feature = "wgpu-fork")] texture_binding_view_dimension: None,
         });
         // The images of slots 0 and 1, then their derivatives
         let f = shared.formats;
@@ -313,7 +314,8 @@ impl GpuKlt {
         let (img, grad) = (|s: usize| &levels[s], |s: usize| &levels[2 + s]);
         let step = |format| device.create_texture(&wgpu::TextureDescriptor {
             label: None, size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 }, mip_level_count: 1, sample_count: 1, dimension: wgpu::TextureDimension::D2, format,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::STORAGE_BINDING, view_formats: &[]
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::STORAGE_BINDING, view_formats: &[],
+            #[cfg(feature = "wgpu-fork")] texture_binding_view_dimension: None,
         });
         // The products' sums along the rows, the strengths
         let steps: Vec<wgpu::Texture> = [SUMS, STRENGTHS].into_iter().map(step).collect();
